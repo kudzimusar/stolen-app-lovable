@@ -5,6 +5,7 @@ import { STOLENLogo } from "@/components/STOLENLogo";
 import { FeatureCard } from "@/components/FeatureCard";
 import { TrustBadge } from "@/components/TrustBadge";
 import { DeviceRegistrationForm } from "@/components/DeviceRegistrationForm";
+import { Link } from "react-router-dom";
 import { 
   Shield, 
   Smartphone, 
@@ -32,10 +33,14 @@ const Index = () => {
             <STOLENLogo />
             <div className="hidden md:flex items-center gap-6">
               <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
-              <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
-              <a href="#marketplace" className="text-muted-foreground hover:text-foreground transition-colors">Marketplace</a>
-              <Button variant="outline">Sign In</Button>
-              <Button variant="hero">Get Started</Button>
+              <Link to="/marketplace" className="text-muted-foreground hover:text-foreground transition-colors">Marketplace</Link>
+              <Link to="/support" className="text-muted-foreground hover:text-foreground transition-colors">Support</Link>
+              <Button variant="outline" asChild>
+                <Link to="/login">Sign In</Link>
+              </Button>
+              <Button variant="hero" asChild>
+                <Link to="/dashboard">Get Started</Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -75,9 +80,11 @@ const Index = () => {
                   Register Your Device
                   <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
-                <Button variant="outline" size="xl">
-                  <QrCode className="w-5 h-5" />
-                  Check Device Status
+                <Button variant="outline" size="xl" asChild>
+                  <Link to="/device/check">
+                    <QrCode className="w-5 h-5" />
+                    Check Device Status
+                  </Link>
                 </Button>
               </div>
 
