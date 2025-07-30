@@ -8,6 +8,11 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Marketplace from "./pages/Marketplace";
 import DeviceCheck from "./pages/DeviceCheck";
+import DeviceRegister from "./pages/DeviceRegister";
+import DeviceDetails from "./pages/DeviceDetails";
+import LostFoundReport from "./pages/LostFoundReport";
+import CommunityBoard from "./pages/CommunityBoard";
+import Profile from "./pages/Profile";
 import Wallet from "./pages/Wallet";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
@@ -26,6 +31,11 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/device/check" element={<DeviceCheck />} />
+          <Route path="/device/register" element={<DeviceRegister />} />
+          <Route path="/device/:id" element={<DeviceDetails />} />
+          <Route path="/lost-found-report" element={<LostFoundReport />} />
+          <Route path="/lost-found-board" element={<CommunityBoard />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/support" element={<Support />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
