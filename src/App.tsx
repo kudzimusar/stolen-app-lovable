@@ -15,6 +15,7 @@ import CommunityBoard from "./pages/CommunityBoard";
 import Profile from "./pages/Profile";
 import Wallet from "./pages/Wallet";
 import Support from "./pages/Support";
+import TransferDonate from "./pages/TransferDonate";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/support" element={<Support />} />
+          <Route path="/transfer-donate" element={<TransferDonate />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
