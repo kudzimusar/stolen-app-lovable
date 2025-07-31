@@ -1,144 +1,102 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface LostReportRequest {
+  deviceId: string;
+  reportType: "lost" | "stolen";
+  incidentDate?: string;
+  incidentLocation?: { lat: number; lng: number };
+  policeReportNumber?: string;
+  description: string;
+  rewardAmount?: number;
+}
+
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
-    const supabaseServiceClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const authHeader = req.headers.get("Authorization")!;
+    const token = authHeader.replace("Bearer ", "");
+    const { data } = await supabaseClient.auth.getUser(token);
+    const user = data.user;
 
-    // Get user from auth header
-    const authHeader = req.headers.get('Authorization')!;
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user } } = await supabaseClient.auth.getUser(token);
-    
     if (!user) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
 
-    const { 
-      device_id,
-      incident_description,
-      incident_date,
-      last_known_location,
-      evidence_files,
-      police_report_number,
-      reward_amount
-    } = await req.json();
+    const reportData: LostReportRequest = await req.json();
 
-    console.log('Processing lost device report for user:', user.id);
-
-    // Input validation
-    if (!device_id || !incident_description || !incident_date) {
-      throw new Error('Missing required report information');
-    }
-
-    // Verify user owns the device
-    const { data: device, error: deviceError } = await supabaseServiceClient
-      .from('devices')
-      .select('id, owner_id, serial_number, device_type, brand, model')
-      .eq('id', device_id)
-      .eq('owner_id', user.id)
+    const { data: device, error: deviceError } = await supabaseClient
+      .from("devices")
+      .select("id, current_owner_id, serial_number")
+      .eq("id", reportData.deviceId)
+      .eq("current_owner_id", user.id)
       .single();
 
     if (deviceError || !device) {
-      throw new Error('Device not found or not owned by user');
+      throw new Error("Device not found or you don't own this device");
     }
 
-    // Check if device is already reported as stolen
-    const { data: existingReport } = await supabaseServiceClient
-      .from('stolen_reports')
-      .select('id')
-      .eq('device_id', device_id)
-      .eq('status', 'active')
-      .single();
-
-    if (existingReport) {
-      throw new Error('Device is already reported as stolen');
+    let locationPoint = null;
+    if (reportData.incidentLocation) {
+      locationPoint = `POINT(${reportData.incidentLocation.lng} ${reportData.incidentLocation.lat})`;
     }
 
-    // Create stolen report
-    const { data: report, error: reportError } = await supabaseServiceClient
-      .from('stolen_reports')
+    const { data: stolenReport, error: reportError } = await supabaseClient
+      .from("stolen_reports")
       .insert({
-        device_id,
+        device_id: reportData.deviceId,
         reporter_id: user.id,
-        incident_description,
-        incident_date,
-        last_known_location,
-        evidence_files,
-        police_report_number,
-        reward_amount: reward_amount || 0,
-        status: 'active',
-        report_date: new Date().toISOString()
+        report_type: reportData.reportType,
+        incident_date: reportData.incidentDate,
+        incident_location: locationPoint,
+        police_report_number: reportData.policeReportNumber,
+        description: reportData.description,
+        reward_amount: reportData.rewardAmount,
+        status: "active"
       })
       .select()
       .single();
 
     if (reportError) {
-      console.error('Report creation error:', reportError);
-      throw new Error('Failed to create stolen report');
+      throw reportError;
     }
 
-    // Update device status to stolen
-    const { error: deviceUpdateError } = await supabaseServiceClient
-      .from('devices')
-      .update({ status: 'stolen' })
-      .eq('id', device_id);
+    const newStatus = reportData.reportType === "stolen" ? "stolen" : "lost";
+    await supabaseClient
+      .from("devices")
+      .update({ status: newStatus })
+      .eq("id", reportData.deviceId);
 
-    if (deviceUpdateError) {
-      console.error('Device status update error:', deviceUpdateError);
-    }
-
-    // TODO: Record on blockchain for immutable proof
-    // const blockchainTxId = await recordStolenOnBlockchain({
-    //   device_id,
-    //   report_id: report.id,
-    //   timestamp: new Date().toISOString()
-    // });
-
-    // TODO: Notify law enforcement via external API
-    // await notifyLawEnforcement({
-    //   report_id: report.id,
-    //   device_info: device,
-    //   incident_info: report
-    // });
-
-    // TODO: Alert community and marketplace
-    // await alertCommunity(report.id);
-
-    console.log('Stolen report created successfully:', report.id);
-
-    return new Response(JSON.stringify({ 
-      success: true, 
-      report_id: report.id,
-      message: 'Device reported as stolen successfully' 
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        report: stolenReport,
+        message: `Device reported as ${reportData.reportType} successfully`
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
 
   } catch (error) {
-    console.error('Error in report-lost:', error);
-    return new Response(JSON.stringify({ 
-      error: error.message 
-    }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error("Lost report error:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
+    );
   }
 });

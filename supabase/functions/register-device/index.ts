@@ -1,143 +1,117 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface DeviceRegistrationRequest {
+  serialNumber: string;
+  imei?: string;
+  deviceName: string;
+  brand: string;
+  model: string;
+  color?: string;
+  purchaseDate?: string;
+  purchasePrice?: number;
+  devicePhotos?: string[];
+  receiptUrl?: string;
+  insurancePolicyId?: string;
+}
+
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
-    const supabaseServiceClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const authHeader = req.headers.get("Authorization")!;
+    const token = authHeader.replace("Bearer ", "");
+    const { data } = await supabaseClient.auth.getUser(token);
+    const user = data.user;
 
-    // Get user from auth header
-    const authHeader = req.headers.get('Authorization')!;
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user } } = await supabaseClient.auth.getUser(token);
-    
     if (!user) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
 
-    const { 
-      serial_number, 
-      device_type, 
-      brand, 
-      model, 
-      purchase_price, 
-      purchase_date, 
-      purchase_location,
-      receipt_image_url,
-      device_photos,
-      location_data 
-    } = await req.json();
+    const deviceData: DeviceRegistrationRequest = await req.json();
 
-    console.log('Registering device for user:', user.id);
-
-    // Input validation
-    if (!serial_number || !device_type || !brand || !model) {
-      throw new Error('Missing required device information');
+    if (!deviceData.serialNumber || !deviceData.deviceName || !deviceData.brand || !deviceData.model) {
+      throw new Error("Missing required device information");
     }
 
-    // Check if device is already registered
-    const { data: existingDevice } = await supabaseServiceClient
-      .from('devices')
-      .select('id, owner_id')
-      .eq('serial_number', serial_number)
+    const { data: existingDevice } = await supabaseClient
+      .from("devices")
+      .select("id, current_owner_id")
+      .eq("serial_number", deviceData.serialNumber)
       .single();
 
     if (existingDevice) {
-      throw new Error('Device already registered');
+      throw new Error("Device with this serial number already registered");
     }
 
-    // TODO: Integrate with Blockchain API to create immutable ownership record
-    // const blockchainTxId = await createBlockchainRecord({
-    //   device_id: serial_number,
-    //   owner_id: user.id,
-    //   timestamp: new Date().toISOString()
-    // });
+    // Placeholder for blockchain registration
+    const blockchainHash = `mock_hash_${Date.now()}`;
 
-    // TODO: Process receipt image with OCR API if provided
-    // if (receipt_image_url) {
-    //   const ocrResult = await processReceiptOCR(receipt_image_url);
-    //   // Validate OCR results against provided data
-    // }
-
-    // Register device in database
-    const { data: device, error: deviceError } = await supabaseServiceClient
-      .from('devices')
+    const { data: newDevice, error: insertError } = await supabaseClient
+      .from("devices")
       .insert({
-        serial_number,
-        device_type,
-        brand,
-        model,
-        purchase_price,
-        purchase_date,
-        purchase_location,
-        receipt_image_url,
-        device_photos,
-        location_data,
-        owner_id: user.id,
-        registration_date: new Date().toISOString(),
-        status: 'active',
-        blockchain_tx_id: 'placeholder_tx_' + Date.now() // TODO: Replace with actual blockchain TX ID
+        serial_number: deviceData.serialNumber,
+        imei: deviceData.imei,
+        device_name: deviceData.deviceName,
+        brand: deviceData.brand,
+        model: deviceData.model,
+        color: deviceData.color,
+        purchase_date: deviceData.purchaseDate,
+        purchase_price: deviceData.purchasePrice,
+        current_owner_id: user.id,
+        device_photos: deviceData.devicePhotos,
+        receipt_url: deviceData.receiptUrl,
+        blockchain_hash: blockchainHash,
+        insurance_policy_id: deviceData.insurancePolicyId,
+        status: "active"
       })
       .select()
       .single();
 
-    if (deviceError) {
-      console.error('Device registration error:', deviceError);
-      throw new Error('Failed to register device');
+    if (insertError) {
+      throw insertError;
     }
 
-    // Create initial ownership history record
-    const { error: historyError } = await supabaseServiceClient
-      .from('ownership_history')
+    await supabaseClient
+      .from("ownership_history")
       .insert({
-        device_id: device.id,
-        previous_owner_id: null,
+        device_id: newDevice.id,
         new_owner_id: user.id,
-        transfer_type: 'initial_registration',
-        transfer_date: new Date().toISOString(),
-        blockchain_tx_id: device.blockchain_tx_id
+        transfer_type: "initial_registration",
+        blockchain_hash: blockchainHash,
+        verified: true
       });
 
-    if (historyError) {
-      console.error('Ownership history error:', historyError);
-    }
-
-    // TODO: Trigger AI analysis for fraud detection
-    // await triggerAIAnalysis(device.id, 'registration');
-
-    console.log('Device registered successfully:', device.id);
-
-    return new Response(JSON.stringify({ 
-      success: true, 
-      device_id: device.id,
-      message: 'Device registered successfully' 
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        device: newDevice,
+        blockchainHash,
+        message: "Device registered successfully"
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
 
   } catch (error) {
-    console.error('Error in register-device:', error);
-    return new Response(JSON.stringify({ 
-      error: error.message 
-    }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error("Device registration error:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
+    );
   }
 });
