@@ -1,1 +1,22 @@
 project_id = "lerjhxchglztvhbsdjjn"
+
+[functions.register-device]
+verify_jwt = true
+
+[functions.create-listing]
+verify_jwt = true
+
+[functions.report-lost]
+verify_jwt = true
+
+[functions.report-found]
+verify_jwt = false
+
+[functions.law-enforcement-access]
+verify_jwt = true
+
+[functions.s-pay-transfer]
+verify_jwt = true
+
+[functions.trigger-ai-analysis]
+verify_jwt = true
