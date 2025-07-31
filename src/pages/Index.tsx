@@ -17,7 +17,8 @@ import {
   AlertTriangle,
   Award,
   Lock,
-  Zap
+  Zap,
+  ArrowRightLeft
 } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 
@@ -58,14 +59,14 @@ const Index = () => {
                   <TrustBadge type="secure" text="Military Grade Security" />
                 </div>
                 <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
-                  Protect Your Devices with{" "}
+                  Protect Your Gadgets with{" "}
                   <span className="bg-gradient-primary bg-clip-text text-transparent">
                     Blockchain Security
                   </span>
                 </h1>
                 <p className="text-xl text-muted-foreground leading-relaxed">
-                  STOLEN revolutionizes device security with immutable blockchain registration, 
-                  AI-powered fraud detection, and a global community dedicated to device recovery.
+                  STOLEN revolutionizes gadget security with immutable blockchain registration, 
+                  AI-powered fraud detection, and a global community dedicated to gadget recovery.
                 </p>
               </div>
 
@@ -77,13 +78,19 @@ const Index = () => {
                   className="group"
                 >
                   <Smartphone className="w-5 h-5" />
-                  Register Your Device
+                  Register Your Gadget
                   <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
                 <Button variant="outline" size="xl" asChild>
                   <Link to="/device/check">
                     <QrCode className="w-5 h-5" />
-                    Check Device Status
+                    Check Gadget Status
+                  </Link>
+                </Button>
+                <Button variant="outline" size="xl" asChild>
+                  <Link to="/transfer-donate">
+                    <ArrowRightLeft className="w-5 h-5" />
+                    Transfer or Donate Gadget
                   </Link>
                 </Button>
               </div>
@@ -91,7 +98,7 @@ const Index = () => {
               <div className="grid grid-cols-3 gap-8 pt-8 border-t border-border/40">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">1M+</div>
-                  <div className="text-sm text-muted-foreground">Devices Protected</div>
+                  <div className="text-sm text-muted-foreground">Gadgets Protected</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">99.9%</div>
@@ -123,7 +130,7 @@ const Index = () => {
             <h2 className="text-4xl font-bold mb-4">Why Choose STOLEN?</h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Advanced blockchain technology meets community-driven security to create 
-              the ultimate device protection platform.
+              the ultimate gadget protection platform.
             </p>
           </div>
 
@@ -131,7 +138,7 @@ const Index = () => {
             <FeatureCard
               icon={<Lock className="w-8 h-8" />}
               title="Blockchain Registration"
-              description="Immutable device records stored on blockchain ensure permanent ownership proof and prevent fraud."
+              description="Immutable gadget records stored on blockchain ensure permanent ownership proof and prevent fraud."
               gradient
             />
             <FeatureCard
@@ -142,24 +149,24 @@ const Index = () => {
             <FeatureCard
               icon={<Users className="w-8 h-8" />}
               title="Global Community"
-              description="Millions of users worldwide help recover lost devices through our decentralized recovery network."
+              description="Millions of users worldwide help recover lost gadgets through our decentralized recovery network."
               gradient
             />
             <FeatureCard
               icon={<ShoppingCart className="w-8 h-8" />}
               title="Secure Marketplace"
-              description="Buy and sell verified second-hand devices with confidence using our escrow-protected marketplace."
+              description="Buy and sell verified second-hand gadgets with confidence using our escrow-protected marketplace."
             />
             <FeatureCard
               icon={<Search className="w-8 h-8" />}
               title="Instant Verification"
-              description="Quickly verify device authenticity and ownership history with our real-time lookup system."
+              description="Quickly verify gadget authenticity and ownership history with our real-time lookup system."
               gradient
             />
             <FeatureCard
               icon={<Award className="w-8 h-8" />}
               title="Recovery Rewards"
-              description="Earn rewards for helping others recover their lost devices and contributing to the community."
+              description="Earn rewards for helping others recover their lost gadgets and contributing to the community."
             />
           </div>
         </div>
@@ -187,9 +194,9 @@ const Index = () => {
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center space-y-8">
-            <h2 className="text-4xl font-bold">Ready to Secure Your Devices?</h2>
+            <h2 className="text-4xl font-bold">Ready to Secure Your Gadgets?</h2>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              Join millions of users who trust STOLEN to protect their valuable devices. 
+              Join millions of users who trust STOLEN to protect their valuable gadgets. 
               Start with our free registration today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -217,13 +224,13 @@ const Index = () => {
             <div className="space-y-4">
               <STOLENLogo />
               <p className="text-muted-foreground">
-                Blockchain-powered device security for the modern world.
+                Blockchain-powered gadget security for the modern world.
               </p>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Platform</h4>
               <div className="space-y-2 text-sm text-muted-foreground">
-                <div>Device Registration</div>
+                <div>Gadget Registration</div>
                 <div>Marketplace</div>
                 <div>Recovery Network</div>
                 <div>API Access</div>
@@ -249,7 +256,7 @@ const Index = () => {
             </div>
           </div>
           <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
-            <p>&copy; 2024 STOLEN. All rights reserved. Securing devices with blockchain technology.</p>
+            <p>&copy; 2024 STOLEN. All rights reserved. Securing gadgets with blockchain technology.</p>
           </div>
         </div>
       </footer>
