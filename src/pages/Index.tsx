@@ -230,28 +230,28 @@ const Index = () => {
             <div>
               <h4 className="font-semibold mb-4">Platform</h4>
               <div className="space-y-2 text-sm text-muted-foreground">
-                <div>Gadget Registration</div>
-                <div>Marketplace</div>
-                <div>Recovery Network</div>
-                <div>API Access</div>
+                <Link to="/device/register" className="block hover:text-foreground transition-colors cursor-pointer">Gadget Registration</Link>
+                <Link to="/marketplace" className="block hover:text-foreground transition-colors cursor-pointer">Marketplace</Link>
+                <Link to="/community-board" className="block hover:text-foreground transition-colors cursor-pointer">Recovery Network</Link>
+                <Link to="/retailer-dashboard" className="block hover:text-foreground transition-colors cursor-pointer">API Access</Link>
               </div>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
               <div className="space-y-2 text-sm text-muted-foreground">
-                <div>Help Center</div>
-                <div>Documentation</div>
-                <div>Community</div>
-                <div>Contact Us</div>
+                <Link to="/support" className="block hover:text-foreground transition-colors cursor-pointer">Help Center</Link>
+                <Link to="/support" className="block hover:text-foreground transition-colors cursor-pointer">Documentation</Link>
+                <Link to="/community-board" className="block hover:text-foreground transition-colors cursor-pointer">Community</Link>
+                <Link to="/support" className="block hover:text-foreground transition-colors cursor-pointer">Contact Us</Link>
               </div>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Company</h4>
               <div className="space-y-2 text-sm text-muted-foreground">
-                <div>About Us</div>
-                <div>Privacy Policy</div>
-                <div>Terms of Service</div>
-                <div>Security</div>
+                <Link to="/support" className="block hover:text-foreground transition-colors cursor-pointer">About Us</Link>
+                <Link to="/support" className="block hover:text-foreground transition-colors cursor-pointer">Privacy Policy</Link>
+                <Link to="/support" className="block hover:text-foreground transition-colors cursor-pointer">Terms of Service</Link>
+                <Link to="/support" className="block hover:text-foreground transition-colors cursor-pointer">Security</Link>
               </div>
             </div>
           </div>
