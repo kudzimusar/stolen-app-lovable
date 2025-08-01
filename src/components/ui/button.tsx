@@ -23,11 +23,11 @@ const buttonVariants = cva(
         scan: "bg-brand-blue text-white hover:bg-brand-blue-dark shadow-card hover:shadow-glow transition-all duration-300",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-12 rounded-lg px-8 text-base",
-        xl: "h-14 rounded-lg px-10 text-lg",
-        icon: "h-10 w-10",
+        default: "h-10 px-4 py-2 text-sm",
+        sm: "h-8 rounded-md px-3 text-xs sm:h-9 sm:text-sm",
+        lg: "h-10 rounded-md px-6 text-sm sm:h-11 sm:px-8 sm:text-base",
+        xl: "h-11 rounded-lg px-6 text-sm sm:h-12 sm:px-8 sm:text-base md:h-14 md:px-10 md:text-lg",
+        icon: "h-9 w-9 sm:h-10 sm:w-10",
       },
     },
     defaultVariants: {

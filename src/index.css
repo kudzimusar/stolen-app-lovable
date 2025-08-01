@@ -128,7 +128,63 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    @apply scroll-smooth;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  /* Mobile-first responsive utilities */
+  .container-responsive {
+    @apply w-full max-w-none px-4 mx-auto;
+    @apply sm:px-6 sm:max-w-screen-sm;
+    @apply md:px-8 md:max-w-screen-md;
+    @apply lg:px-12 lg:max-w-screen-lg;
+    @apply xl:px-16 xl:max-w-screen-xl;
+    @apply 2xl:px-20 2xl:max-w-screen-2xl;
+  }
+
+  .text-responsive {
+    @apply text-sm leading-5;
+    @apply sm:text-base sm:leading-6;
+    @apply lg:text-lg lg:leading-7;
+  }
+
+  .heading-responsive {
+    @apply text-2xl leading-tight font-bold;
+    @apply sm:text-3xl sm:leading-tight;
+    @apply md:text-4xl md:leading-tight;
+    @apply lg:text-5xl lg:leading-tight;
+    @apply xl:text-6xl xl:leading-tight;
+  }
+
+  .subheading-responsive {
+    @apply text-lg leading-6 font-semibold;
+    @apply sm:text-xl sm:leading-7;
+    @apply md:text-2xl md:leading-8;
+    @apply lg:text-3xl lg:leading-9;
+  }
+
+  .grid-responsive-cards {
+    @apply grid grid-cols-1 gap-4;
+    @apply sm:grid-cols-2 sm:gap-6;
+    @apply lg:grid-cols-3 lg:gap-8;
+  }
+
+  .flex-responsive-stack {
+    @apply flex flex-col gap-3;
+    @apply sm:flex-row sm:gap-4;
+  }
+
+  .spacing-responsive {
+    @apply py-8 space-y-6;
+    @apply sm:py-12 sm:space-y-8;
+    @apply md:py-16 md:space-y-10;
+    @apply lg:py-20 lg:space-y-12;
   }
 }
