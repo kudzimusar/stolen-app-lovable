@@ -387,16 +387,20 @@ const Profile = () => {
             </Link>
           </Button>
           
-          <Button variant="outline" className="w-full justify-start">
-            <Settings className="w-4 h-4 mr-3" />
-            Advanced Settings
+          <Button variant="outline" className="w-full justify-start" asChild>
+            <Link to="/analytics-insights">
+              <Settings className="w-4 h-4 mr-3" />
+              Advanced Settings
+            </Link>
           </Button>
           
           <Separator />
           
-          <Button variant="destructive" className="w-full justify-start">
-            <LogOut className="w-4 h-4 mr-3" />
-            Sign Out
+          <Button variant="destructive" className="w-full justify-start" asChild>
+            <Link to="/login">
+              <LogOut className="w-4 h-4 mr-3" />
+              Sign Out
+            </Link>
           </Button>
         </div>
       </div>

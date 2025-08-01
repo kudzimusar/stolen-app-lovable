@@ -81,27 +81,17 @@ const Index = () => {
                   Register Your Gadget
                   <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="xl" 
-                  onClick={() => {
-                    console.log("Check Gadget Status button clicked");
-                    window.location.href = "/device/check";
-                  }}
-                >
-                  <QrCode className="w-5 h-5" />
-                  Check Gadget Status
+                <Button variant="outline" size="xl" asChild>
+                  <Link to="/device/check">
+                    <QrCode className="w-5 h-5" />
+                    Check Gadget Status
+                  </Link>
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="xl" 
-                  onClick={() => {
-                    console.log("Transfer or Donate Gadget button clicked");
-                    window.location.href = "/transfer-donate";
-                  }}
-                >
-                  <ArrowRightLeft className="w-5 h-5" />
-                  Transfer or Donate Gadget
+                <Button variant="outline" size="xl" asChild>
+                  <Link to="/transfer-donate">
+                    <ArrowRightLeft className="w-5 h-5" />
+                    Transfer or Donate Gadget
+                  </Link>
                 </Button>
               </div>
 
@@ -219,8 +209,8 @@ const Index = () => {
                 <Zap className="w-5 h-5" />
                 Register Now - Free
               </Button>
-              <Button variant="outline" size="xl" className="border-white text-white hover:bg-white/10">
-                Learn More
+              <Button variant="outline" size="xl" className="border-white text-white hover:bg-white/10" asChild>
+                <Link to="/support">Learn More</Link>
               </Button>
             </div>
           </div>

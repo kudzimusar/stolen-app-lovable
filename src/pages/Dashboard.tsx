@@ -50,7 +50,7 @@ const Dashboard = () => {
     {
       icon: <AlertTriangle className="w-5 h-5" />,
       label: "Report Lost",
-      href: "/lost-found",
+      href: "/lost-found-report",
       variant: "destructive" as const
     },
     {
@@ -62,7 +62,7 @@ const Dashboard = () => {
     {
       icon: <Wrench className="w-5 h-5" />,
       label: "Repair Logs",
-      href: "/repairs",
+      href: "/repair-shop-dashboard",
       variant: "outline" as const
     },
     {
@@ -101,7 +101,7 @@ const Dashboard = () => {
             <STOLENLogo />
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="icon" asChild>
-                <Link to="/notifications">
+                <Link to="/fraud-alerts">
                   <Bell className="w-5 h-5" />
                 </Link>
               </Button>

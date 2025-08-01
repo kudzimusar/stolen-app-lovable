@@ -97,12 +97,16 @@ const Marketplace = () => {
               <STOLENLogo />
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <Heart className="w-4 h-4" />
-                Watchlist
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/profile">
+                  <Heart className="w-4 h-4" />
+                  Watchlist
+                </Link>
               </Button>
-              <Button variant="hero" size="sm">
-                Sell Device
+              <Button variant="hero" size="sm" asChild>
+                <Link to="/device/register">
+                  Sell Device
+                </Link>
               </Button>
             </div>
           </div>
@@ -184,8 +188,10 @@ const Marketplace = () => {
                     className="w-full h-48 object-cover"
                   />
                   <div className="absolute top-3 right-3">
-                    <Button variant="ghost" size="icon" className="bg-background/80 backdrop-blur-sm">
-                      <Heart className="w-4 h-4" />
+                    <Button variant="ghost" size="icon" className="bg-background/80 backdrop-blur-sm" asChild>
+                      <Link to="/profile">
+                        <Heart className="w-4 h-4" />
+                      </Link>
                     </Button>
                   </div>
                   {listing.isVerified && (
@@ -254,8 +260,10 @@ const Marketplace = () => {
 
         {/* Load More */}
         <div className="text-center">
-          <Button variant="outline" size="lg">
-            Load More Listings
+          <Button variant="outline" size="lg" asChild>
+            <Link to="/marketplace">
+              Load More Listings
+            </Link>
           </Button>
         </div>
       </div>

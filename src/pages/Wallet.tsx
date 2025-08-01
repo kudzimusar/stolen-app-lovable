@@ -147,9 +147,11 @@ const Wallet = () => {
               </Button>
               <STOLENLogo />
             </div>
-            <Button variant="outline" size="sm">
-              <CreditCard className="w-4 h-4" />
-              Add Funds
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/escrow-payment">
+                <CreditCard className="w-4 h-4" />
+                Add Funds
+              </Link>
             </Button>
           </div>
         </div>
@@ -200,21 +202,29 @@ const Wallet = () => {
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Button variant="outline" className="h-16 flex-col gap-2">
-            <Send className="w-5 h-5" />
-            <span>Send</span>
+          <Button variant="outline" className="h-16 flex-col gap-2" asChild>
+            <Link to="/escrow-payment">
+              <Send className="w-5 h-5" />
+              <span>Send</span>
+            </Link>
           </Button>
-          <Button variant="outline" className="h-16 flex-col gap-2">
-            <Download className="w-5 h-5" />
-            <span>Receive</span>
+          <Button variant="outline" className="h-16 flex-col gap-2" asChild>
+            <Link to="/escrow-payment">
+              <Download className="w-5 h-5" />
+              <span>Receive</span>
+            </Link>
           </Button>
-          <Button variant="outline" className="h-16 flex-col gap-2">
-            <Plus className="w-5 h-5" />
-            <span>Request</span>
+          <Button variant="outline" className="h-16 flex-col gap-2" asChild>
+            <Link to="/community-rewards">
+              <Plus className="w-5 h-5" />
+              <span>Request</span>
+            </Link>
           </Button>
-          <Button variant="outline" className="h-16 flex-col gap-2">
-            <CreditCard className="w-5 h-5" />
-            <span>Withdraw</span>
+          <Button variant="outline" className="h-16 flex-col gap-2" asChild>
+            <Link to="/escrow-payment">
+              <CreditCard className="w-5 h-5" />
+              <span>Withdraw</span>
+            </Link>
           </Button>
         </div>
 
@@ -348,11 +358,15 @@ const Wallet = () => {
                         Funds will be released automatically on {escrow.estimatedRelease} upon delivery confirmation
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          Contact Seller
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to="/support">
+                            Contact Seller
+                          </Link>
                         </Button>
-                        <Button variant="outline" size="sm">
-                          Dispute Transaction
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to="/support">
+                            Dispute Transaction
+                          </Link>
                         </Button>
                       </div>
                     </div>
