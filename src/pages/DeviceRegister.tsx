@@ -182,7 +182,7 @@ const DeviceRegister = () => {
                   <Label htmlFor="purchasePrice">Purchase Price</Label>
                   <Input
                     id="purchasePrice"
-                    placeholder="$999"
+                    placeholder="R15,000"
                     value={formData.purchasePrice}
                     onChange={(e) => setFormData({...formData, purchasePrice: e.target.value})}
                   />

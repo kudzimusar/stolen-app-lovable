@@ -18,6 +18,7 @@ import {
   FileText,
   Shield
 } from "lucide-react";
+import Map from "@/components/Map";
 import { useToast } from "@/hooks/use-toast";
 
 const LostFoundReport = () => {
@@ -168,11 +169,17 @@ const LostFoundReport = () => {
                 </div>
               </div>
               
-              <div className="bg-muted/50 p-3 rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  🗺️ Interactive map will be shown here for precise location marking
-                </p>
-              </div>
+              <Map 
+                center={[-26.2041, 28.0473]} // Johannesburg, South Africa
+                zoom={10}
+                markers={[
+                  {
+                    position: [-26.2041, 28.0473],
+                    popup: "Click to mark location"
+                  }
+                ]}
+                className="h-48 w-full"
+              />
             </Card>
 
             {/* Additional Information */}
@@ -185,7 +192,7 @@ const LostFoundReport = () => {
                     <Label htmlFor="reward">Reward Amount (Optional)</Label>
                     <Input
                       id="reward"
-                      placeholder="e.g., $50"
+                      placeholder="e.g., R500"
                       value={formData.reward}
                       onChange={(e) => setFormData({...formData, reward: e.target.value})}
                     />

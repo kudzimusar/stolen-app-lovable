@@ -56,7 +56,7 @@ const Login = () => {
               id="credential"
               type={loginMethod === "email" ? "email" : "tel"}
               placeholder={
-                loginMethod === "email" ? "user@example.com" : "+1 (555) 123-4567"
+                loginMethod === "email" ? "user@example.com" : "+27 82 123 4567"
               }
               className="h-12"
             />

@@ -28,7 +28,7 @@ const Dashboard = () => {
       serial: "ABC123DEF456",
       status: "verified",
       registeredDate: "2024-01-15",
-      location: "San Francisco, CA"
+      location: "Cape Town, WC"
     },
     {
       id: 2,
@@ -36,7 +36,7 @@ const Dashboard = () => {
       serial: "XYZ789GHI012",
       status: "needs-attention",
       registeredDate: "2024-02-20",
-      location: "San Francisco, CA"
+      location: "Johannesburg, GP"
     }
   ];
 

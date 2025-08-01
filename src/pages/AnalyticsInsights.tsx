@@ -26,11 +26,11 @@ const AnalyticsInsights = () => {
   ];
 
   const locationData = [
-    { location: 'San Francisco', reports: 89, recoveries: 67 },
-    { location: 'Los Angeles', reports: 76, recoveries: 54 },
-    { location: 'New York', reports: 92, recoveries: 71 },
-    { location: 'Chicago', reports: 45, recoveries: 32 },
-    { location: 'Miami', reports: 38, recoveries: 28 }
+    { location: 'Cape Town', reports: 89, recoveries: 67 },
+    { location: 'Johannesburg', reports: 92, recoveries: 71 },
+    { location: 'Durban', reports: 76, recoveries: 54 },
+    { location: 'Pretoria', reports: 45, recoveries: 32 },
+    { location: 'Port Elizabeth', reports: 38, recoveries: 28 }
   ];
 
   const fraudMetrics = [

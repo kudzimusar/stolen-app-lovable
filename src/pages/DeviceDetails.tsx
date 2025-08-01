@@ -31,7 +31,7 @@ const DeviceDetails = () => {
     status: "verified",
     purchaseDate: "2024-01-15",
     purchasePrice: "$999",
-    location: "San Francisco, CA",
+    location: "Cape Town, WC",
     description: "Space Black 128GB, excellent condition",
     owner: "John D.",
     registrationDate: "2024-01-16",
