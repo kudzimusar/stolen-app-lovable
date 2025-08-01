@@ -25,6 +25,11 @@ import FraudAlerts from "./pages/FraudAlerts";
 import RetailerDashboard from "./pages/RetailerDashboard";
 import RepairShopDashboard from "./pages/RepairShopDashboard";
 import LawEnforcementDashboard from "./pages/LawEnforcementDashboard";
+import NGODashboard from "./pages/NGODashboard";
+import PsychologyAssistedHelper from "./pages/PsychologyAssistedHelper";
+import ReverseVerify from "./pages/ReverseVerify";
+import FeedbackRating from "./pages/FeedbackRating";
+import AnalyticsInsights from "./pages/AnalyticsInsights";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +60,11 @@ const App = () => (
           <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
           <Route path="/repair-shop-dashboard" element={<RepairShopDashboard />} />
           <Route path="/law-enforcement-dashboard" element={<LawEnforcementDashboard />} />
+          <Route path="/ngo-dashboard" element={<NGODashboard />} />
+          <Route path="/psychology-helper" element={<PsychologyAssistedHelper />} />
+          <Route path="/reverse-verify" element={<ReverseVerify />} />
+          <Route path="/feedback-rating" element={<FeedbackRating />} />
+          <Route path="/analytics-insights" element={<AnalyticsInsights />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/support" element={<Support />} />
