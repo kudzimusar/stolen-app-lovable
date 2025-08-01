@@ -22,6 +22,9 @@ import DeviceRecoveryStatus from "./pages/DeviceRecoveryStatus";
 import CommunityRewards from "./pages/CommunityRewards";
 import EscrowPayment from "./pages/EscrowPayment";
 import FraudAlerts from "./pages/FraudAlerts";
+import RetailerDashboard from "./pages/RetailerDashboard";
+import RepairShopDashboard from "./pages/RepairShopDashboard";
+import LawEnforcementDashboard from "./pages/LawEnforcementDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +52,9 @@ const App = () => (
           <Route path="/insurance-hub" element={<InsuranceHub />} />
           <Route path="/escrow-payment" element={<EscrowPayment />} />
           <Route path="/fraud-alerts" element={<FraudAlerts />} />
+          <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
+          <Route path="/repair-shop-dashboard" element={<RepairShopDashboard />} />
+          <Route path="/law-enforcement-dashboard" element={<LawEnforcementDashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/support" element={<Support />} />
