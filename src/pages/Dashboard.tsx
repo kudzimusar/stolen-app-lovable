@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { STOLENLogo } from "@/components/STOLENLogo";
+import { AppHeader } from "@/components/AppHeader";
+import { LiveChatWidget } from "@/components/LiveChatWidget";
 import { TrustBadge } from "@/components/TrustBadge";
 import { Link } from "react-router-dom";
 import {
@@ -94,26 +95,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <STOLENLogo />
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" asChild>
-                <Link to="/fraud-alerts">
-                  <Bell className="w-5 h-5" />
-                </Link>
-              </Button>
-              <Button variant="ghost" size="icon" asChild>
-                <Link to="/profile">
-                  <Settings className="w-5 h-5" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AppHeader title="Dashboard" showLogo={true} />
 
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Welcome Section */}
@@ -240,6 +222,9 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
+      
+      {/* Live Chat Widget */}
+      <LiveChatWidget />
     </div>
   );
 };

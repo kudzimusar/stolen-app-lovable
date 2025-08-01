@@ -6,8 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
-import { STOLENLogo } from "@/components/STOLENLogo";
-import { Link, useNavigate } from "react-router-dom";
+import { AppHeader } from "@/components/AppHeader";
+import { UploadComponent } from "@/components/UploadComponent";
+import { QRScanner } from "@/components/QRScanner";
+import { EnhancedSelect, DEVICE_BRANDS, SA_CITIES, DEVICE_TYPES } from "@/components/EnhancedSelect";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Upload, Scan, MapPin, Shield, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -18,8 +21,10 @@ const DeviceRegister = () => {
     serialNumber: "",
     model: "",
     brand: "",
+    deviceType: "",
     purchaseDate: "",
     purchasePrice: "",
+    purchaseLocation: "",
     description: "",
     enableLocation: false,
     photos: [] as File[],
@@ -79,12 +84,22 @@ const DeviceRegister = () => {
               </div>
               
               <div className="space-y-2">
+                <Label htmlFor="deviceType">Device Type</Label>
+                <EnhancedSelect
+                  placeholder="Select device type"
+                  options={DEVICE_TYPES}
+                  value={formData.deviceType}
+                  onValueChange={(value) => setFormData({...formData, deviceType: value})}
+                />
+              </div>
+              
+              <div className="space-y-2">
                 <Label htmlFor="brand">Brand</Label>
-                <Input
-                  id="brand"
-                  placeholder="e.g., Apple"
+                <EnhancedSelect
+                  placeholder="Select device brand"
+                  options={DEVICE_BRANDS}
                   value={formData.brand}
-                  onChange={(e) => setFormData({...formData, brand: e.target.value})}
+                  onValueChange={(value) => setFormData({...formData, brand: value})}
                 />
               </div>
               
@@ -107,9 +122,13 @@ const DeviceRegister = () => {
                     value={formData.serialNumber}
                     onChange={(e) => setFormData({...formData, serialNumber: e.target.value})}
                   />
-                  <Button variant="outline" size="icon">
-                    <Scan className="w-4 h-4" />
-                  </Button>
+                  <QRScanner 
+                    onScanSuccess={(data) => {
+                      // Extract serial from QR data
+                      const serial = data.split(':').pop() || '';
+                      setFormData({...formData, serialNumber: serial});
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -126,23 +145,21 @@ const DeviceRegister = () => {
             </div>
             
             <div className="space-y-4">
-              <Card className="p-6 border-2 border-dashed border-muted-foreground/25 text-center">
-                <Camera className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground mb-3">Take photos of your device</p>
-                <Button variant="outline" className="w-full">
-                  <Camera className="w-4 h-4 mr-2" />
-                  Open Camera
-                </Button>
-              </Card>
+              <UploadComponent
+                variant="photo"
+                accept="image/*"
+                multiple={true}
+                maxSize={10}
+                onUpload={(files) => setFormData({...formData, photos: files.map(f => f as any)})}
+              />
               
-              <Card className="p-6 border-2 border-dashed border-muted-foreground/25 text-center">
-                <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground mb-3">Upload purchase receipt</p>
-                <Button variant="outline" className="w-full">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Receipt
-                </Button>
-              </Card>
+              <UploadComponent
+                variant="receipt"
+                accept="image/*,application/pdf"
+                multiple={false}
+                maxSize={5}
+                onUpload={(files) => setFormData({...formData, receipt: files[0] as any})}
+              />
               
               <div className="space-y-2">
                 <Label htmlFor="description">Additional Description</Label>
@@ -179,7 +196,7 @@ const DeviceRegister = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="purchasePrice">Purchase Price</Label>
+                  <Label htmlFor="purchasePrice">Purchase Price (ZAR)</Label>
                   <Input
                     id="purchasePrice"
                     placeholder="R15,000"
@@ -187,6 +204,16 @@ const DeviceRegister = () => {
                     onChange={(e) => setFormData({...formData, purchasePrice: e.target.value})}
                   />
                 </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="purchaseLocation">Purchase Location</Label>
+                <EnhancedSelect
+                  placeholder="Select city where purchased"
+                  options={SA_CITIES}
+                  value={formData.purchaseLocation}
+                  onValueChange={(value) => setFormData({...formData, purchaseLocation: value})}
+                />
               </div>
               
               <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -250,20 +277,7 @@ const DeviceRegister = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Button variant="ghost" size="icon" asChild>
-              <Link to="/dashboard">
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-            </Button>
-            <STOLENLogo />
-            <div className="w-10" />
-          </div>
-        </div>
-      </header>
+      <AppHeader title="Register Device" showBackButton={true} backTo="/dashboard" />
 
       <div className="container mx-auto px-4 py-6">
         {/* Progress */}

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { STOLENLogo } from "@/components/STOLENLogo";
+import { AppHeader } from "@/components/AppHeader";
+import { LiveChatWidget } from "@/components/LiveChatWidget";
 import { FeatureCard } from "@/components/FeatureCard";
 import { TrustBadge } from "@/components/TrustBadge";
 import { DeviceRegistrationForm } from "@/components/DeviceRegistrationForm";
@@ -27,38 +29,22 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/40">
-        <div className="container-responsive">
-          <div className="flex items-center justify-between py-3 sm:py-4">
-            <STOLENLogo />
-            
-            {/* Mobile menu button */}
-            <div className="md:hidden">
-              <Button variant="ghost" size="icon" className="relative">
-                <div className="w-5 h-5 flex flex-col justify-center items-center">
-                  <span className="w-4 h-0.5 bg-foreground block transition-all duration-300"></span>
-                  <span className="w-4 h-0.5 bg-foreground block mt-1 transition-all duration-300"></span>
-                  <span className="w-4 h-0.5 bg-foreground block mt-1 transition-all duration-300"></span>
-                </div>
-              </Button>
-            </div>
-
-            {/* Desktop navigation */}
-            <div className="hidden md:flex items-center gap-4 lg:gap-6">
-              <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Features</a>
-              <Link to="/marketplace" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Marketplace</Link>
-              <Link to="/support" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Support</Link>
-              <Button variant="outline" size="sm" asChild className="md:size-default">
-                <Link to="/login">Sign In</Link>
-              </Button>
-              <Button variant="hero" size="sm" asChild className="md:size-default">
-                <Link to="/dashboard">Get Started</Link>
-              </Button>
-            </div>
+      <AppHeader 
+        showLogo={true}
+        rightActions={
+          <div className="hidden md:flex items-center gap-4 lg:gap-6">
+            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Features</a>
+            <Link to="/marketplace" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Marketplace</Link>
+            <Link to="/support" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Support</Link>
+            <Button variant="outline" size="sm" asChild className="md:size-default">
+              <Link to="/login">Sign In</Link>
+            </Button>
+            <Button variant="hero" size="sm" asChild className="md:size-default">
+              <Link to="/dashboard">Get Started</Link>
+            </Button>
           </div>
-        </div>
-      </nav>
+        }
+      />
 
       {/* Hero Section */}
       <section className="relative spacing-responsive overflow-hidden">
@@ -275,6 +261,9 @@ const Index = () => {
           </div>
         </div>
       </footer>
+      
+      {/* Live Chat Widget */}
+      <LiveChatWidget />
     </div>
   );
 };

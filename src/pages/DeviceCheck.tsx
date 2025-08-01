@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { STOLENLogo } from "@/components/STOLENLogo";
+import { AppHeader } from "@/components/AppHeader";
+import { QRScanner } from "@/components/QRScanner";
 import { TrustBadge } from "@/components/TrustBadge";
-import { Link } from "react-router-dom";
 import {
   Search,
   QrCode,
@@ -23,6 +23,7 @@ const DeviceCheck = () => {
   const [searchMethod, setSearchMethod] = useState<"serial" | "qr">("serial");
   const [serialNumber, setSerialNumber] = useState("");
   const [searchResult, setSearchResult] = useState<any>(null);
+  const [showQRScanner, setShowQRScanner] = useState(false);
 
   const handleSearch = () => {
     // Simulate search result
@@ -82,25 +83,17 @@ const DeviceCheck = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" asChild>
-                <Link to="/dashboard">
-                  <ArrowLeft className="w-5 h-5" />
-                </Link>
-              </Button>
-              <STOLENLogo />
-            </div>
-            <Button variant="outline" size="sm">
-              <Eye className="w-4 h-4" />
-              View History
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader 
+        title="Device Check" 
+        showBackButton={true} 
+        backTo="/dashboard"
+        rightActions={
+          <Button variant="outline" size="sm">
+            <Eye className="w-4 h-4" />
+            View History
+          </Button>
+        }
+      />
 
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Hero Section */}
@@ -162,18 +155,30 @@ const DeviceCheck = () => {
               </Button>
             </div>
           ) : (
-            <Card className="p-8 text-center space-y-4">
-              <QrCode className="w-16 h-16 mx-auto text-muted-foreground" />
-              <div className="space-y-2">
-                <h3 className="font-semibold">Scan QR Code</h3>
-                <p className="text-sm text-muted-foreground">
-                  Point your camera at the device's QR code
-                </p>
-              </div>
-              <Button variant="hero" size="lg">
-                Open Camera
-              </Button>
-            </Card>
+            showQRScanner ? (
+              <QRScanner 
+                onScanSuccess={(data) => {
+                  const serial = data.split(':').pop() || '';
+                  setSerialNumber(serial);
+                  setShowQRScanner(false);
+                  handleSearch();
+                }}
+                onClose={() => setShowQRScanner(false)}
+              />
+            ) : (
+              <Card className="p-8 text-center space-y-4">
+                <QrCode className="w-16 h-16 mx-auto text-muted-foreground" />
+                <div className="space-y-2">
+                  <h3 className="font-semibold">Scan QR Code</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Point your camera at the device's QR code
+                  </p>
+                </div>
+                <Button variant="hero" size="lg" onClick={() => setShowQRScanner(true)}>
+                  Open Camera
+                </Button>
+              </Card>
+            )
           )}
         </div>
 
