@@ -13,6 +13,9 @@ import { cn } from "@/lib/utils";
 export const BottomNavigation = () => {
   const location = useLocation();
   
+  // Mock authentication state - in real app would come from auth context
+  const isLoggedIn = false; // This should come from auth context
+  
   const navItems = [
     {
       icon: Home,
@@ -47,8 +50,8 @@ export const BottomNavigation = () => {
     }
   ];
 
-  // Don't show on landing page, splash screen, or PC screens
-  if (location.pathname === "/" || location.pathname === "/splash-welcome") return null;
+  // Don't show on landing page, splash screen, PC screens, or when logged out
+  if (location.pathname === "/" || location.pathname === "/splash-welcome" || !isLoggedIn) return null;
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-border">

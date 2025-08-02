@@ -37,7 +37,7 @@ const SplashWelcome = () => {
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center space-y-8">
-        <div className="relative">
+        <div className="relative flex justify-center">
           <div className="absolute inset-0 bg-white/20 rounded-full blur-3xl animate-pulse-glow"></div>
           <STOLENLogo className="relative z-10 scale-150" />
         </div>
