@@ -47,11 +47,11 @@ export const BottomNavigation = () => {
     }
   ];
 
-  // Don't show on landing page
-  if (location.pathname === "/") return null;
+  // Don't show on landing page, splash screen, or PC screens
+  if (location.pathname === "/" || location.pathname === "/splash-welcome") return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-border">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-border">
       <div className="flex items-center justify-around px-4 py-2 max-w-lg mx-auto">
         {navItems.map((item) => {
           const Icon = item.icon;

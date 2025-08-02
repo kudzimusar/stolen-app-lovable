@@ -38,7 +38,7 @@ export const AppHeader = ({
     { label: "My Devices", href: "/my-devices" },
     { label: "Support", href: "/support" }
   ] : [
-    { label: "Register Profile", href: "/login" },
+    { label: "Register", href: "/register" },
     { label: "Sign In", href: "/login" },
     { label: "About Us", href: "/learn" },
     { label: "Support", href: "/support" }
@@ -95,53 +95,70 @@ export const AppHeader = ({
               </>
             )}
             
-            {/* Hamburger menu for landing page */}
+            {/* Hamburger menu for mobile */}
             {isLandingPage && (
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="w-5 h-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-72">
-                  <div className="flex flex-col gap-4 mt-8">
-                    <div className="mb-6">
-                      <STOLENLogo />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
-                        Quick Access
-                      </h3>
-                      {menuItems.map((item) => (
-                        item.isGreeting ? (
-                          <div key={item.href} className="p-3 bg-primary/10 rounded-lg">
-                            <p className="font-semibold text-primary">{item.label}</p>
-                          </div>
-                        ) : (
-                          <Button
-                            key={item.href}
-                            variant="ghost"
-                            className="w-full justify-start"
-                            asChild
-                          >
-                            <Link to={item.href}>{item.label}</Link>
-                          </Button>
-                        )
-                      ))}
-                    </div>
-                    
-                    <div className="mt-8 p-4 bg-muted/50 rounded-lg">
-                      <p className="text-sm text-muted-foreground">
-                        Need help? Contact our support team for assistance with device registration and verification.
-                      </p>
-                      <Button variant="outline" size="sm" className="w-full mt-3" asChild>
-                        <Link to="/support">Get Support</Link>
+              <>
+                {/* Mobile hamburger menu */}
+                <div className="md:hidden">
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Menu className="w-5 h-5" />
                       </Button>
-                    </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
+                    </SheetTrigger>
+                    <SheetContent side="right" className="w-72">
+                      <div className="flex flex-col gap-4 mt-8">
+                        <div className="mb-6">
+                          <STOLENLogo />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
+                            Quick Access
+                          </h3>
+                          {menuItems.map((item) => (
+                            item.isGreeting ? (
+                              <div key={item.href} className="p-3 bg-primary/10 rounded-lg">
+                                <p className="font-semibold text-primary">{item.label}</p>
+                              </div>
+                            ) : (
+                              <Button
+                                key={item.href}
+                                variant="ghost"
+                                className="w-full justify-start"
+                                asChild
+                              >
+                                <Link to={item.href}>{item.label}</Link>
+                              </Button>
+                            )
+                          ))}
+                        </div>
+                        
+                        <div className="mt-8 p-4 bg-muted/50 rounded-lg">
+                          <p className="text-sm text-muted-foreground">
+                            Need help? Contact our support team for assistance with device registration and verification.
+                          </p>
+                          <Button variant="outline" size="sm" className="w-full mt-3" asChild>
+                            <Link to="/support">Get Support</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                </div>
+
+                {/* Desktop navigation links */}
+                <div className="hidden md:flex items-center gap-6">
+                  <Link to="/learn" className="text-muted-foreground hover:text-foreground transition-colors">About Us</Link>
+                  <Link to="/support" className="text-muted-foreground hover:text-foreground transition-colors">Support</Link>
+                  <Button variant="outline" asChild>
+                    <Link to="/login">Sign In</Link>
+                  </Button>
+                  <Button variant="hero" asChild>
+                    <Link to="/register">Register</Link>
+                  </Button>
+                </div>
+              </>
             )}
           </div>
         </div>

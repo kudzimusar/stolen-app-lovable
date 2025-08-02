@@ -84,6 +84,21 @@ All colors MUST be HSL.
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  /* Global content padding for mobile navigation */
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .main-content {
+    padding-bottom: 5rem; /* Space for bottom nav on mobile */
+  }
+
+  @media (min-width: 768px) {
+    .main-content {
+      padding-bottom: 0;
+    }
+  }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;

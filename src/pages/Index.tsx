@@ -40,7 +40,7 @@ const Index = () => {
               <Link to="/login">Sign In</Link>
             </Button>
             <Button variant="hero" size="sm" asChild className="md:size-default">
-              <Link to="/dashboard">Get Started</Link>
+              <Link to="/register">Get Started</Link>
             </Button>
           </div>
         }

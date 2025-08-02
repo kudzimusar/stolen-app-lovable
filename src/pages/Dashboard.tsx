@@ -24,7 +24,8 @@ import {
   ShieldCheck,
   TrendingUp,
   ArrowUpRight,
-  HeartHandshake
+  HeartHandshake,
+  QrCode
 } from "lucide-react";
 
 const Dashboard = () => {
@@ -134,35 +135,49 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-6 text-center">
-            <div className="text-2xl font-bold text-primary">{devices.length}</div>
-            <div className="text-sm text-muted-foreground">Devices Protected</div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <Card className="p-4 md:p-6 text-center">
+            <div className="text-xl md:text-2xl font-bold text-primary">{devices.length}</div>
+            <div className="text-xs md:text-sm text-muted-foreground">Devices Protected</div>
           </Card>
           <Link to="/device-transfer">
-            <Card className="p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="text-2xl font-bold text-primary">3</div>
-              <div className="text-sm text-muted-foreground">Devices Transferred</div>
-              <ArrowUpRight className="w-4 h-4 text-muted-foreground mt-1 mx-auto" />
+            <Card className="p-4 md:p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="text-xl md:text-2xl font-bold text-primary">3</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Devices Transferred</div>
+              <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 text-muted-foreground mt-1 mx-auto" />
             </Card>
           </Link>
           <Link to="/device-warranty-status">
-            <Card className="p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="text-2xl font-bold text-success">2</div>
-              <div className="text-sm text-muted-foreground">Active Warranties</div>
-              <ArrowUpRight className="w-4 h-4 text-muted-foreground mt-1 mx-auto" />
+            <Card className="p-4 md:p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="text-xl md:text-2xl font-bold text-success">2</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Active Warranties</div>
+              <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 text-muted-foreground mt-1 mx-auto" />
             </Card>
           </Link>
           <Link to="/community-board">
-            <Card className="p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="text-2xl font-bold text-primary">
+            <Card className="p-4 md:p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="text-xl md:text-2xl font-bold text-primary">
                 <div className="flex items-center justify-center gap-1">
-                  <HeartHandshake className="w-5 h-5" />
-                  <span>Check</span>
+                  <HeartHandshake className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="hidden sm:inline">Check</span>
                 </div>
               </div>
-              <div className="text-sm text-muted-foreground">Lost & Found</div>
-              <ArrowUpRight className="w-4 h-4 text-muted-foreground mt-1 mx-auto" />
+              <div className="text-xs md:text-sm text-muted-foreground">Lost & Found</div>
+              <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 text-muted-foreground mt-1 mx-auto" />
+            </Card>
+          </Link>
+          <Link to="/stolen-reports">
+            <Card className="p-4 md:p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="text-xl md:text-2xl font-bold text-destructive">1</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Devices Reported Lost</div>
+              <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 text-muted-foreground mt-1 mx-auto" />
+            </Card>
+          </Link>
+          <Link to="/community-rewards">
+            <Card className="p-4 md:p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="text-xl md:text-2xl font-bold text-primary">7</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Community Engagements</div>
+              <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 text-muted-foreground mt-1 mx-auto" />
             </Card>
           </Link>
         </div>
@@ -171,11 +186,11 @@ const Dashboard = () => {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Quick Actions</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {quickActions.map((action, index) => (
+            {quickActions.slice(0, 8).map((action, index) => (
               <Button
                 key={index}
                 variant={action.variant}
-                className="h-20 flex-col gap-2"
+                className="h-16 md:h-20 flex-col gap-2 text-xs md:text-sm"
                 asChild
               >
                 <Link to={action.href}>
@@ -184,6 +199,39 @@ const Dashboard = () => {
                 </Link>
               </Button>
             ))}
+          </div>
+        </div>
+
+        {/* QR Scanner Section */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Device Verification</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Button
+              variant="outline"
+              className="h-16 md:h-20 flex items-center justify-center gap-3"
+              asChild
+            >
+              <Link to="/device/check">
+                <QrCode className="w-6 h-6" />
+                <div className="text-left">
+                  <div className="font-medium">QR Code Scanner</div>
+                  <div className="text-xs text-muted-foreground">Quickly verify any device</div>
+                </div>
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-16 md:h-20 flex items-center justify-center gap-3"
+              asChild
+            >
+              <Link to="/reverse-verify">
+                <Search className="w-6 h-6" />
+                <div className="text-left">
+                  <div className="font-medium">Reverse Lookup</div>
+                  <div className="text-xs text-muted-foreground">Search by serial number</div>
+                </div>
+              </Link>
+            </Button>
           </div>
         </div>
 
@@ -260,6 +308,9 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
+      
+      {/* Bottom padding for mobile navigation */}
+      <div className="h-20 md:h-0"></div>
       
       {/* Live Chat Widget */}
       <LiveChatWidget />

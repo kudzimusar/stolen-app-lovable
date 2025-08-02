@@ -40,6 +40,7 @@ import DeviceLifecycleManager from "./pages/DeviceLifecycleManager";
 import DeviceWarrantyStatus from "./pages/DeviceWarrantyStatus";
 import WidgetGenerator from "./pages/WidgetGenerator";
 import Learn from "./pages/Learn";
+import Register from "./pages/Register";
 
 const queryClient = new QueryClient();
 
@@ -53,7 +54,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/splash-welcome" element={<SplashWelcome />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Navigate to="/device/register" replace />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/device/check" element={<DeviceCheck />} />
