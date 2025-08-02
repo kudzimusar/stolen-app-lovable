@@ -92,28 +92,103 @@ export const UploadComponent = ({
     onUpload?.(updatedFiles);
   };
 
+  const handleCapturedFile = async (file: File) => {
+    const newFile: UploadedFile = {
+      id: Date.now().toString(),
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      url: URL.createObjectURL(file)
+    };
+
+    setUploading(true);
+    
+    // Simulate upload progress
+    for (let progress = 0; progress <= 100; progress += 10) {
+      setUploadProgress(progress);
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    const updatedFiles = multiple ? [...files, newFile] : [newFile];
+    setFiles(updatedFiles);
+    onUpload?.(updatedFiles);
+    setUploading(false);
+    setUploadProgress(0);
+    
+    toast({
+      title: "Photo captured",
+      description: "Photo captured and uploaded successfully"
+    });
+  };
+
   const openCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        } 
       });
       
-      // Create video element for camera preview
+      // Create modal with camera preview
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4';
+      
+      const container = document.createElement('div');
+      container.className = 'bg-white rounded-lg p-6 max-w-md w-full';
+      
       const video = document.createElement('video');
       video.srcObject = stream;
-      video.play();
+      video.autoplay = true;
+      video.playsInline = true;
+      video.className = 'w-full rounded-lg mb-4';
       
-      // This is a simplified implementation
-      // In a real app, you'd show a camera preview modal
+      const captureBtn = document.createElement('button');
+      captureBtn.textContent = 'Capture Photo';
+      captureBtn.className = 'w-full bg-blue-600 text-white py-2 px-4 rounded-lg mb-2';
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.textContent = 'Close';
+      closeBtn.className = 'w-full bg-gray-500 text-white py-2 px-4 rounded-lg';
+      
+      container.appendChild(video);
+      container.appendChild(captureBtn);
+      container.appendChild(closeBtn);
+      modal.appendChild(container);
+      document.body.appendChild(modal);
+      
+      captureBtn.onclick = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(video, 0, 0);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            // Create a simple file object from blob
+            const fileName = `camera-${Date.now()}.jpg`;
+            const file = blob as File;
+            // Add name property
+            Object.defineProperty(file, 'name', { value: fileName });
+            handleCapturedFile(file);
+          }
+        }, 'image/jpeg', 0.9);
+        
+        stream.getTracks().forEach(track => track.stop());
+        document.body.removeChild(modal);
+      };
+      
+      closeBtn.onclick = () => {
+        stream.getTracks().forEach(track => track.stop());
+        document.body.removeChild(modal);
+      };
+      
       toast({
         title: "Camera opened",
-        description: "Camera functionality is now active"
+        description: "Camera is now active - tap Capture Photo to take a picture"
       });
-      
-      // Stop stream after demo
-      setTimeout(() => {
-        stream.getTracks().forEach(track => track.stop());
-      }, 3000);
       
     } catch (error) {
       toast({

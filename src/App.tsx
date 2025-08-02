@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BottomNavigation } from "@/components/BottomNavigation";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -60,6 +61,7 @@ const App = () => (
           <Route path="/device/:id" element={<DeviceDetails />} />
           <Route path="/device/recovery-status" element={<DeviceRecoveryStatus />} />
           <Route path="/lost-found-report" element={<LostFoundReport />} />
+          <Route path="/community-board" element={<CommunityBoard />} />
           <Route path="/lost-found-board" element={<CommunityBoard />} />
           <Route path="/community-rewards" element={<CommunityRewards />} />
           <Route path="/insurance-hub" element={<InsuranceHub />} />
@@ -88,6 +90,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <BottomNavigation />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

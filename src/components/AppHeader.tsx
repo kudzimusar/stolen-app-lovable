@@ -3,6 +3,7 @@ import { STOLENLogo } from "@/components/STOLENLogo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft, Menu, Bell, Settings } from "lucide-react";
+import { BackButton } from "@/components/BackButton";
 
 interface AppHeaderProps {
   title?: string;
@@ -22,13 +23,24 @@ export const AppHeader = ({
   const location = useLocation();
   const isLandingPage = location.pathname === "/";
   
-  // Hamburger menu items for RBAC
-  const menuItems = [
-    { label: "Register", href: "/device/register" },
-    { label: "Sign In", href: "/login" },
-    { label: "Login", href: "/login" },
+  // Check if user is logged in (mock for now)
+  const isLoggedIn = false; // This should come from auth context
+  const userName = "Kudzie"; // This should come from user profile
+
+  // Dynamic hamburger menu items based on auth state
+  const menuItems = isLoggedIn ? [
+    { label: `Hi ${userName}`, href: "#", isGreeting: true },
     { label: "Dashboard", href: "/dashboard" },
     { label: "Marketplace", href: "/marketplace" },
+    { label: "Register New Gadget", href: "/device/register" },
+    { label: "Transfer", href: "/device-transfer" },
+    { label: "Lost and Found Community", href: "/community-board" },
+    { label: "My Devices", href: "/my-devices" },
+    { label: "Support", href: "/support" }
+  ] : [
+    { label: "Register Profile", href: "/login" },
+    { label: "Sign In", href: "/login" },
+    { label: "About Us", href: "/learn" },
     { label: "Support", href: "/support" }
   ];
 
@@ -39,11 +51,7 @@ export const AppHeader = ({
           {/* Left Section */}
           <div className="flex items-center gap-4">
             {showBackButton && (
-              <Button variant="ghost" size="icon" asChild>
-                <Link to={backTo}>
-                  <ArrowLeft className="w-5 h-5" />
-                </Link>
-              </Button>
+              <BackButton to={backTo} />
             )}
             
             {/* Show logo on landing page or when explicitly requested */}
@@ -106,14 +114,20 @@ export const AppHeader = ({
                         Quick Access
                       </h3>
                       {menuItems.map((item) => (
-                        <Button
-                          key={item.href}
-                          variant="ghost"
-                          className="w-full justify-start"
-                          asChild
-                        >
-                          <Link to={item.href}>{item.label}</Link>
-                        </Button>
+                        item.isGreeting ? (
+                          <div key={item.href} className="p-3 bg-primary/10 rounded-lg">
+                            <p className="font-semibold text-primary">{item.label}</p>
+                          </div>
+                        ) : (
+                          <Button
+                            key={item.href}
+                            variant="ghost"
+                            className="w-full justify-start"
+                            asChild
+                          >
+                            <Link to={item.href}>{item.label}</Link>
+                          </Button>
+                        )
                       ))}
                     </div>
                     

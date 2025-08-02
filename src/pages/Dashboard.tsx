@@ -18,7 +18,13 @@ import {
   Shield,
   MapPin,
   Calendar,
-  Award
+  Award,
+  Users,
+  RefreshCw,
+  ShieldCheck,
+  TrendingUp,
+  ArrowUpRight,
+  HeartHandshake
 } from "lucide-react";
 
 const Dashboard = () => {
@@ -61,6 +67,18 @@ const Dashboard = () => {
       variant: "outline" as const
     },
     {
+      icon: <RefreshCw className="w-5 h-5" />,
+      label: "Transfer Device",
+      href: "/device-transfer",
+      variant: "outline" as const
+    },
+    {
+      icon: <Users className="w-5 h-5" />,
+      label: "Lost & Found",
+      href: "/community-board",
+      variant: "outline" as const
+    },
+    {
       icon: <Wrench className="w-5 h-5" />,
       label: "Repair Logs",
       href: "/repair-shop-dashboard",
@@ -76,6 +94,12 @@ const Dashboard = () => {
       icon: <ShoppingCart className="w-5 h-5" />,
       label: "Marketplace",
       href: "/marketplace",
+      variant: "outline" as const
+    },
+    {
+      icon: <ShieldCheck className="w-5 h-5" />,
+      label: "My Devices",
+      href: "/my-devices",
       variant: "outline" as const
     }
   ];
@@ -115,24 +139,38 @@ const Dashboard = () => {
             <div className="text-2xl font-bold text-primary">{devices.length}</div>
             <div className="text-sm text-muted-foreground">Devices Protected</div>
           </Card>
-          <Card className="p-6 text-center">
-            <div className="text-2xl font-bold text-success">100%</div>
-            <div className="text-sm text-muted-foreground">Security Score</div>
-          </Card>
-          <Card className="p-6 text-center">
-            <div className="text-2xl font-bold text-primary">0</div>
-            <div className="text-sm text-muted-foreground">Active Reports</div>
-          </Card>
-          <Card className="p-6 text-center">
-            <div className="text-2xl font-bold text-primary">$250</div>
-            <div className="text-sm text-muted-foreground">S-Pay Balance</div>
-          </Card>
+          <Link to="/device-transfer">
+            <Card className="p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="text-2xl font-bold text-primary">3</div>
+              <div className="text-sm text-muted-foreground">Devices Transferred</div>
+              <ArrowUpRight className="w-4 h-4 text-muted-foreground mt-1 mx-auto" />
+            </Card>
+          </Link>
+          <Link to="/device-warranty-status">
+            <Card className="p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="text-2xl font-bold text-success">2</div>
+              <div className="text-sm text-muted-foreground">Active Warranties</div>
+              <ArrowUpRight className="w-4 h-4 text-muted-foreground mt-1 mx-auto" />
+            </Card>
+          </Link>
+          <Link to="/community-board">
+            <Card className="p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="text-2xl font-bold text-primary">
+                <div className="flex items-center justify-center gap-1">
+                  <HeartHandshake className="w-5 h-5" />
+                  <span>Check</span>
+                </div>
+              </div>
+              <div className="text-sm text-muted-foreground">Lost & Found</div>
+              <ArrowUpRight className="w-4 h-4 text-muted-foreground mt-1 mx-auto" />
+            </Card>
+          </Link>
         </div>
 
         {/* Quick Actions */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {quickActions.map((action, index) => (
               <Button
                 key={index}
