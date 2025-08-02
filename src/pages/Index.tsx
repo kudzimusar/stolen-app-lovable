@@ -87,12 +87,12 @@ const Index = () => {
                       Check Status
                     </Link>
                   </Button>
-                  <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                    <Link to="/transfer-donate">
-                      <ArrowRightLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-                      Transfer/Donate
-                    </Link>
-                  </Button>
+                <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
+                  <Link to="/device-transfer">
+                    <ArrowRightLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                    Transfer/Donate
+                  </Link>
+                </Button>
                 </div>
               </div>
 

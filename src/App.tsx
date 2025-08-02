@@ -41,6 +41,9 @@ import DeviceWarrantyStatus from "./pages/DeviceWarrantyStatus";
 import WidgetGenerator from "./pages/WidgetGenerator";
 import Learn from "./pages/Learn";
 import Register from "./pages/Register";
+import AboutUs from "./pages/AboutUs";
+import StolenReports from "./pages/StolenReports";
+import DeviceCertificate from "./pages/DeviceCertificate";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +91,9 @@ const App = () => (
           <Route path="/device-warranty-status" element={<DeviceWarrantyStatus />} />
           <Route path="/widget-generator" element={<WidgetGenerator />} />
           <Route path="/learn" element={<Learn />} />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/stolen-reports" element={<StolenReports />} />
+          <Route path="/device-certificate/:deviceId" element={<DeviceCertificate />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

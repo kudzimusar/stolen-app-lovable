@@ -91,7 +91,17 @@ const Login = () => {
             </Link>
           </div>
 
-          <Button type="submit" className="w-full h-12" size="lg">
+          <Button 
+            type="submit" 
+            className="w-full h-12" 
+            size="lg"
+            onClick={(e) => {
+              e.preventDefault();
+              // Mock login - in real app would authenticate user and redirect based on role
+              // For now, redirect all to individual dashboard
+              window.location.href = "/dashboard";
+            }}
+          >
             <Lock className="w-4 h-4" />
             Sign In
           </Button>

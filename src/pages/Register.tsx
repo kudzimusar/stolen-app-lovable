@@ -65,8 +65,34 @@ const Register = () => {
       setIsLoading(false);
       if (formData.role === "other") {
         alert("Thank you for your registration. Our team will review your application and contact you within 24-48 hours.");
-      } else {
-        navigate("/dashboard");
+        return;
+      }
+      
+      // Role-based redirection
+      switch (formData.role) {
+        case "individual":
+          navigate("/dashboard");
+          break;
+        case "retailer":
+          navigate("/retailer-dashboard");
+          break;
+        case "repair_shop":
+          navigate("/repair-shop-dashboard");
+          break;
+        case "insurance":
+          navigate("/insurance-hub");
+          break;
+        case "law_enforcement":
+          navigate("/law-enforcement-dashboard");
+          break;
+        case "ngo":
+          navigate("/ngo-dashboard");
+          break;
+        case "business":
+          navigate("/retailer-dashboard"); // Redirect to retailer dashboard for business users
+          break;
+        default:
+          navigate("/dashboard");
       }
     }, 2000);
   };

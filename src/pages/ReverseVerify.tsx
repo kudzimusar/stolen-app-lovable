@@ -71,17 +71,24 @@ const ReverseVerify = () => {
   };
 
   const handleShareDevice = () => {
+    const certificateUrl = `${window.location.origin}/device-certificate/${mockDevice.id}`;
+    
     if (navigator.share) {
       navigator.share({
-        title: 'STOLEN Device Verification',
-        text: `Check out this verified device: ${mockDevice.name}`,
-        url: window.location.href
+        title: 'STOLEN Device Verification Certificate',
+        text: `View the verified certificate for this device: ${mockDevice.name}`,
+        url: certificateUrl
       });
     } else {
+      // Copy to clipboard and show certificate
+      navigator.clipboard.writeText(certificateUrl);
       toast({
-        title: "Link Copied",
-        description: "Device verification link copied to clipboard."
+        title: "Certificate Link Generated",
+        description: "Opening device verification certificate..."
       });
+      
+      // Open certificate in new window
+      window.open(certificateUrl, '_blank');
     }
   };
 

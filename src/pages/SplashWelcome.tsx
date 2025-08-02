@@ -78,7 +78,7 @@ const SplashWelcome = () => {
             asChild 
             className="w-full border-white text-white hover:bg-white/10"
           >
-            <Link to="/">Learn More</Link>
+            <Link to="/learn">Learn More</Link>
           </Button>
         </div>
 

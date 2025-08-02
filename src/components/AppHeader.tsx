@@ -36,11 +36,12 @@ export const AppHeader = ({
     { label: "Transfer", href: "/device-transfer" },
     { label: "Lost and Found Community", href: "/community-board" },
     { label: "My Devices", href: "/my-devices" },
+    { label: "Stolen Reports", href: "/stolen-reports" },
     { label: "Support", href: "/support" }
   ] : [
     { label: "Register", href: "/register" },
     { label: "Sign In", href: "/login" },
-    { label: "About Us", href: "/learn" },
+    { label: "About Us", href: "/about-us" },
     { label: "Support", href: "/support" }
   ];
 
@@ -149,7 +150,7 @@ export const AppHeader = ({
 
                 {/* Desktop navigation links */}
                 <div className="hidden md:flex items-center gap-6">
-                  <Link to="/learn" className="text-muted-foreground hover:text-foreground transition-colors">About Us</Link>
+                  <Link to="/about-us" className="text-muted-foreground hover:text-foreground transition-colors">About Us</Link>
                   <Link to="/support" className="text-muted-foreground hover:text-foreground transition-colors">Support</Link>
                   <Button variant="outline" asChild>
                     <Link to="/login">Sign In</Link>

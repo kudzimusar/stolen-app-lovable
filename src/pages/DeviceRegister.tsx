@@ -20,6 +20,7 @@ const DeviceRegister = () => {
   const [formData, setFormData] = useState({
     deviceName: "",
     serialNumber: "",
+    imeiNumber: "",
     model: "",
     brand: "",
     deviceType: "",
@@ -115,13 +116,14 @@ const DeviceRegister = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="serialNumber">Serial/IMEI Number</Label>
+                <Label htmlFor="serialNumber">Serial Number *</Label>
                 <div className="flex gap-2">
                   <Input
                     id="serialNumber"
-                    placeholder="Enter serial or IMEI"
+                    placeholder="Enter device serial number"
                     value={formData.serialNumber}
                     onChange={(e) => setFormData({...formData, serialNumber: e.target.value})}
+                    required
                   />
                   <QRScanner 
                     onScanSuccess={(data) => {
@@ -131,6 +133,16 @@ const DeviceRegister = () => {
                     }}
                   />
                 </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="imeiNumber">IMEI Number</Label>
+                <Input
+                  id="imeiNumber"
+                  placeholder="Enter IMEI number (for mobile devices)"
+                  value={formData.imeiNumber || ""}
+                  onChange={(e) => setFormData({...formData, imeiNumber: e.target.value})}
+                />
               </div>
             </div>
           </div>
