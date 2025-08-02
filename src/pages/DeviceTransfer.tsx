@@ -266,7 +266,7 @@ const DeviceTransfer = () => {
 
         {showQRScanner && (
           <QRScanner
-            onResult={handleQRScan}
+            onScanSuccess={handleQRScan}
             onClose={() => setShowQRScanner(false)}
           />
         )}

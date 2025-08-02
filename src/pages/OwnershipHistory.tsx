@@ -123,8 +123,9 @@ const OwnershipHistory = () => {
             />
           </div>
           <DocumentDownloader 
-            documentType="ownership_history"
-            deviceData={selectedDeviceData}
+            type="report"
+            deviceName={selectedDeviceData.name}
+            serialNumber={selectedDeviceData.serial}
             variant="outline"
           />
         </div>
@@ -205,8 +206,9 @@ const OwnershipHistory = () => {
                             {entry.documents.map((doc) => (
                               <DocumentDownloader
                                 key={doc}
-                                documentType={doc}
-                                deviceData={selectedDeviceData}
+                                type="certificate"
+                                deviceName={selectedDeviceData.name}
+                                serialNumber={selectedDeviceData.serial}
                                 size="sm"
                                 variant="outline"
                               />

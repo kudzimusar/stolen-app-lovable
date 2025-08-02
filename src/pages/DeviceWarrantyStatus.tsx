@@ -207,8 +207,9 @@ const DeviceWarrantyStatus = () => {
                       Set Alerts
                     </Button>
                     <DocumentDownloader 
-                      documentType="warranty_certificate"
-                      deviceData={device}
+                      type="certificate"
+                      deviceName={device.name}
+                      serialNumber={device.serial}
                       size="sm"
                       variant="outline"
                     />

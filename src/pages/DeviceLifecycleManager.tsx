@@ -335,8 +335,8 @@ const DeviceLifecycleManager = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold">Lifecycle History</h2>
               <DocumentDownloader 
-                documentType="lifecycle_report"
-                deviceData={{ name: "All Devices" }}
+                type="report"
+                deviceName="All Devices"
                 variant="outline"
               />
             </div>
@@ -379,8 +379,8 @@ const DeviceLifecycleManager = () => {
                           Certificate ID: {entry.certificateId}
                         </span>
                         <DocumentDownloader 
-                          documentType="lifecycle_certificate"
-                          deviceData={{ name: entry.device }}
+                          type="certificate"
+                          deviceName={entry.device}
                           size="sm"
                           variant="outline"
                         />
