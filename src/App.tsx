@@ -31,6 +31,14 @@ import ReverseVerify from "./pages/ReverseVerify";
 import FeedbackRating from "./pages/FeedbackRating";
 import AnalyticsInsights from "./pages/AnalyticsInsights";
 import NotFound from "./pages/NotFound";
+import DeviceTransfer from "./pages/DeviceTransfer";
+import OwnershipHistory from "./pages/OwnershipHistory";
+import FraudDatabase from "./pages/FraudDatabase";
+import MyDevices from "./pages/MyDevices";
+import DeviceLifecycleManager from "./pages/DeviceLifecycleManager";
+import DeviceWarrantyStatus from "./pages/DeviceWarrantyStatus";
+import WidgetGenerator from "./pages/WidgetGenerator";
+import Learn from "./pages/Learn";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +77,14 @@ const App = () => (
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/support" element={<Support />} />
           <Route path="/transfer-donate" element={<TransferDonate />} />
+          <Route path="/device-transfer" element={<DeviceTransfer />} />
+          <Route path="/ownership-history" element={<OwnershipHistory />} />
+          <Route path="/fraud-database" element={<FraudDatabase />} />
+          <Route path="/my-devices" element={<MyDevices />} />
+          <Route path="/device-lifecycle-manager" element={<DeviceLifecycleManager />} />
+          <Route path="/device-warranty-status" element={<DeviceWarrantyStatus />} />
+          <Route path="/widget-generator" element={<WidgetGenerator />} />
+          <Route path="/learn" element={<Learn />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
