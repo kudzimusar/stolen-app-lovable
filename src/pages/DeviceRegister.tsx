@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { AppHeader } from "@/components/AppHeader";
+import { BackButton } from "@/components/BackButton";
 import { UploadComponent } from "@/components/UploadComponent";
 import { QRScanner } from "@/components/QRScanner";
 import { EnhancedSelect, DEVICE_TYPES, DEVICE_BRANDS, SA_CITIES } from "@/components/EnhancedSelect";
@@ -293,6 +294,10 @@ const DeviceRegister = () => {
       <AppHeader title="Register Device" showBackButton={true} backTo="/dashboard" />
 
       <div className="container mx-auto px-4 py-6">
+        {/* Mobile Back Navigation - Fallback */}
+        <div className="md:hidden mb-4">
+          <BackButton />
+        </div>
         {/* Progress */}
         <div className="mb-8 space-y-2">
           <div className="flex justify-between text-sm">

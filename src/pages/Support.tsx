@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { STOLENLogo } from "@/components/STOLENLogo";
+import { BackButton } from "@/components/BackButton";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -125,6 +126,10 @@ const Support = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Mobile Back Navigation - Fallback */}
+        <div className="md:hidden mb-4">
+          <BackButton />
+        </div>
         {/* Hero Section */}
         <div className="text-center space-y-4">
           <div className="flex justify-center">

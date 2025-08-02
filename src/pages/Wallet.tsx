@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { STOLENLogo } from "@/components/STOLENLogo";
+import { BackButton } from "@/components/BackButton";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -158,6 +159,10 @@ const Wallet = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Mobile Back Navigation - Fallback */}
+        <div className="md:hidden mb-4">
+          <BackButton />
+        </div>
         {/* Balance Card */}
         <Card className="p-6 bg-gradient-hero text-white">
           <div className="space-y-4">

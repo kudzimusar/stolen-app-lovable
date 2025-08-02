@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { AppHeader } from "@/components/AppHeader";
+import { BackButton } from "@/components/BackButton";
 import { 
   Search, 
   Play,
@@ -150,6 +151,11 @@ const Learn = () => {
       <AppHeader />
       
       <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Mobile Back Navigation */}
+        <div className="md:hidden mb-4">
+          <BackButton />
+        </div>
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">STOLEN Academy</h1>
           <p className="text-muted-foreground">

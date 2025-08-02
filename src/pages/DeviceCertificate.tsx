@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { BackButton } from "@/components/BackButton";
 import { Shield, Download, Home, CheckCircle, Calendar, User, Smartphone } from "lucide-react";
 
 const DeviceCertificate = () => {
@@ -41,12 +42,17 @@ const DeviceCertificate = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header Actions - Don't print */}
         <div className="flex justify-between items-center mb-6 print:hidden">
-          <Button variant="outline" asChild>
-            <Link to="/dashboard">
-              <Home className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="md:hidden">
+              <BackButton />
+            </div>
+            <Button variant="outline" asChild className="hidden md:flex">
+              <Link to="/dashboard">
+                <Home className="w-4 h-4 mr-2" />
+                Back to Dashboard
+              </Link>
+            </Button>
+          </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handlePrint}>
               Print Certificate

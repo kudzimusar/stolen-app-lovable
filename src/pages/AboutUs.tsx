@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppHeader } from "@/components/AppHeader";
+import { BackButton } from "@/components/BackButton";
 import { Shield, Globe, Users, Award, Target, Eye, Sparkles, Zap, Heart } from "lucide-react";
 
 const AboutUs = () => {
@@ -8,6 +9,10 @@ const AboutUs = () => {
       <AppHeader />
       
       <div className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* Mobile Back Navigation */}
+        <div className="md:hidden mb-4">
+          <BackButton />
+        </div>
         {/* Hero Section */}
         <div className="text-center space-y-6 mb-16 relative">
           <div className="absolute inset-0 bg-gradient-primary/5 rounded-3xl blur-3xl"></div>

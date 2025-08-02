@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { STOLENLogo } from "@/components/STOLENLogo";
 import { TrustBadge } from "@/components/TrustBadge";
+import { BackButton } from "@/components/BackButton";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -94,6 +95,10 @@ const Profile = () => {
       </header>
 
       <div className="container mx-auto px-4 py-6 space-y-6">
+        {/* Mobile Back Navigation - Fallback */}
+        <div className="md:hidden mb-4">
+          <BackButton />
+        </div>
         {/* Profile Header */}
         <Card className="p-6">
           <div className="flex items-center gap-4">

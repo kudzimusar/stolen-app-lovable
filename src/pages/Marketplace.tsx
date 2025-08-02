@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { STOLENLogo } from "@/components/STOLENLogo";
 import { TrustBadge } from "@/components/TrustBadge";
+import { BackButton } from "@/components/BackButton";
 import { Link } from "react-router-dom";
 import {
   Search,
@@ -114,6 +115,10 @@ const Marketplace = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Mobile Back Navigation - Fallback */}
+        <div className="md:hidden mb-4">
+          <BackButton />
+        </div>
         {/* Search Section */}
         <div className="space-y-4">
           <div className="text-center space-y-2">

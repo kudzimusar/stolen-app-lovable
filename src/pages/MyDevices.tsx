@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import { AppHeader } from "@/components/AppHeader";
+import { BackButton } from "@/components/BackButton";
 import { 
   Search, 
   Smartphone, 
@@ -120,6 +121,10 @@ const MyDevices = () => {
       <AppHeader />
       
       <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Mobile Back Navigation - Fallback */}
+        <div className="md:hidden mb-4">
+          <BackButton />
+        </div>
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">My Devices</h1>
