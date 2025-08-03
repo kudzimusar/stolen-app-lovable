@@ -14,7 +14,7 @@ export const BottomNavigation = () => {
   const location = useLocation();
   
   // Mock authentication state - in real app would come from auth context
-  const isLoggedIn = false; // This should come from auth context
+  const isLoggedIn = true; // This should come from auth context
   
   const navItems = [
     {
@@ -50,8 +50,11 @@ export const BottomNavigation = () => {
     }
   ];
 
-  // Don't show on landing page, splash screen, PC screens, or when logged out
-  if (location.pathname === "/" || location.pathname === "/splash-welcome" || !isLoggedIn) return null;
+  // Don't show on landing page, splash screen, or role-based dashboards
+  const roleBasedPaths = ["/retailer-dashboard", "/repair-shop-dashboard", "/insurance-dashboard", "/law-enforcement-dashboard", "/ngo-dashboard"];
+  const hideOnPaths = ["/", "/splash-welcome", "/login", "/register"];
+  
+  if (hideOnPaths.includes(location.pathname) || roleBasedPaths.includes(location.pathname)) return null;
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-border">

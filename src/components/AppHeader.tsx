@@ -25,7 +25,7 @@ export const AppHeader = ({
   const isLandingPage = location.pathname === "/";
   
   // Check if user is logged in (mock for now)
-  const isLoggedIn = false; // This should come from auth context
+  const isLoggedIn = true; // This should come from auth context
   const userName = "Kudzie"; // This should come from user profile
 
   // Dynamic hamburger menu items based on auth state
@@ -86,13 +86,19 @@ export const AppHeader = ({
             {/* Custom right actions */}
             {rightActions}
             
-            {/* Dashboard specific actions */}
+            {/* Dashboard specific actions for all dashboard pages and profile pages */}
             {(location.pathname === "/dashboard" || 
               location.pathname === "/retailer-dashboard" ||
               location.pathname === "/repair-shop-dashboard" ||
               location.pathname === "/insurance-dashboard" ||
               location.pathname === "/law-enforcement-dashboard" ||
-              location.pathname === "/ngo-dashboard") && (
+              location.pathname === "/ngo-dashboard" ||
+              location.pathname === "/profile" ||
+              location.pathname === "/retailer-profile" ||
+              location.pathname === "/repairer-profile" ||
+              location.pathname === "/insurance-profile" ||
+              location.pathname === "/law-enforcement-profile" ||
+              location.pathname === "/ngo-profile") && (
               <>
                 <Button variant="ghost" size="icon" asChild>
                   <Link to="/fraud-alerts">
@@ -101,11 +107,11 @@ export const AppHeader = ({
                 </Button>
             <Button variant="ghost" size="icon" asChild>
               <Link to={
-                location.pathname === "/retailer-dashboard" ? "/retailer-profile" :
-                location.pathname === "/repair-shop-dashboard" ? "/repairer-profile" :
-                location.pathname === "/insurance-dashboard" ? "/insurance-profile" :
-                location.pathname === "/law-enforcement-dashboard" ? "/law-enforcement-profile" :
-                location.pathname === "/ngo-dashboard" ? "/ngo-profile" :
+                location.pathname === "/retailer-dashboard" || location.pathname === "/retailer-profile" ? "/retailer-profile" :
+                location.pathname === "/repair-shop-dashboard" || location.pathname === "/repairer-profile" ? "/repairer-profile" :
+                location.pathname === "/insurance-dashboard" || location.pathname === "/insurance-profile" ? "/insurance-profile" :
+                location.pathname === "/law-enforcement-dashboard" || location.pathname === "/law-enforcement-profile" ? "/law-enforcement-profile" :
+                location.pathname === "/ngo-dashboard" || location.pathname === "/ngo-profile" ? "/ngo-profile" :
                 "/profile"
               }>
                 <User className="w-5 h-5" />
@@ -113,27 +119,27 @@ export const AppHeader = ({
             </Button>
             <HamburgerMenu 
               dashboardLink={
-                location.pathname === "/retailer-dashboard" ? "/retailer-dashboard" :
-                location.pathname === "/repair-shop-dashboard" ? "/repair-shop-dashboard" :
-                location.pathname === "/insurance-dashboard" ? "/insurance-dashboard" :
-                location.pathname === "/law-enforcement-dashboard" ? "/law-enforcement-dashboard" :
-                location.pathname === "/ngo-dashboard" ? "/ngo-dashboard" :
+                location.pathname === "/retailer-dashboard" || location.pathname === "/retailer-profile" ? "/retailer-dashboard" :
+                location.pathname === "/repair-shop-dashboard" || location.pathname === "/repairer-profile" ? "/repair-shop-dashboard" :
+                location.pathname === "/insurance-dashboard" || location.pathname === "/insurance-profile" ? "/insurance-dashboard" :
+                location.pathname === "/law-enforcement-dashboard" || location.pathname === "/law-enforcement-profile" ? "/law-enforcement-dashboard" :
+                location.pathname === "/ngo-dashboard" || location.pathname === "/ngo-profile" ? "/ngo-dashboard" :
                 "/dashboard"
               }
               profileLink={
-                location.pathname === "/retailer-dashboard" ? "/retailer-profile" :
-                location.pathname === "/repair-shop-dashboard" ? "/repairer-profile" :
-                location.pathname === "/insurance-dashboard" ? "/insurance-profile" :
-                location.pathname === "/law-enforcement-dashboard" ? "/law-enforcement-profile" :
-                location.pathname === "/ngo-dashboard" ? "/ngo-profile" :
+                location.pathname === "/retailer-dashboard" || location.pathname === "/retailer-profile" ? "/retailer-profile" :
+                location.pathname === "/repair-shop-dashboard" || location.pathname === "/repairer-profile" ? "/repairer-profile" :
+                location.pathname === "/insurance-dashboard" || location.pathname === "/insurance-profile" ? "/insurance-profile" :
+                location.pathname === "/law-enforcement-dashboard" || location.pathname === "/law-enforcement-profile" ? "/law-enforcement-profile" :
+                location.pathname === "/ngo-dashboard" || location.pathname === "/ngo-profile" ? "/ngo-profile" :
                 "/profile"
               }
               userRole={
-                location.pathname === "/retailer-dashboard" ? "retailer" :
-                location.pathname === "/repair-shop-dashboard" ? "repairer" :
-                location.pathname === "/insurance-dashboard" ? "insurance" :
-                location.pathname === "/law-enforcement-dashboard" ? "law-enforcement" :
-                location.pathname === "/ngo-dashboard" ? "ngo" :
+                location.pathname === "/retailer-dashboard" || location.pathname === "/retailer-profile" ? "retailer" :
+                location.pathname === "/repair-shop-dashboard" || location.pathname === "/repairer-profile" ? "repairer" :
+                location.pathname === "/insurance-dashboard" || location.pathname === "/insurance-profile" ? "insurance" :
+                location.pathname === "/law-enforcement-dashboard" || location.pathname === "/law-enforcement-profile" ? "law-enforcement" :
+                location.pathname === "/ngo-dashboard" || location.pathname === "/ngo-profile" ? "ngo" :
                 "member"
               }
             />
