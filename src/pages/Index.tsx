@@ -29,22 +29,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader 
-        showLogo={true}
-        rightActions={
-          <div className="hidden md:flex items-center gap-4 lg:gap-6">
-            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Features</a>
-            <Link to="/marketplace" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Marketplace</Link>
-            <Link to="/support" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Support</Link>
-            <Button variant="outline" size="sm" asChild className="md:size-default">
-              <Link to="/login">Sign In</Link>
-            </Button>
-            <Button variant="hero" size="sm" asChild className="md:size-default">
-              <Link to="/splash-welcome">Get Started</Link>
-            </Button>
-          </div>
-        }
-      />
+      <AppHeader showLogo={true} />
 
       {/* Hero Section */}
       <section className="relative spacing-responsive overflow-hidden">
@@ -249,7 +234,7 @@ const Index = () => {
             <div>
               <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Company</h4>
               <div className="space-y-2 text-xs sm:text-sm text-muted-foreground">
-                <Link to="/support" className="block hover:text-foreground transition-colors cursor-pointer">About Us</Link>
+                <Link to="/about-us" className="block hover:text-foreground transition-colors cursor-pointer">About Us</Link>
                 <Link to="/support" className="block hover:text-foreground transition-colors cursor-pointer">Privacy Policy</Link>
                 <Link to="/support" className="block hover:text-foreground transition-colors cursor-pointer">Terms of Service</Link>
                 <Link to="/support" className="block hover:text-foreground transition-colors cursor-pointer">Security</Link>

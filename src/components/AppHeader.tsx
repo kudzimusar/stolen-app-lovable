@@ -149,14 +149,15 @@ export const AppHeader = ({
                 </div>
 
                 {/* Desktop navigation links */}
-                <div className="hidden md:flex items-center gap-6">
-                  <Link to="/about-us" className="text-muted-foreground hover:text-foreground transition-colors">About Us</Link>
-                  <Link to="/support" className="text-muted-foreground hover:text-foreground transition-colors">Support</Link>
-                  <Button variant="outline" asChild>
+                <div className="hidden md:flex items-center gap-4 lg:gap-6">
+                  <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Features</a>
+                  <Link to="/marketplace" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Marketplace</Link>
+                  <Link to="/support" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Support</Link>
+                  <Button variant="outline" size="sm" asChild className="md:size-default">
                     <Link to="/login">Sign In</Link>
                   </Button>
-                  <Button variant="hero" asChild>
-                    <Link to="/register">Register</Link>
+                  <Button variant="hero" size="sm" asChild className="md:size-default">
+                    <Link to="/splash-welcome">Get Started</Link>
                   </Button>
                 </div>
               </>

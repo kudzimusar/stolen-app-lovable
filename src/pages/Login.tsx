@@ -6,23 +6,79 @@ import { Card } from "@/components/ui/card";
 import { STOLENLogo } from "@/components/STOLENLogo";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Link } from "react-router-dom";
-import { Lock, Mail, Smartphone, Fingerprint } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Lock, Mail, Smartphone, Fingerprint, Users, Building, Wrench, FileText, Gavel, Heart, Shield } from "lucide-react";
 
 const Login = () => {
+  const [searchParams] = useSearchParams();
   const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
   const [rememberMe, setRememberMe] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string>(searchParams.get('role') || "");
+
+  const roles = [
+    { id: "member", label: "Member", icon: Users },
+    { id: "retailer", label: "Retailer Admin", icon: Building },
+    { id: "repairer", label: "Repairer Admin", icon: Wrench },
+    { id: "insurance", label: "Insurance Admin", icon: FileText },
+    { id: "law-enforcement", label: "Law Enforcement Admin", icon: Gavel },
+    { id: "ngo", label: "NGO Admin", icon: Heart },
+    { id: "other", label: "Other", icon: Shield }
+  ];
+
+  const handleLogin = () => {
+    // Mock role-based redirect
+    const roleRoutes = {
+      "member": "/dashboard",
+      "retailer": "/retailer-dashboard", 
+      "repairer": "/repair-shop-dashboard",
+      "insurance": "/insurance-hub",
+      "law-enforcement": "/law-enforcement-dashboard",
+      "ngo": "/ngo-dashboard",
+      "other": "/dashboard"
+    };
+    
+    const route = roleRoutes[selectedRole as keyof typeof roleRoutes] || "/dashboard";
+    window.location.href = route;
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-8 space-y-6">
         <div className="text-center space-y-4">
-          <STOLENLogo />
+          <div className="flex justify-center">
+            <STOLENLogo />
+          </div>
           <div>
             <h1 className="text-2xl font-bold">Welcome Back</h1>
             <p className="text-muted-foreground">
-              Sign in to access your device security dashboard
+              Sign in to access your dashboard
             </p>
+          </div>
+        </div>
+
+        {/* Role Selection */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Select Your Role</Label>
+          <div className="grid grid-cols-2 gap-2">
+            {roles.map((role) => {
+              const IconComponent = role.icon;
+              return (
+                <Button
+                  key={role.id}
+                  variant={selectedRole === role.id ? "default" : "outline"}
+                  size="sm"
+                  className={`h-auto p-3 flex flex-col items-center space-y-1 ${
+                    selectedRole === role.id ? "ring-2 ring-primary/20" : ""
+                  }`}
+                  onClick={() => setSelectedRole(role.id)}
+                >
+                  <IconComponent className="w-4 h-4" />
+                  <span className="text-xs font-medium text-center leading-tight">
+                    {role.label}
+                  </span>
+                </Button>
+              );
+            })}
           </div>
         </div>
 
@@ -95,11 +151,10 @@ const Login = () => {
             type="submit" 
             className="w-full h-12" 
             size="lg"
+            disabled={!selectedRole}
             onClick={(e) => {
               e.preventDefault();
-              // Mock login - in real app would authenticate user and redirect based on role
-              // For now, redirect all to individual dashboard
-              window.location.href = "/dashboard";
+              handleLogin();
             }}
           >
             <Lock className="w-4 h-4" />
@@ -111,6 +166,7 @@ const Login = () => {
             variant="outline"
             className="w-full h-12"
             size="lg"
+            disabled={!selectedRole}
           >
             <Fingerprint className="w-4 h-4" />
             Use Biometric Login

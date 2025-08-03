@@ -101,7 +101,9 @@ const Register = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-lg p-8 space-y-6">
         <div className="text-center space-y-4">
-          <STOLENLogo />
+          <div className="flex justify-center">
+            <STOLENLogo />
+          </div>
           <div>
             <h1 className="text-2xl font-bold">Create Your Account</h1>
             <p className="text-muted-foreground">
