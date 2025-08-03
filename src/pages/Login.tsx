@@ -31,7 +31,7 @@ const Login = () => {
       "member": "/dashboard",
       "retailer": "/retailer-dashboard", 
       "repairer": "/repair-shop-dashboard",
-      "insurance": "/insurance-hub",
+      "insurance": "/insurance-dashboard",
       "law-enforcement": "/law-enforcement-dashboard",
       "ngo": "/ngo-dashboard",
       "other": "/dashboard"

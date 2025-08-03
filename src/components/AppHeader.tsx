@@ -100,14 +100,42 @@ export const AppHeader = ({
                   </Link>
                 </Button>
             <Button variant="ghost" size="icon" asChild>
-              <Link to="/profile">
+              <Link to={
+                location.pathname === "/retailer-dashboard" ? "/retailer-profile" :
+                location.pathname === "/repair-shop-dashboard" ? "/repairer-profile" :
+                location.pathname === "/insurance-dashboard" ? "/insurance-profile" :
+                location.pathname === "/law-enforcement-dashboard" ? "/law-enforcement-profile" :
+                location.pathname === "/ngo-dashboard" ? "/ngo-profile" :
+                "/profile"
+              }>
                 <User className="w-5 h-5" />
               </Link>
             </Button>
             <HamburgerMenu 
-              dashboardLink="/dashboard" 
-              profileLink="/profile" 
-              userRole="member" 
+              dashboardLink={
+                location.pathname === "/retailer-dashboard" ? "/retailer-dashboard" :
+                location.pathname === "/repair-shop-dashboard" ? "/repair-shop-dashboard" :
+                location.pathname === "/insurance-dashboard" ? "/insurance-dashboard" :
+                location.pathname === "/law-enforcement-dashboard" ? "/law-enforcement-dashboard" :
+                location.pathname === "/ngo-dashboard" ? "/ngo-dashboard" :
+                "/dashboard"
+              }
+              profileLink={
+                location.pathname === "/retailer-dashboard" ? "/retailer-profile" :
+                location.pathname === "/repair-shop-dashboard" ? "/repairer-profile" :
+                location.pathname === "/insurance-dashboard" ? "/insurance-profile" :
+                location.pathname === "/law-enforcement-dashboard" ? "/law-enforcement-profile" :
+                location.pathname === "/ngo-dashboard" ? "/ngo-profile" :
+                "/profile"
+              }
+              userRole={
+                location.pathname === "/retailer-dashboard" ? "retailer" :
+                location.pathname === "/repair-shop-dashboard" ? "repairer" :
+                location.pathname === "/insurance-dashboard" ? "insurance" :
+                location.pathname === "/law-enforcement-dashboard" ? "law-enforcement" :
+                location.pathname === "/ngo-dashboard" ? "ngo" :
+                "member"
+              }
             />
               </>
             )}

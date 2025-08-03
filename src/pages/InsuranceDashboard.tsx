@@ -100,7 +100,7 @@ const InsuranceDashboard = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Button variant="ghost" size="icon" asChild>
-              <Link to="/dashboard">
+              <Link to="/insurance-dashboard">
                 <ArrowLeft className="w-5 h-5" />
               </Link>
             </Button>
