@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { STOLENLogo } from "@/components/STOLENLogo";
 import { TrustBadge } from "@/components/TrustBadge";
 import { BackButton } from "@/components/BackButton";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   User,
@@ -24,18 +24,39 @@ import {
   Edit3,
   Settings,
   Eye,
-  EyeOff
+  EyeOff,
+  Building,
+  FileText,
+  MapPin,
+  Phone,
+  Mail,
+  Calendar
 } from "lucide-react";
 
 const Profile = () => {
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [showSensitive, setShowSensitive] = useState(false);
+  const [userRole, setUserRole] = useState<string>("member"); // Mock role - should come from auth context
+  
   const [profile, setProfile] = useState({
     name: "John Doe",
     email: "john.doe@example.com",
     phone: "+1 (555) 123-4567",
     location: "San Francisco, CA",
     memberSince: "January 2024"
+  });
+
+  // Role-specific business information
+  const [businessInfo, setBusinessInfo] = useState({
+    companyName: "",
+    registrationNumber: "",
+    licenseNumber: "",
+    businessAddress: "",
+    contactPerson: "",
+    website: "",
+    specializations: "",
+    certifications: ""
   });
 
   const [notifications, setNotifications] = useState({
@@ -71,6 +92,35 @@ const Profile = () => {
     // Here you would typically save to backend
   };
 
+  const handleLogout = () => {
+    // Clear auth session
+    navigate("/login");
+  };
+
+  const getDashboardLink = () => {
+    switch (userRole) {
+      case "retailer": return "/retailer-dashboard";
+      case "repairer": return "/repair-shop-dashboard";
+      case "insurance": return "/insurance-dashboard";
+      case "law-enforcement": return "/law-enforcement-dashboard";
+      case "ngo": return "/ngo-dashboard";
+      default: return "/dashboard";
+    }
+  };
+
+  const getRoleDisplayName = () => {
+    switch (userRole) {
+      case "retailer": return "Retailer Admin";
+      case "repairer": return "Repair Shop Admin";
+      case "insurance": return "Insurance Admin";
+      case "law-enforcement": return "Law Enforcement";
+      case "ngo": return "NGO Admin";
+      default: return "Member";
+    }
+  };
+
+  const showBusinessInfo = ["retailer", "repairer", "insurance", "ngo"].includes(userRole);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -78,7 +128,7 @@ const Profile = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Button variant="ghost" size="icon" asChild>
-              <Link to="/dashboard">
+              <Link to={getDashboardLink()}>
                 <ArrowLeft className="w-5 h-5" />
               </Link>
             </Button>
@@ -115,6 +165,9 @@ const Profile = () => {
                 <TrustBadge type="secure" text="Verified" />
               </div>
               <p className="text-muted-foreground">{profile.email}</p>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline">{getRoleDisplayName()}</Badge>
+              </div>
               <p className="text-sm text-muted-foreground">
                 Member since {profile.memberSince}
               </p>
@@ -216,6 +269,126 @@ const Profile = () => {
             )}
           </div>
         </Card>
+
+        {/* Business Information for Business Accounts */}
+        {showBusinessInfo && (
+          <Card className="p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Building className="w-5 h-5" />
+                Business Information
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="companyName">Company Name</Label>
+                  {isEditing ? (
+                    <Input
+                      id="companyName"
+                      value={businessInfo.companyName}
+                      onChange={(e) => setBusinessInfo({...businessInfo, companyName: e.target.value})}
+                      placeholder="Enter company name"
+                    />
+                  ) : (
+                    <p className="text-sm">{businessInfo.companyName || "Not specified"}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="registrationNumber">Registration Number</Label>
+                  {isEditing ? (
+                    <Input
+                      id="registrationNumber"
+                      value={businessInfo.registrationNumber}
+                      onChange={(e) => setBusinessInfo({...businessInfo, registrationNumber: e.target.value})}
+                      placeholder="Government registration number"
+                    />
+                  ) : (
+                    <p className="text-sm">{businessInfo.registrationNumber || "Not specified"}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="licenseNumber">License Number</Label>
+                  {isEditing ? (
+                    <Input
+                      id="licenseNumber"
+                      value={businessInfo.licenseNumber}
+                      onChange={(e) => setBusinessInfo({...businessInfo, licenseNumber: e.target.value})}
+                      placeholder="Professional license number"
+                    />
+                  ) : (
+                    <p className="text-sm">{businessInfo.licenseNumber || "Not specified"}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="website">Website</Label>
+                  {isEditing ? (
+                    <Input
+                      id="website"
+                      value={businessInfo.website}
+                      onChange={(e) => setBusinessInfo({...businessInfo, website: e.target.value})}
+                      placeholder="https://example.com"
+                    />
+                  ) : (
+                    <p className="text-sm">{businessInfo.website || "Not specified"}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="businessAddress">Business Address</Label>
+                {isEditing ? (
+                  <Input
+                    id="businessAddress"
+                    value={businessInfo.businessAddress}
+                    onChange={(e) => setBusinessInfo({...businessInfo, businessAddress: e.target.value})}
+                    placeholder="Complete business address"
+                  />
+                ) : (
+                  <p className="text-sm">{businessInfo.businessAddress || "Not specified"}</p>
+                )}
+              </div>
+
+              {userRole === "repairer" && (
+                <div className="space-y-2">
+                  <Label htmlFor="specializations">Specializations</Label>
+                  {isEditing ? (
+                    <Input
+                      id="specializations"
+                      value={businessInfo.specializations}
+                      onChange={(e) => setBusinessInfo({...businessInfo, specializations: e.target.value})}
+                      placeholder="e.g., iPhone, Samsung, Laptop repairs"
+                    />
+                  ) : (
+                    <p className="text-sm">{businessInfo.specializations || "Not specified"}</p>
+                  )}
+                </div>
+              )}
+
+              {(userRole === "insurance" || userRole === "repairer") && (
+                <div className="space-y-2">
+                  <Label htmlFor="certifications">Certifications</Label>
+                  {isEditing ? (
+                    <Input
+                      id="certifications"
+                      value={businessInfo.certifications}
+                      onChange={(e) => setBusinessInfo({...businessInfo, certifications: e.target.value})}
+                      placeholder="Professional certifications"
+                    />
+                  ) : (
+                    <p className="text-sm">{businessInfo.certifications || "Not specified"}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
 
         {/* Connected Devices */}
         <Card className="p-6 space-y-4">
@@ -393,6 +566,13 @@ const Profile = () => {
           </Button>
           
           <Button variant="outline" className="w-full justify-start" asChild>
+            <Link to={getDashboardLink()}>
+              <Shield className="w-4 h-4 mr-3" />
+              Go to Dashboard
+            </Link>
+          </Button>
+          
+          <Button variant="outline" className="w-full justify-start" asChild>
             <Link to="/analytics-insights">
               <Settings className="w-4 h-4 mr-3" />
               Advanced Settings
@@ -401,11 +581,9 @@ const Profile = () => {
           
           <Separator />
           
-          <Button variant="destructive" className="w-full justify-start" asChild>
-            <Link to="/login">
-              <LogOut className="w-4 h-4 mr-3" />
-              Sign Out
-            </Link>
+          <Button variant="destructive" className="w-full justify-start" onClick={handleLogout}>
+            <LogOut className="w-4 h-4 mr-3" />
+            Sign Out
           </Button>
         </div>
       </div>

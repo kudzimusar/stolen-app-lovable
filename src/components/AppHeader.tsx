@@ -68,8 +68,13 @@ export const AppHeader = ({
             )}
           </div>
 
-          {/* Center - Logo for dashboard */}
-          {location.pathname === "/dashboard" && !showLogo && (
+          {/* Center - Logo for dashboards */}
+          {(location.pathname === "/dashboard" || 
+            location.pathname === "/retailer-dashboard" ||
+            location.pathname === "/repair-shop-dashboard" ||
+            location.pathname === "/insurance-dashboard" ||
+            location.pathname === "/law-enforcement-dashboard" ||
+            location.pathname === "/ngo-dashboard") && !showLogo && (
             <Link to="/">
               <STOLENLogo />
             </Link>
@@ -81,7 +86,12 @@ export const AppHeader = ({
             {rightActions}
             
             {/* Dashboard specific actions */}
-            {location.pathname === "/dashboard" && (
+            {(location.pathname === "/dashboard" || 
+              location.pathname === "/retailer-dashboard" ||
+              location.pathname === "/repair-shop-dashboard" ||
+              location.pathname === "/insurance-dashboard" ||
+              location.pathname === "/law-enforcement-dashboard" ||
+              location.pathname === "/ngo-dashboard") && (
               <>
                 <Button variant="ghost" size="icon" asChild>
                   <Link to="/fraud-alerts">
