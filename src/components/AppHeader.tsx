@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { STOLENLogo } from "@/components/STOLENLogo";
+import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowLeft, Menu, Bell, Settings } from "lucide-react";
+import { ArrowLeft, Menu, Bell, Settings, User } from "lucide-react";
 import { BackButton } from "@/components/BackButton";
 
 interface AppHeaderProps {
@@ -98,11 +99,16 @@ export const AppHeader = ({
                     <Bell className="w-5 h-5" />
                   </Link>
                 </Button>
-                <Button variant="ghost" size="icon" asChild>
-                  <Link to="/profile">
-                    <Settings className="w-5 h-5" />
-                  </Link>
-                </Button>
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/profile">
+                <User className="w-5 h-5" />
+              </Link>
+            </Button>
+            <HamburgerMenu 
+              dashboardLink="/dashboard" 
+              profileLink="/profile" 
+              userRole="member" 
+            />
               </>
             )}
             

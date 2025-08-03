@@ -44,6 +44,12 @@ import Register from "./pages/Register";
 import AboutUs from "./pages/AboutUs";
 import StolenReports from "./pages/StolenReports";
 import DeviceCertificate from "./pages/DeviceCertificate";
+import InsuranceDashboard from "./pages/InsuranceDashboard";
+import RetailerProfile from "./pages/RetailerProfile";
+import RepairerProfile from "./pages/RepairerProfile";
+import InsuranceProfile from "./pages/InsuranceProfile";
+import LawEnforcementProfile from "./pages/LawEnforcementProfile";
+import NGOProfile from "./pages/NGOProfile";
 
 const queryClient = new QueryClient();
 
@@ -75,11 +81,17 @@ const App = () => (
           <Route path="/repair-shop-dashboard" element={<RepairShopDashboard />} />
           <Route path="/law-enforcement-dashboard" element={<LawEnforcementDashboard />} />
           <Route path="/ngo-dashboard" element={<NGODashboard />} />
+          <Route path="/insurance-dashboard" element={<InsuranceDashboard />} />
           <Route path="/psychology-helper" element={<PsychologyAssistedHelper />} />
           <Route path="/reverse-verify" element={<ReverseVerify />} />
           <Route path="/feedback-rating" element={<FeedbackRating />} />
           <Route path="/analytics-insights" element={<AnalyticsInsights />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/retailer-profile" element={<RetailerProfile />} />
+          <Route path="/repairer-profile" element={<RepairerProfile />} />
+          <Route path="/insurance-profile" element={<InsuranceProfile />} />
+          <Route path="/law-enforcement-profile" element={<LawEnforcementProfile />} />
+          <Route path="/ngo-profile" element={<NGOProfile />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/support" element={<Support />} />
           <Route path="/transfer-donate" element={<TransferDonate />} />
