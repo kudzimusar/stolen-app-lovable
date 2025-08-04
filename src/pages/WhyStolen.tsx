@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AppHeader } from "@/components/AppHeader";
+import { STOLENLogo } from "@/components/STOLENLogo";
+import { BackButton } from "@/components/BackButton";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   Shield, 
   TrendingUp, 
@@ -24,6 +26,7 @@ import {
 
 const WhyStolen = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const globalStats = [
     {
@@ -201,7 +204,27 @@ const WhyStolen = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      <AppHeader />
+      {/* Custom Header */}
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container-responsive flex h-16 items-center justify-between">
+          {/* Left side - Back button (desktop only) */}
+          <div className="flex items-center">
+            {!isMobile && (
+              <BackButton className="mr-4" />
+            )}
+          </div>
+          
+          {/* Center - Logo linking to landing page */}
+          <div className="flex-1 flex justify-center">
+            <Link to="/" className="hover:opacity-80 transition-opacity">
+              <STOLENLogo />
+            </Link>
+          </div>
+          
+          {/* Right side - Empty space for balance */}
+          <div className="w-12"></div>
+        </div>
+      </header>
       
       {/* Hero Section */}
       <section className="section-spacing bg-gradient-hero text-white relative">
