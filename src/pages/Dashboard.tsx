@@ -82,7 +82,7 @@ const Dashboard = () => {
     {
       icon: <Wrench className="w-5 h-5" />,
       label: "Repair Logs",
-      href: "/repair-shop-dashboard",
+      href: "/user/repair-history",
       variant: "outline" as const
     },
     {
