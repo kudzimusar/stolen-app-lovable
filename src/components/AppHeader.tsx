@@ -3,8 +3,11 @@ import { STOLENLogo } from "@/components/STOLENLogo";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowLeft, Menu, Bell, Settings, User } from "lucide-react";
+import { ArrowLeft, Menu, Bell, Settings, User, LogOut } from "lucide-react";
 import { BackButton } from "@/components/BackButton";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface AppHeaderProps {
   title?: string;
@@ -24,9 +27,32 @@ export const AppHeader = ({
   const location = useLocation();
   const isLandingPage = location.pathname === "/";
   
-  // Check if user is logged in (mock for now)
-  const isLoggedIn = true; // This should come from auth context
-  const userName = "Kudzie"; // This should come from user profile
+  // Authentication state
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setIsLoggedIn(!!session?.user);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      setIsLoggedIn(!!session?.user);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User";
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  };
 
   // Dynamic hamburger menu items based on auth state
   const menuItems = isLoggedIn ? [
@@ -164,27 +190,41 @@ export const AppHeader = ({
                           <STOLENLogo />
                         </div>
                         
-                        <div className="space-y-2">
-                          <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
-                            Quick Access
-                          </h3>
-                          {menuItems.map((item) => (
-                            item.isGreeting ? (
-                              <div key={item.href} className="p-3 bg-primary/10 rounded-lg">
-                                <p className="font-semibold text-primary">{item.label}</p>
-                              </div>
-                            ) : (
-                              <Button
-                                key={item.href}
-                                variant="ghost"
-                                className="w-full justify-start"
-                                asChild
-                              >
-                                <Link to={item.href}>{item.label}</Link>
-                              </Button>
-                            )
-                          ))}
-                        </div>
+                         <div className="space-y-2">
+                           <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
+                             Quick Access
+                           </h3>
+                           {menuItems.map((item) => (
+                             item.isGreeting ? (
+                               <div key={item.href} className="p-3 bg-primary/10 rounded-lg">
+                                 <p className="font-semibold text-primary">{item.label}</p>
+                               </div>
+                             ) : (
+                               <Button
+                                 key={item.href}
+                                 variant="ghost"
+                                 className="w-full justify-start"
+                                 asChild
+                               >
+                                 <Link to={item.href}>{item.label}</Link>
+                               </Button>
+                             )
+                           ))}
+                           
+                           {/* Logout button for authenticated users */}
+                           {isLoggedIn && (
+                             <div className="border-t pt-4 mt-4">
+                               <Button 
+                                 variant="destructive" 
+                                 className="w-full justify-start" 
+                                 onClick={handleLogout}
+                               >
+                                 <LogOut className="w-4 h-4 mr-3" />
+                                 Sign Out
+                               </Button>
+                             </div>
+                           )}
+                         </div>
                         
                         <div className="mt-8 p-4 bg-muted/50 rounded-lg">
                           <p className="text-sm text-muted-foreground">
@@ -205,12 +245,31 @@ export const AppHeader = ({
                   <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Features</a>
                   <Link to="/marketplace" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Marketplace</Link>
                   <Link to="/support" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Support</Link>
-                  <Button variant="outline" size="sm" asChild className="md:size-default">
-                    <Link to="/login">Sign In</Link>
-                  </Button>
-                  <Button variant="hero" size="sm" asChild className="md:size-default">
-                    <Link to="/splash-welcome">Get Started</Link>
-                  </Button>
+                  
+                  {isLoggedIn ? (
+                    <>
+                      <Button variant="outline" size="sm" asChild className="md:size-default">
+                        <Link to="/dashboard">Dashboard</Link>
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        className="md:size-default" 
+                        onClick={handleLogout}
+                      >
+                        Sign Out
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="outline" size="sm" asChild className="md:size-default">
+                        <Link to="/login">Sign In</Link>
+                      </Button>
+                      <Button variant="hero" size="sm" asChild className="md:size-default">
+                        <Link to="/splash-welcome">Get Started</Link>
+                      </Button>
+                    </>
+                  )}
                 </div>
               </>
             )}

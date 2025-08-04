@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -66,49 +67,52 @@ const App = () => (
           <Route path="/splash-welcome" element={<SplashWelcome />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          {/* Protected routes - require authentication */}
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/my-devices" element={<ProtectedRoute><MyDevices /></ProtectedRoute>} />
+          <Route path="/device/register" element={<ProtectedRoute><DeviceRegister /></ProtectedRoute>} />
+          <Route path="/device/:id" element={<ProtectedRoute><DeviceDetails /></ProtectedRoute>} />
+          <Route path="/device/recovery-status" element={<ProtectedRoute><DeviceRecoveryStatus /></ProtectedRoute>} />
+          <Route path="/lost-found-report" element={<ProtectedRoute><LostFoundReport /></ProtectedRoute>} />
+          <Route path="/community-rewards" element={<ProtectedRoute><CommunityRewards /></ProtectedRoute>} />
+          <Route path="/escrow-payment" element={<ProtectedRoute><EscrowPayment /></ProtectedRoute>} />
+          <Route path="/fraud-alerts" element={<ProtectedRoute><FraudAlerts /></ProtectedRoute>} />
+          <Route path="/retailer-dashboard" element={<ProtectedRoute><RetailerDashboard /></ProtectedRoute>} />
+          <Route path="/repair-shop-dashboard" element={<ProtectedRoute><RepairShopDashboard /></ProtectedRoute>} />
+          <Route path="/law-enforcement-dashboard" element={<ProtectedRoute><LawEnforcementDashboard /></ProtectedRoute>} />
+          <Route path="/ngo-dashboard" element={<ProtectedRoute><NGODashboard /></ProtectedRoute>} />
+          <Route path="/insurance-dashboard" element={<ProtectedRoute><InsuranceDashboard /></ProtectedRoute>} />
+          <Route path="/psychology-helper" element={<ProtectedRoute><PsychologyAssistedHelper /></ProtectedRoute>} />
+          <Route path="/feedback-rating" element={<ProtectedRoute><FeedbackRating /></ProtectedRoute>} />
+          <Route path="/analytics-insights" element={<ProtectedRoute><AnalyticsInsights /></ProtectedRoute>} />
+          <Route path="/retailer-profile" element={<ProtectedRoute><RetailerProfile /></ProtectedRoute>} />
+          <Route path="/repairer-profile" element={<ProtectedRoute><RepairerProfile /></ProtectedRoute>} />
+          <Route path="/insurance-profile" element={<ProtectedRoute><InsuranceProfile /></ProtectedRoute>} />
+          <Route path="/law-enforcement-profile" element={<ProtectedRoute><LawEnforcementProfile /></ProtectedRoute>} />
+          <Route path="/ngo-profile" element={<ProtectedRoute><NGOProfile /></ProtectedRoute>} />
+          <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+          <Route path="/device-transfer" element={<ProtectedRoute><DeviceTransfer /></ProtectedRoute>} />
+          <Route path="/ownership-history" element={<ProtectedRoute><OwnershipHistory /></ProtectedRoute>} />
+          <Route path="/fraud-database" element={<ProtectedRoute><FraudDatabase /></ProtectedRoute>} />
+          <Route path="/device-lifecycle-manager" element={<ProtectedRoute><DeviceLifecycleManager /></ProtectedRoute>} />
+          <Route path="/device-warranty-status" element={<ProtectedRoute><DeviceWarrantyStatus /></ProtectedRoute>} />
+          <Route path="/widget-generator" element={<ProtectedRoute><WidgetGenerator /></ProtectedRoute>} />
+          <Route path="/user/repair-history" element={<ProtectedRoute><UserRepairHistory /></ProtectedRoute>} />
+          
+          {/* Public routes - accessible without authentication */}
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/device/check" element={<DeviceCheck />} />
-          <Route path="/device/register" element={<DeviceRegister />} />
-          <Route path="/device/:id" element={<DeviceDetails />} />
-          <Route path="/device/recovery-status" element={<DeviceRecoveryStatus />} />
-          <Route path="/lost-found-report" element={<LostFoundReport />} />
           <Route path="/community-board" element={<CommunityBoard />} />
           <Route path="/lost-found-board" element={<CommunityBoard />} />
-          <Route path="/community-rewards" element={<CommunityRewards />} />
           <Route path="/insurance-hub" element={<InsuranceHub />} />
-          <Route path="/escrow-payment" element={<EscrowPayment />} />
-          <Route path="/fraud-alerts" element={<FraudAlerts />} />
-          <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
-          <Route path="/repair-shop-dashboard" element={<RepairShopDashboard />} />
-          <Route path="/law-enforcement-dashboard" element={<LawEnforcementDashboard />} />
-          <Route path="/ngo-dashboard" element={<NGODashboard />} />
-          <Route path="/insurance-dashboard" element={<InsuranceDashboard />} />
-          <Route path="/psychology-helper" element={<PsychologyAssistedHelper />} />
           <Route path="/reverse-verify" element={<ReverseVerify />} />
-          <Route path="/feedback-rating" element={<FeedbackRating />} />
-          <Route path="/analytics-insights" element={<AnalyticsInsights />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/retailer-profile" element={<RetailerProfile />} />
-          <Route path="/repairer-profile" element={<RepairerProfile />} />
-          <Route path="/insurance-profile" element={<InsuranceProfile />} />
-          <Route path="/law-enforcement-profile" element={<LawEnforcementProfile />} />
-          <Route path="/ngo-profile" element={<NGOProfile />} />
-          <Route path="/wallet" element={<Wallet />} />
           <Route path="/support" element={<Support />} />
           <Route path="/transfer-donate" element={<TransferDonate />} />
-          <Route path="/device-transfer" element={<DeviceTransfer />} />
-          <Route path="/ownership-history" element={<OwnershipHistory />} />
-          <Route path="/fraud-database" element={<FraudDatabase />} />
-          <Route path="/my-devices" element={<MyDevices />} />
-          <Route path="/device-lifecycle-manager" element={<DeviceLifecycleManager />} />
-          <Route path="/device-warranty-status" element={<DeviceWarrantyStatus />} />
-          <Route path="/widget-generator" element={<WidgetGenerator />} />
           <Route path="/learn" element={<Learn />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/stolen-reports" element={<StolenReports />} />
           <Route path="/why-stolen" element={<WhyStolen />} />
-          <Route path="/user/repair-history" element={<UserRepairHistory />} />
           <Route path="/device-certificate/:deviceId" element={<DeviceCertificate />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
