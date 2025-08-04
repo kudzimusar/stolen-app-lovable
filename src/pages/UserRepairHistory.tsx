@@ -110,11 +110,9 @@ const UserRepairHistory = () => {
     <div className="min-h-screen bg-background">
       <AppHeader title="Repair History" showLogo={true} />
       
-      {!isMobile && (
-        <div className="container mx-auto px-4 py-4">
-          <BackButton />
-        </div>
-      )}
+      <div className="container mx-auto px-4 py-4">
+        <BackButton to="/dashboard" />
+      </div>
 
       <div className="container mx-auto px-4 py-8 space-y-6">
         {/* Header */}
@@ -171,7 +169,7 @@ const UserRepairHistory = () => {
               <p className="text-muted-foreground mb-4">
                 Your devices haven't been repaired yet, or repair records haven't been logged.
               </p>
-              <Button variant="outline" onClick={() => window.history.back()}>
+              <Button variant="outline" onClick={() => window.location.href = '/dashboard'}>
                 Go Back
               </Button>
             </Card>
