@@ -124,9 +124,9 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-hero opacity-5"></div>
         <div className="container-responsive relative z-10">
           <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <h2 className="subheading-responsive mb-4 sm:mb-6">
+            <Link to="/why-stolen" className="subheading-responsive mb-4 sm:mb-6 hover:text-primary transition-colors cursor-pointer inline-block">
               Global Impact Statistics
-            </h2>
+            </Link>
             <p className="text-responsive text-muted-foreground max-w-2xl lg:max-w-3xl mx-auto">
               Understanding the global impact of device theft and why STOLEN is essential for gadget protection
             </p>
