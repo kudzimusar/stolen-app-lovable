@@ -109,6 +109,80 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Quick Stats Section */}
+      <section className="py-16 sm:py-20 lg:py-24 bg-background relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-hero opacity-5"></div>
+        <div className="container-responsive relative z-10">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 sm:mb-6">
+              Quick Stats
+            </h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+              The global impact of device theft and the need for STOLEN
+            </p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
+            <Card className="p-6 sm:p-8 bg-card/80 backdrop-blur-sm border-0 hover:shadow-card transition-all duration-300 hover:scale-105">
+              <div className="text-center space-y-4">
+                <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-destructive/10 rounded-full flex items-center justify-center">
+                  <Lock className="w-8 h-8 sm:w-10 sm:h-10 text-destructive" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl sm:text-3xl font-bold text-destructive">1 in 5</h3>
+                  <p className="text-lg sm:text-xl font-semibold text-foreground">
+                    stolen devices are ever recovered
+                  </p>
+                </div>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                  A staggering 80% of stolen electronics are never returned to their rightful owners, 
+                  primarily due to lack of device registration, weak proof of ownership, and cross-border resale. 
+                  STOLEN App provides a decentralized registry to reverse this trend through instant ownership 
+                  verification and global traceability.
+                </p>
+              </div>
+            </Card>
+
+            <Card className="p-6 sm:p-8 bg-gradient-card backdrop-blur-sm border-0 hover:shadow-card transition-all duration-300 hover:scale-105">
+              <div className="text-center space-y-4">
+                <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-primary/10 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl sm:text-3xl font-bold text-primary">40%+</h3>
+                  <p className="text-lg sm:text-xl font-semibold text-foreground">
+                    of global e-waste from untracked devices
+                  </p>
+                </div>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                  Without traceability, millions of devices contribute to pollution. STOLEN encourages 
+                  ethical reuse and verified donations, reducing tech waste and supporting sustainability goals.
+                </p>
+              </div>
+            </Card>
+
+            <Card className="p-6 sm:p-8 bg-card/80 backdrop-blur-sm border-0 hover:shadow-card transition-all duration-300 hover:scale-105">
+              <div className="text-center space-y-4">
+                <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-secondary/10 rounded-full flex items-center justify-center">
+                  <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-secondary" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl sm:text-3xl font-bold text-secondary">$30B+</h3>
+                  <p className="text-lg sm:text-xl font-semibold text-foreground">
+                    yearly cost of consumer tech theft
+                  </p>
+                </div>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                  From mobile phones to laptops, unprotected devices cost billions in lost productivity, 
+                  insurance fraud, and resales on black markets. STOLEN blocks resale of flagged items 
+                  and builds trust into the second-hand device economy.
+                </p>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section id="features" className="spacing-responsive bg-muted/30">
         <div className="container-responsive">
