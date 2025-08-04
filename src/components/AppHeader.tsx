@@ -40,6 +40,7 @@ export const AppHeader = ({
     { label: "Stolen Reports", href: "/stolen-reports" },
     { label: "Support", href: "/support" }
   ] : [
+    { label: "Why STOLEN?", href: "/why-stolen" },
     { label: "Register", href: "/register" },
     { label: "Sign In", href: "/login" },
     { label: "About Us", href: "/about-us" },
@@ -200,6 +201,7 @@ export const AppHeader = ({
 
                 {/* Desktop navigation links */}
                 <div className="hidden md:flex items-center gap-4 lg:gap-6">
+                  <Link to="/why-stolen" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Why STOLEN?</Link>
                   <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Features</a>
                   <Link to="/marketplace" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Marketplace</Link>
                   <Link to="/support" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Support</Link>

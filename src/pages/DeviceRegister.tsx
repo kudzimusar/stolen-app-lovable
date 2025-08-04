@@ -12,7 +12,7 @@ import { UploadComponent } from "@/components/UploadComponent";
 import { QRScanner } from "@/components/QRScanner";
 import { EnhancedSelect, DEVICE_TYPES, DEVICE_BRANDS, SA_CITIES } from "@/components/EnhancedSelect";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Camera, Upload, Scan, MapPin, Shield, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -299,12 +299,27 @@ const DeviceRegister = () => {
           <BackButton />
         </div>
         {/* Progress */}
-        <div className="mb-8 space-y-2">
+        <div className="mb-6 space-y-2">
           <div className="flex justify-between text-sm">
             <span>Step {step} of 4</span>
             <span>{Math.round(progress)}%</span>
           </div>
           <Progress value={progress} className="h-2" />
+        </div>
+
+        {/* Why Register Banner */}
+        <div className="mb-8 p-4 bg-primary/5 border border-primary/10 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">Why register with STOLEN?</span>
+            </div>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/why-stolen" className="text-primary hover:text-primary/80">
+                Learn More →
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Content */}

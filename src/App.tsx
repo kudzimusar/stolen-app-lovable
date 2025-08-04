@@ -50,6 +50,7 @@ import RepairerProfile from "./pages/RepairerProfile";
 import InsuranceProfile from "./pages/InsuranceProfile";
 import LawEnforcementProfile from "./pages/LawEnforcementProfile";
 import NGOProfile from "./pages/NGOProfile";
+import WhyStolen from "./pages/WhyStolen";
 
 const queryClient = new QueryClient();
 
@@ -105,6 +106,7 @@ const App = () => (
           <Route path="/learn" element={<Learn />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/stolen-reports" element={<StolenReports />} />
+          <Route path="/why-stolen" element={<WhyStolen />} />
           <Route path="/device-certificate/:deviceId" element={<DeviceCertificate />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

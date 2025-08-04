@@ -318,12 +318,12 @@ const Index = () => {
               </div>
             </div>
             <div>
-              <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Company</h4>
+              <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Our Mission</h4>
               <div className="space-y-2 text-xs sm:text-sm text-muted-foreground">
+                <Link to="/why-stolen" className="block hover:text-foreground transition-colors cursor-pointer">Why STOLEN?</Link>
                 <Link to="/about-us" className="block hover:text-foreground transition-colors cursor-pointer">About Us</Link>
                 <Link to="/support" className="block hover:text-foreground transition-colors cursor-pointer">Privacy Policy</Link>
                 <Link to="/support" className="block hover:text-foreground transition-colors cursor-pointer">Terms of Service</Link>
-                <Link to="/support" className="block hover:text-foreground transition-colors cursor-pointer">Security</Link>
               </div>
             </div>
           </div>
