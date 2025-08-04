@@ -21,7 +21,9 @@ import {
   Award,
   Lock,
   Zap,
-  ArrowRightLeft
+  ArrowRightLeft,
+  DollarSign,
+  Globe
 } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 
@@ -44,10 +46,10 @@ const Index = () => {
                   <TrustBadge type="blockchain" text="Blockchain Powered" />
                   <TrustBadge type="secure" text="Military Grade Security" />
                 </div>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
+                <h1 className="heading-responsive">
                   Protect Your Gadgets with{" "}
                   <span className="bg-gradient-primary bg-clip-text text-transparent">
-                    Blockchain Security
+                    Blockchain Technology
                   </span>
                 </h1>
                 <p className="text-responsive text-muted-foreground max-w-2xl">
@@ -117,21 +119,21 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Quick Stats Section */}
+      {/* Global Impact Statistics */}
       <section className="relative spacing-responsive bg-muted/30 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero opacity-5"></div>
         <div className="container-responsive relative z-10">
           <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 sm:mb-6">
+            <h2 className="subheading-responsive mb-4 sm:mb-6">
               Global Impact Statistics
             </h2>
             <p className="text-responsive text-muted-foreground max-w-2xl lg:max-w-3xl mx-auto">
-              The global impact of device theft and why STOLEN is essential
+              Understanding the global impact of device theft and why STOLEN is essential for gadget protection
             </p>
           </div>
 
           <div className="grid-responsive-cards">
-            <Card className="group relative overflow-hidden bg-card/80 backdrop-blur-sm border-0 hover:shadow-card transition-all duration-300 hover:scale-105">
+            <Card className="group relative overflow-hidden bg-card/90 backdrop-blur-sm border-0 hover:shadow-card transition-all duration-300 hover:scale-105">
               <div className="absolute inset-0 bg-gradient-hero opacity-5 group-hover:opacity-10 transition-opacity"></div>
               <div className="relative z-10 p-6 sm:p-8 text-center space-y-4 sm:space-y-6">
                 <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-destructive/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -140,12 +142,11 @@ const Index = () => {
                 <div className="space-y-2">
                   <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-destructive">1 in 5</h3>
                   <p className="text-lg sm:text-xl font-semibold text-foreground">
-                    stolen devices are ever recovered
+                    stolen devices recovered
                   </p>
                 </div>
-                <p className="text-responsive text-muted-foreground leading-relaxed">
-                  Most stolen electronics are never returned due to poor registration and weak ownership proof. 
-                  STOLEN provides instant ownership verification and global traceability.
+                <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
+                  Most stolen electronics never return due to poor registration. STOLEN provides instant ownership verification and global traceability.
                 </p>
               </div>
             </Card>
@@ -154,36 +155,34 @@ const Index = () => {
               <div className="absolute inset-0 bg-gradient-hero opacity-5 group-hover:opacity-10 transition-opacity"></div>
               <div className="relative z-10 p-6 sm:p-8 text-center space-y-4 sm:space-y-6">
                 <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-primary/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <AlertTriangle className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+                  <Globe className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary">40%+</h3>
                   <p className="text-lg sm:text-xl font-semibold text-foreground">
-                    of global e-waste from untracked devices
+                    e-waste from untracked devices
                   </p>
                 </div>
-                <p className="text-responsive text-muted-foreground leading-relaxed">
-                  Untracked devices fuel pollution. STOLEN enables ethical reuse and verified donations, 
-                  reducing waste and supporting sustainability goals.
+                <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
+                  Untracked devices fuel pollution. STOLEN enables ethical reuse and verified donations, reducing waste effectively.
                 </p>
               </div>
             </Card>
 
-            <Card className="group relative overflow-hidden bg-card/80 backdrop-blur-sm border-0 hover:shadow-card transition-all duration-300 hover:scale-105">
+            <Card className="group relative overflow-hidden bg-card/90 backdrop-blur-sm border-0 hover:shadow-card transition-all duration-300 hover:scale-105">
               <div className="absolute inset-0 bg-gradient-hero opacity-5 group-hover:opacity-10 transition-opacity"></div>
               <div className="relative z-10 p-6 sm:p-8 text-center space-y-4 sm:space-y-6">
                 <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-accent/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-accent" />
+                  <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 text-accent" />
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-accent">$30B+</h3>
                   <p className="text-lg sm:text-xl font-semibold text-foreground">
-                    yearly cost of consumer tech theft
+                    yearly tech theft costs
                   </p>
                 </div>
-                <p className="text-responsive text-muted-foreground leading-relaxed">
-                  Unprotected devices cost billions in lost productivity and fraud. STOLEN blocks resale 
-                  of flagged items and builds trust in the second-hand economy.
+                <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
+                  Unprotected devices cost billions in fraud. STOLEN blocks resale of flagged items and builds marketplace trust.
                 </p>
               </div>
             </Card>
@@ -192,10 +191,10 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="spacing-responsive bg-muted/30">
+      <section id="features" className="spacing-responsive">
         <div className="container-responsive">
           <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 sm:mb-6">Why Choose STOLEN?</h1>
+            <h2 className="subheading-responsive mb-4 sm:mb-6">Why Choose STOLEN?</h2>
             <p className="text-responsive text-muted-foreground max-w-2xl lg:max-w-3xl mx-auto">
               Advanced blockchain technology meets community-driven security to create 
               the ultimate gadget protection platform.
@@ -258,11 +257,11 @@ const Index = () => {
       )}
 
       {/* CTA Section */}
-      <section className="spacing-responsive bg-gradient-hero text-white relative overflow-hidden mb-8 sm:mb-12 lg:mb-16">
+      <section className="spacing-responsive bg-gradient-hero text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="container-responsive relative z-10">
           <div className="text-center space-y-6 sm:space-y-8">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">Ready to Secure Your Gadgets?</h2>
+            <h2 className="subheading-responsive text-white">Ready to Secure Your Gadgets?</h2>
             <p className="text-responsive text-white/90 max-w-xl lg:max-w-2xl mx-auto">
               Join millions of users who trust STOLEN to protect their valuable gadgets. 
               Start with our free registration today.
@@ -281,7 +280,7 @@ const Index = () => {
                 variant="outline" 
                 size="lg" 
                 onClick={() => navigate('/support')}
-                className="border-white text-primary bg-white hover:bg-white/90 w-full sm:w-auto"
+                className="border-white text-brand-blue bg-white hover:bg-white/90 w-full sm:w-auto"
               >
                 Learn More
               </Button>
@@ -291,7 +290,7 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 sm:py-12 border-t border-border">
+      <footer className="py-8 sm:py-12 border-t border-border mt-8 sm:mt-12 lg:mt-16">
         <div className="container-responsive">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-4 sm:col-span-2 lg:col-span-1">
