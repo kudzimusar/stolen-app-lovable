@@ -19,8 +19,12 @@ import {
   GraduationCap,
   MoreHorizontal 
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Register = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -30,7 +34,6 @@ const Register = () => {
   });
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
   const roleOptions = [
     { value: "individual", label: "Member", icon: <User className="w-4 h-4" /> },
@@ -50,51 +53,100 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreeToTerms) {
-      alert("Please agree to the terms and conditions");
+      toast({
+        title: "Terms Required",
+        description: "Please agree to the terms and conditions",
+        variant: "destructive",
+      });
       return;
     }
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
       return;
     }
     
     setIsLoading(true);
-    
-    // Simulate registration process
-    setTimeout(() => {
-      setIsLoading(false);
-      if (formData.role === "other") {
-        alert("Thank you for your registration. Our team will review your application and contact you within 24-48 hours.");
+
+    try {
+      // Sign up with Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            display_name: formData.fullName,
+            role: formData.role,
+          }
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Registration Failed",
+          description: error.message,
+          variant: "destructive",
+        });
         return;
       }
-      
-      // Role-based redirection
-      switch (formData.role) {
-        case "individual":
-          navigate("/dashboard");
-          break;
-        case "retailer":
-          navigate("/retailer-dashboard");
-          break;
-        case "repair_shop":
-          navigate("/repair-shop-dashboard");
-          break;
-        case "insurance":
-          navigate("/insurance-hub");
-          break;
-        case "law_enforcement":
-          navigate("/law-enforcement-dashboard");
-          break;
-        case "ngo":
-          navigate("/ngo-dashboard");
-          break;
-        case "business":
-          navigate("/retailer-dashboard"); // Redirect to retailer dashboard for business users
-          break;
-        default:
-          navigate("/dashboard");
+
+      if (data.user) {
+        // Create user profile in our users table
+        const { error: profileError } = await supabase
+          .from('users')
+          .insert({
+            id: data.user.id,
+            email: formData.email,
+            display_name: formData.fullName,
+            role: formData.role as any,
+          });
+
+        if (profileError) {
+          console.error('Error creating user profile:', profileError);
+        }
+
+        if (formData.role === "other") {
+          toast({
+            title: "Registration Submitted",
+            description: "Thank you for your registration. Our team will review your application and contact you within 24-48 hours.",
+          });
+          navigate("/login");
+          return;
+        }
+
+        toast({
+          title: "Registration Successful",
+          description: "Please check your email to confirm your account.",
+        });
+
+        // Role-based redirection
+        const roleRoutes = {
+          "individual": "/dashboard",
+          "retailer": "/retailer-dashboard",
+          "repair_shop": "/repair-shop-dashboard",
+          "insurance": "/insurance-dashboard",
+          "law_enforcement": "/law-enforcement-dashboard",
+          "ngo": "/ngo-dashboard",
+          "business": "/retailer-dashboard"
+        };
+
+        const route = roleRoutes[formData.role as keyof typeof roleRoutes] || "/dashboard";
+        navigate(route);
       }
-    }, 2000);
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast({
+        title: "Registration Failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
