@@ -11,6 +11,8 @@ import { STOLENLogo } from "@/components/STOLENLogo";
 import { TrustBadge } from "@/components/TrustBadge";
 import { BackButton } from "@/components/BackButton";
 import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft,
   User,
@@ -35,29 +37,24 @@ import {
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [showSensitive, setShowSensitive] = useState(false);
-  const [userRole, setUserRole] = useState<string>("member"); // Mock role - should come from auth context
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [user, setUser] = useState<any>(null);
   
   const [profile, setProfile] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    location: "San Francisco, CA",
-    memberSince: "January 2024"
+    display_name: "",
+    email: "",
+    phone: "",
+    address: null,
+    role: "individual",
+    verification_status: false,
+    avatar_url: ""
   });
 
-  // Role-specific business information
-  const [businessInfo, setBusinessInfo] = useState({
-    companyName: "",
-    registrationNumber: "",
-    licenseNumber: "",
-    businessAddress: "",
-    contactPerson: "",
-    website: "",
-    specializations: "",
-    certifications: ""
-  });
+  const [devices, setDevices] = useState<any[]>([]);
 
   const [notifications, setNotifications] = useState({
     deviceAlerts: true,
@@ -72,54 +69,179 @@ const Profile = () => {
     activityStatus: false
   });
 
-  const connectedDevices = [
-    {
-      id: 1,
-      name: "iPhone 15 Pro",
-      status: "verified",
-      registeredDate: "2024-01-15"
-    },
-    {
-      id: 2,
-      name: "MacBook Pro M3",
-      status: "needs-attention",
-      registeredDate: "2024-02-20"
-    }
-  ];
+  // Load user data on component mount
+  useEffect(() => {
+    loadUserData();
+  }, []);
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // Here you would typically save to backend
+  const loadUserData = async () => {
+    try {
+      setLoading(true);
+      
+      // Get current user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        navigate('/login');
+        return;
+      }
+
+      setUser(user);
+
+      // Get user profile
+      const { data: userProfile, error: profileError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error loading profile:', profileError);
+        toast({
+          title: "Error",
+          description: "Failed to load profile data",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setProfile({
+        display_name: userProfile.display_name || "",
+        email: userProfile.email || "",
+        phone: userProfile.phone || "",
+        address: userProfile.address,
+        role: userProfile.role || "individual",
+        verification_status: userProfile.verification_status || false,
+        avatar_url: userProfile.avatar_url || ""
+      });
+
+      // Get user devices
+      const { data: userDevices, error: devicesError } = await supabase
+        .from('devices')
+        .select('*')
+        .eq('current_owner_id', user.id);
+
+      if (devicesError) {
+        console.error('Error loading devices:', devicesError);
+      } else {
+        setDevices(userDevices || []);
+      }
+
+    } catch (error) {
+      console.error('Error loading user data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load user data",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleLogout = () => {
-    // Clear auth session
-    navigate("/login");
+  const handleSave = async () => {
+    if (!user) return;
+    
+    try {
+      setSaving(true);
+      
+      const { error } = await supabase
+        .from('users')
+        .update({
+          display_name: profile.display_name,
+          phone: profile.phone,
+          address: profile.address
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error saving profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save profile changes",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setIsEditing(false);
+      toast({
+        title: "Success",
+        description: "Profile updated successfully"
+      });
+      
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save profile changes",
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate("/login");
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to log out",
+        variant: "destructive"
+      });
+    }
   };
 
   const getDashboardLink = () => {
-    switch (userRole) {
+    switch (profile.role) {
       case "retailer": return "/retailer-dashboard";
-      case "repairer": return "/repair-shop-dashboard";
+      case "repair_shop": return "/repair-shop-dashboard";
       case "insurance": return "/insurance-dashboard";
-      case "law-enforcement": return "/law-enforcement-dashboard";
+      case "law_enforcement": return "/law-enforcement-dashboard";
       case "ngo": return "/ngo-dashboard";
       default: return "/dashboard";
     }
   };
 
   const getRoleDisplayName = () => {
-    switch (userRole) {
-      case "retailer": return "Retailer Admin";
-      case "repairer": return "Repair Shop Admin";
-      case "insurance": return "Insurance Admin";
-      case "law-enforcement": return "Law Enforcement";
-      case "ngo": return "NGO Admin";
-      default: return "Member";
+    switch (profile.role) {
+      case "retailer": return "Retailer";
+      case "repair_shop": return "Repair Shop";
+      case "insurance": return "Insurance Provider";
+      case "law_enforcement": return "Law Enforcement";
+      case "ngo": return "NGO";
+      default: return "Individual User";
     }
   };
 
-  const showBusinessInfo = ["retailer", "repairer", "insurance", "ngo"].includes(userRole);
+  const formatMemberSince = () => {
+    if (!user?.created_at) return "Recently joined";
+    return new Date(user.created_at).toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long' 
+    });
+  };
+
+  const getLocationDisplay = () => {
+    if (!profile.address) return "Not specified";
+    if (typeof profile.address === 'string') return profile.address;
+    if (typeof profile.address === 'object') {
+      const addr = profile.address as any;
+      return `${addr.city || ''}, ${addr.country || ''}`.replace(/^,\s*|,\s*$/g, '') || "Not specified";
+    }
+    return "Not specified";
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -153,23 +275,25 @@ const Profile = () => {
         <Card className="p-6">
           <div className="flex items-center gap-4">
             <Avatar className="w-20 h-20">
-              <AvatarImage src="/placeholder.svg" />
+              <AvatarImage src={profile.avatar_url || "/placeholder.svg"} />
               <AvatarFallback className="text-lg">
-                {profile.name.split(' ').map(n => n[0]).join('')}
+                {profile.display_name?.split(' ').map(n => n[0]).join('').toUpperCase() || profile.email[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
             
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold">{profile.name}</h1>
-                <TrustBadge type="secure" text="Verified" />
+                <h1 className="text-xl font-bold">{profile.display_name || "User"}</h1>
+                {profile.verification_status && (
+                  <TrustBadge type="secure" text="Verified" />
+                )}
               </div>
               <p className="text-muted-foreground">{profile.email}</p>
               <div className="flex items-center gap-2">
                 <Badge variant="outline">{getRoleDisplayName()}</Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                Member since {profile.memberSince}
+                Member since {formatMemberSince()}
               </p>
             </div>
           </div>
@@ -201,11 +325,12 @@ const Profile = () => {
                 {isEditing ? (
                   <Input
                     id="name"
-                    value={profile.name}
-                    onChange={(e) => setProfile({...profile, name: e.target.value})}
+                    value={profile.display_name}
+                    onChange={(e) => setProfile({...profile, display_name: e.target.value})}
+                    placeholder="Enter your full name"
                   />
                 ) : (
-                  <p className="text-sm">{profile.name}</p>
+                  <p className="text-sm">{profile.display_name || "Not specified"}</p>
                 )}
               </div>
               
@@ -216,10 +341,14 @@ const Profile = () => {
                     id="email"
                     type="email"
                     value={profile.email}
-                    onChange={(e) => setProfile({...profile, email: e.target.value})}
+                    disabled
+                    className="opacity-60"
                   />
                 ) : (
                   <p className="text-sm">{profile.email}</p>
+                )}
+                {isEditing && (
+                  <p className="text-xs text-muted-foreground">Email cannot be changed</p>
                 )}
               </div>
             </div>
@@ -235,14 +364,22 @@ const Profile = () => {
                   />
                 ) : (
                   <div className="flex items-center gap-2">
-                    <p className="text-sm">{showSensitive ? profile.phone : "••• ••• ••67"}</p>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowSensitive(!showSensitive)}
-                    >
-                      {showSensitive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </Button>
+                    <p className="text-sm">
+                      {profile.phone ? (
+                        showSensitive ? profile.phone : profile.phone.replace(/\d(?=\d{4})/g, '•')
+                      ) : (
+                        "Not specified"
+                      )}
+                    </p>
+                    {profile.phone && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowSensitive(!showSensitive)}
+                      >
+                        {showSensitive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
@@ -252,143 +389,29 @@ const Profile = () => {
                 {isEditing ? (
                   <Input
                     id="location"
-                    value={profile.location}
-                    onChange={(e) => setProfile({...profile, location: e.target.value})}
+                    value={typeof profile.address === 'string' ? profile.address : ''}
+                    onChange={(e) => setProfile({...profile, address: e.target.value})}
+                    placeholder="Enter your location"
                   />
                 ) : (
-                  <p className="text-sm">{profile.location}</p>
+                  <p className="text-sm">{getLocationDisplay()}</p>
                 )}
               </div>
             </div>
 
             {isEditing && (
               <div className="flex gap-2">
-                <Button onClick={handleSave}>Save Changes</Button>
-                <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+                <Button onClick={handleSave} disabled={saving}>
+                  {saving ? "Saving..." : "Save Changes"}
+                </Button>
+                <Button variant="outline" onClick={() => setIsEditing(false)} disabled={saving}>
+                  Cancel
+                </Button>
               </div>
             )}
           </div>
         </Card>
 
-        {/* Business Information for Business Accounts */}
-        {showBusinessInfo && (
-          <Card className="p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <Building className="w-5 h-5" />
-                Business Information
-              </h2>
-            </div>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="companyName">Company Name</Label>
-                  {isEditing ? (
-                    <Input
-                      id="companyName"
-                      value={businessInfo.companyName}
-                      onChange={(e) => setBusinessInfo({...businessInfo, companyName: e.target.value})}
-                      placeholder="Enter company name"
-                    />
-                  ) : (
-                    <p className="text-sm">{businessInfo.companyName || "Not specified"}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="registrationNumber">Registration Number</Label>
-                  {isEditing ? (
-                    <Input
-                      id="registrationNumber"
-                      value={businessInfo.registrationNumber}
-                      onChange={(e) => setBusinessInfo({...businessInfo, registrationNumber: e.target.value})}
-                      placeholder="Government registration number"
-                    />
-                  ) : (
-                    <p className="text-sm">{businessInfo.registrationNumber || "Not specified"}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="licenseNumber">License Number</Label>
-                  {isEditing ? (
-                    <Input
-                      id="licenseNumber"
-                      value={businessInfo.licenseNumber}
-                      onChange={(e) => setBusinessInfo({...businessInfo, licenseNumber: e.target.value})}
-                      placeholder="Professional license number"
-                    />
-                  ) : (
-                    <p className="text-sm">{businessInfo.licenseNumber || "Not specified"}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="website">Website</Label>
-                  {isEditing ? (
-                    <Input
-                      id="website"
-                      value={businessInfo.website}
-                      onChange={(e) => setBusinessInfo({...businessInfo, website: e.target.value})}
-                      placeholder="https://example.com"
-                    />
-                  ) : (
-                    <p className="text-sm">{businessInfo.website || "Not specified"}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="businessAddress">Business Address</Label>
-                {isEditing ? (
-                  <Input
-                    id="businessAddress"
-                    value={businessInfo.businessAddress}
-                    onChange={(e) => setBusinessInfo({...businessInfo, businessAddress: e.target.value})}
-                    placeholder="Complete business address"
-                  />
-                ) : (
-                  <p className="text-sm">{businessInfo.businessAddress || "Not specified"}</p>
-                )}
-              </div>
-
-              {userRole === "repairer" && (
-                <div className="space-y-2">
-                  <Label htmlFor="specializations">Specializations</Label>
-                  {isEditing ? (
-                    <Input
-                      id="specializations"
-                      value={businessInfo.specializations}
-                      onChange={(e) => setBusinessInfo({...businessInfo, specializations: e.target.value})}
-                      placeholder="e.g., iPhone, Samsung, Laptop repairs"
-                    />
-                  ) : (
-                    <p className="text-sm">{businessInfo.specializations || "Not specified"}</p>
-                  )}
-                </div>
-              )}
-
-              {(userRole === "insurance" || userRole === "repairer") && (
-                <div className="space-y-2">
-                  <Label htmlFor="certifications">Certifications</Label>
-                  {isEditing ? (
-                    <Input
-                      id="certifications"
-                      value={businessInfo.certifications}
-                      onChange={(e) => setBusinessInfo({...businessInfo, certifications: e.target.value})}
-                      placeholder="Professional certifications"
-                    />
-                  ) : (
-                    <p className="text-sm">{businessInfo.certifications || "Not specified"}</p>
-                  )}
-                </div>
-              )}
-            </div>
-          </Card>
-        )}
 
         {/* Connected Devices */}
         <Card className="p-6 space-y-4">
@@ -398,26 +421,36 @@ const Profile = () => {
           </h2>
           
           <div className="space-y-3">
-            {connectedDevices.map((device) => (
-              <div key={device.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="space-y-1">
-                  <p className="font-medium">{device.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Registered {device.registeredDate}
-                  </p>
+            {devices.length > 0 ? (
+              devices.map((device) => (
+                <div key={device.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="space-y-1">
+                    <p className="font-medium">{device.device_name || `${device.brand} ${device.model}`}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Registered {new Date(device.registration_date).toLocaleDateString()}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Status: {device.status}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {device.status === "active" ? (
+                      <TrustBadge type="secure" text="Active" />
+                    ) : (
+                      <Badge variant="secondary">{device.status}</Badge>
+                    )}
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to={`/device-details?id=${device.id}`}>View</Link>
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {device.status === "verified" ? (
-                    <TrustBadge type="secure" text="Verified" />
-                  ) : (
-                    <Badge variant="secondary">Needs Attention</Badge>
-                  )}
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to={`/device/${device.id}`}>View</Link>
-                  </Button>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-6 text-muted-foreground">
+                <Smartphone className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>No devices registered yet</p>
               </div>
-            ))}
+            )}
           </div>
           
           <Button variant="outline" className="w-full" asChild>
