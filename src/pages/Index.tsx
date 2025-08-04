@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { STOLENLogo } from "@/components/STOLENLogo";
@@ -26,6 +27,7 @@ import heroImage from "@/assets/hero-image.jpg";
 
 const Index = () => {
   const [showRegistration, setShowRegistration] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,7 +44,7 @@ const Index = () => {
                   <TrustBadge type="blockchain" text="Blockchain Powered" />
                   <TrustBadge type="secure" text="Military Grade Security" />
                 </div>
-                <h1 className="heading-responsive">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
                   Protect Your Gadgets with{" "}
                   <span className="bg-gradient-primary bg-clip-text text-transparent">
                     Blockchain Security
@@ -65,19 +67,25 @@ const Index = () => {
                   Register Your Gadget
                   <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                  <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                    <Link to="/device/check">
-                      <QrCode className="w-4 h-4 sm:w-5 sm:h-5" />
-                      Check Status
-                    </Link>
+                <div className="flex flex-col sm:flex-row md:flex-row gap-3 sm:gap-4">
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    onClick={() => navigate('/reverse-verify')}
+                    className="w-full sm:w-auto"
+                  >
+                    <QrCode className="w-4 h-4 sm:w-5 sm:h-5" />
+                    Check Status
                   </Button>
-                <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                  <Link to="/device-transfer">
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    onClick={() => navigate('/transfer-donate')}
+                    className="w-full sm:w-auto"
+                  >
                     <ArrowRightLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                     Transfer/Donate
-                  </Link>
-                </Button>
+                  </Button>
                 </div>
               </div>
 
@@ -110,72 +118,72 @@ const Index = () => {
       </section>
 
       {/* Quick Stats Section */}
-      <section className="py-16 sm:py-20 lg:py-24 bg-background relative overflow-hidden">
+      <section className="relative spacing-responsive bg-muted/30 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero opacity-5"></div>
         <div className="container-responsive relative z-10">
-          <div className="text-center mb-12 sm:mb-16">
+          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 sm:mb-6">
-              Quick Stats
+              Global Impact Statistics
             </h2>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
-              The global impact of device theft and the need for STOLEN
+            <p className="text-responsive text-muted-foreground max-w-2xl lg:max-w-3xl mx-auto">
+              The global impact of device theft and why STOLEN is essential
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
-            <Card className="p-6 sm:p-8 bg-card/80 backdrop-blur-sm border-0 hover:shadow-card transition-all duration-300 hover:scale-105">
-              <div className="text-center space-y-4">
-                <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-destructive/10 rounded-full flex items-center justify-center">
+          <div className="grid-responsive-cards">
+            <Card className="group relative overflow-hidden bg-card/80 backdrop-blur-sm border-0 hover:shadow-card transition-all duration-300 hover:scale-105">
+              <div className="absolute inset-0 bg-gradient-hero opacity-5 group-hover:opacity-10 transition-opacity"></div>
+              <div className="relative z-10 p-6 sm:p-8 text-center space-y-4 sm:space-y-6">
+                <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-destructive/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Lock className="w-8 h-8 sm:w-10 sm:h-10 text-destructive" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl sm:text-3xl font-bold text-destructive">1 in 5</h3>
+                  <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-destructive">1 in 5</h3>
                   <p className="text-lg sm:text-xl font-semibold text-foreground">
                     stolen devices are ever recovered
                   </p>
                 </div>
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  A staggering 80% of stolen electronics are never returned to their rightful owners, 
-                  primarily due to lack of device registration, weak proof of ownership, and cross-border resale. 
-                  STOLEN App provides a decentralized registry to reverse this trend through instant ownership 
-                  verification and global traceability.
+                <p className="text-responsive text-muted-foreground leading-relaxed">
+                  Most stolen electronics are never returned due to poor registration and weak ownership proof. 
+                  STOLEN provides instant ownership verification and global traceability.
                 </p>
               </div>
             </Card>
 
-            <Card className="p-6 sm:p-8 bg-gradient-card backdrop-blur-sm border-0 hover:shadow-card transition-all duration-300 hover:scale-105">
-              <div className="text-center space-y-4">
-                <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-primary/10 rounded-full flex items-center justify-center">
+            <Card className="group relative overflow-hidden bg-gradient-card backdrop-blur-sm border-0 hover:shadow-card transition-all duration-300 hover:scale-105">
+              <div className="absolute inset-0 bg-gradient-hero opacity-5 group-hover:opacity-10 transition-opacity"></div>
+              <div className="relative z-10 p-6 sm:p-8 text-center space-y-4 sm:space-y-6">
+                <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-primary/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
                   <AlertTriangle className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl sm:text-3xl font-bold text-primary">40%+</h3>
+                  <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary">40%+</h3>
                   <p className="text-lg sm:text-xl font-semibold text-foreground">
                     of global e-waste from untracked devices
                   </p>
                 </div>
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Without traceability, millions of devices contribute to pollution. STOLEN encourages 
-                  ethical reuse and verified donations, reducing tech waste and supporting sustainability goals.
+                <p className="text-responsive text-muted-foreground leading-relaxed">
+                  Untracked devices fuel pollution. STOLEN enables ethical reuse and verified donations, 
+                  reducing waste and supporting sustainability goals.
                 </p>
               </div>
             </Card>
 
-            <Card className="p-6 sm:p-8 bg-card/80 backdrop-blur-sm border-0 hover:shadow-card transition-all duration-300 hover:scale-105">
-              <div className="text-center space-y-4">
-                <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-secondary/10 rounded-full flex items-center justify-center">
-                  <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-secondary" />
+            <Card className="group relative overflow-hidden bg-card/80 backdrop-blur-sm border-0 hover:shadow-card transition-all duration-300 hover:scale-105">
+              <div className="absolute inset-0 bg-gradient-hero opacity-5 group-hover:opacity-10 transition-opacity"></div>
+              <div className="relative z-10 p-6 sm:p-8 text-center space-y-4 sm:space-y-6">
+                <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-accent/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-accent" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl sm:text-3xl font-bold text-secondary">$30B+</h3>
+                  <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-accent">$30B+</h3>
                   <p className="text-lg sm:text-xl font-semibold text-foreground">
                     yearly cost of consumer tech theft
                   </p>
                 </div>
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  From mobile phones to laptops, unprotected devices cost billions in lost productivity, 
-                  insurance fraud, and resales on black markets. STOLEN blocks resale of flagged items 
-                  and builds trust into the second-hand device economy.
+                <p className="text-responsive text-muted-foreground leading-relaxed">
+                  Unprotected devices cost billions in lost productivity and fraud. STOLEN blocks resale 
+                  of flagged items and builds trust in the second-hand economy.
                 </p>
               </div>
             </Card>
@@ -187,7 +195,7 @@ const Index = () => {
       <section id="features" className="spacing-responsive bg-muted/30">
         <div className="container-responsive">
           <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <h2 className="subheading-responsive mb-4 sm:mb-6">Why Choose STOLEN?</h2>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 sm:mb-6">Why Choose STOLEN?</h1>
             <p className="text-responsive text-muted-foreground max-w-2xl lg:max-w-3xl mx-auto">
               Advanced blockchain technology meets community-driven security to create 
               the ultimate gadget protection platform.
@@ -250,11 +258,11 @@ const Index = () => {
       )}
 
       {/* CTA Section */}
-      <section className="spacing-responsive bg-gradient-hero text-white relative overflow-hidden">
+      <section className="spacing-responsive bg-gradient-hero text-white relative overflow-hidden mb-8 sm:mb-12 lg:mb-16">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="container-responsive relative z-10">
           <div className="text-center space-y-6 sm:space-y-8">
-            <h2 className="subheading-responsive text-white">Ready to Secure Your Gadgets?</h2>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">Ready to Secure Your Gadgets?</h2>
             <p className="text-responsive text-white/90 max-w-xl lg:max-w-2xl mx-auto">
               Join millions of users who trust STOLEN to protect their valuable gadgets. 
               Start with our free registration today.
@@ -269,8 +277,13 @@ const Index = () => {
                 <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
                 Register Now - Free
               </Button>
-              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10 w-full sm:w-auto" asChild>
-                <Link to="/support">Learn More</Link>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                onClick={() => navigate('/support')}
+                className="border-white text-primary bg-white hover:bg-white/90 w-full sm:w-auto"
+              >
+                Learn More
               </Button>
             </div>
           </div>
