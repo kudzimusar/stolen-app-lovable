@@ -86,6 +86,13 @@ export default {
 					green: 'hsl(var(--brand-green))',
 					purple: 'hsl(var(--brand-purple))'
 				},
+				sa: {
+					gold: 'hsl(var(--sa-gold))',
+					green: 'hsl(var(--sa-green))',
+					blue: 'hsl(var(--sa-flag-blue))',
+					red: 'hsl(var(--sa-flag-red))',
+					currency: 'hsl(var(--sa-currency))'
+				},
 				verified: 'hsl(var(--verified))',
 				secure: 'hsl(var(--secure))',
 				blockchain: 'hsl(var(--blockchain))',

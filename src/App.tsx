@@ -54,6 +54,7 @@ import NGOProfile from "./pages/NGOProfile";
 import WhyStolen from "./pages/WhyStolen";
 import UserRepairHistory from "./pages/UserRepairHistory";
 import SecurityTesting from "./pages/SecurityTesting";
+import GeolocationTesting from "./pages/GeolocationTesting";
 
 const queryClient = new QueryClient();
 
@@ -115,8 +116,9 @@ const App = () => (
           <Route path="/stolen-reports" element={<StolenReports />} />
           <Route path="/why-stolen" element={<WhyStolen />} />
           <Route path="/device-certificate/:deviceId" element={<DeviceCertificate />} />
-          <Route path="/security-testing" element={<SecurityTesting />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+           <Route path="/security-testing" element={<SecurityTesting />} />
+           <Route path="/geolocation-testing" element={<GeolocationTesting />} />
+           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
         <BottomNavigation />

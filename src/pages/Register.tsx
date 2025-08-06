@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { STOLENLogo } from "@/components/STOLENLogo";
 import { EnhancedSelect } from "@/components/EnhancedSelect";
 import { Checkbox } from "@/components/ui/checkbox";
+import { LocationSelector } from "@/components/LocationSelector";
 import { Link, useNavigate } from "react-router-dom";
 import { 
   UserPlus, 
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { LocationData, DEFAULT_LOCATION } from "@/lib/geolocation";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -32,6 +34,7 @@ const Register = () => {
     confirmPassword: "",
     role: ""
   });
+  const [selectedLocation, setSelectedLocation] = useState<LocationData>(DEFAULT_LOCATION);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -81,6 +84,7 @@ const Register = () => {
           data: {
             display_name: formData.fullName,
             role: formData.role,
+            location: selectedLocation,
           }
         }
       });
@@ -103,6 +107,17 @@ const Register = () => {
             email: formData.email,
             display_name: formData.fullName,
             role: formData.role as any,
+            address: {
+              country: selectedLocation.country,
+              countryCode: selectedLocation.countryCode,
+              province: selectedLocation.province,
+              provinceCode: selectedLocation.provinceCode,
+              city: selectedLocation.city,
+              timezone: selectedLocation.timezone,
+              currency: selectedLocation.currency,
+              latitude: selectedLocation.latitude,
+              longitude: selectedLocation.longitude
+            }
           });
 
         if (profileError) {
@@ -201,6 +216,12 @@ const Register = () => {
               className="h-12"
             />
           </div>
+
+          <LocationSelector
+            onLocationSelected={setSelectedLocation}
+            initialLocation={selectedLocation}
+            showAutoDetect={true}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="password">Password *</Label>

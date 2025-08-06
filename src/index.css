@@ -77,6 +77,13 @@
     --brand-green: 142 76% 36%;
     --brand-purple: 252 83% 57%;
     
+    /* South African theme colors */
+    --sa-gold: 45 100% 50%;
+    --sa-green: 120 100% 25%;
+    --sa-flag-blue: 220 100% 40%;
+    --sa-flag-red: 0 100% 50%;
+    --sa-currency: 45 100% 35%;
+    
     /* Component specific colors */
     --verified: 142 76% 36%;
     --secure: 220 100% 55%;

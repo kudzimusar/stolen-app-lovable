@@ -66,15 +66,15 @@ export const SA_CITIES = [
 ];
 
 export const SA_PROVINCES = [
-  { value: "WC", label: "Western Cape" },
   { value: "GP", label: "Gauteng" },
+  { value: "WC", label: "Western Cape" },
   { value: "KZN", label: "KwaZulu-Natal" },
   { value: "EC", label: "Eastern Cape" },
-  { value: "FS", label: "Free State" },
-  { value: "LP", label: "Limpopo" },
   { value: "MP", label: "Mpumalanga" },
-  { value: "NC", label: "Northern Cape" },
-  { value: "NW", label: "North West" }
+  { value: "LP", label: "Limpopo" },
+  { value: "NW", label: "North West" },
+  { value: "FS", label: "Free State" },
+  { value: "NC", label: "Northern Cape" }
 ];
 
 export const DEVICE_TYPES = [
