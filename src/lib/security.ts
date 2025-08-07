@@ -1,22 +1,33 @@
 import { supabase } from "@/integrations/supabase/client";
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
-// Device Fingerprinting (FingerprintJS alternative - browser-based)
-export const generateDeviceFingerprint = (): string => {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  ctx!.textBaseline = 'top';
-  ctx!.font = '14px Arial';
-  ctx!.fillText('Device fingerprint', 2, 2);
-  
-  const fingerprint = [
-    navigator.userAgent,
-    navigator.language,
-    screen.width + 'x' + screen.height,
-    new Date().getTimezoneOffset(),
-    canvas.toDataURL()
-  ].join('|');
-  
-  return btoa(fingerprint).substring(0, 32);
+// Device Fingerprinting using FingerprintJS
+export const generateDeviceFingerprint = async (): Promise<string> => {
+  try {
+    const fp = await FingerprintJS.load();
+    const result = await fp.get();
+    return result.visitorId;
+  } catch (error) {
+    console.warn('FingerprintJS failed, falling back to basic fingerprinting:', error);
+    // Fallback to basic browser fingerprinting
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.textBaseline = 'top';
+      ctx.font = '14px Arial';
+      ctx.fillText('Device fingerprint', 2, 2);
+    }
+    
+    const fingerprint = [
+      navigator.userAgent,
+      navigator.language,
+      screen.width + 'x' + screen.height,
+      new Date().getTimezoneOffset(),
+      canvas.toDataURL()
+    ].join('|');
+    
+    return btoa(fingerprint).substring(0, 32);
+  }
 };
 
 // Mock IMEI Database Check

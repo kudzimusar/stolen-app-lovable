@@ -98,7 +98,7 @@ export const DeviceRegistrationForm = () => {
 
   const runSecurityChecks = async () => {
     // Generate device fingerprint
-    const fingerprint = generateDeviceFingerprint();
+    const fingerprint = await generateDeviceFingerprint();
     setSecurityChecks(prev => ({ ...prev, deviceFingerprint: fingerprint }));
     
     // Log security event

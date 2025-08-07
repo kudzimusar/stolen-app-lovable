@@ -65,8 +65,8 @@ export const SecurityVerification = ({ onVerificationComplete, showAllChecks = f
     }
   };
 
-  const handleDeviceFingerprint = () => {
-    const fingerprint = generateDeviceFingerprint();
+  const handleDeviceFingerprint = async () => {
+    const fingerprint = await generateDeviceFingerprint();
     setVerificationResults(prev => ({ 
       ...prev, 
       fingerprint: { id: fingerprint, timestamp: new Date().toISOString() }
