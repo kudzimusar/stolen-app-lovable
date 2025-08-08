@@ -11,14 +11,10 @@ import { EnhancedSelect } from "@/components/EnhancedSelect";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import {
   Search,
-  Filter,
   Heart,
-  Star,
   Shield,
-  Eye,
   ArrowLeft,
   MapPin,
-  Calendar,
   Smartphone,
   Laptop,
   Tablet,
@@ -33,9 +29,9 @@ const Marketplace = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedLocation, setSelectedLocation] = useState("all");
+  const [selectedLocation, setSelectedLocation] = useState("gauteng");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 12;
 
   const categories = [
     { id: "all", label: "All", icon: <Search className="w-4 h-4" /> },
@@ -64,7 +60,7 @@ const Marketplace = () => {
       title: "iPhone 15 Pro Max 256GB",
       price: 18999,
       originalPrice: 24999,
-      image: "/placeholder.svg",
+      image: "https://placehold.co/320x220?text=Phone",
       seller: "TechDeals Pro",
       rating: 4.8,
       location: "Johannesburg",
@@ -81,7 +77,7 @@ const Marketplace = () => {
       title: "MacBook Pro M3 14-inch",
       price: 32999,
       originalPrice: 45999,
-      image: "/placeholder.svg",
+      image: "https://placehold.co/320x220?text=Laptop",
       seller: "Apple Certified",
       rating: 4.9,
       location: "Cape Town",
@@ -98,7 +94,7 @@ const Marketplace = () => {
       title: "Samsung Galaxy S24 Ultra",
       price: 14999,
       originalPrice: 22999,
-      image: "/placeholder.svg",
+      image: "https://placehold.co/320x220?text=Phone",
       seller: "MobilePro",
       rating: 4.7,
       location: "Durban",
@@ -115,7 +111,7 @@ const Marketplace = () => {
       title: "iPad Pro 12.9-inch M2",
       price: 16999,
       originalPrice: 21999,
-      image: "/placeholder.svg",
+      image: "https://placehold.co/320x220?text=Tablet",
       seller: "iDevice Store",
       rating: 4.6,
       location: "Pretoria",
@@ -132,7 +128,7 @@ const Marketplace = () => {
       title: "Apple Watch Series 9",
       price: 6999,
       originalPrice: 8999,
-      image: "/placeholder.svg",
+      image: "https://placehold.co/320x220?text=Watch",
       seller: "Watch World",
       rating: 4.5,
       location: "Port Elizabeth",
@@ -149,7 +145,7 @@ const Marketplace = () => {
       title: "Dell XPS 13 Intel i7",
       price: 19999,
       originalPrice: 28999,
-      image: "/placeholder.svg",
+      image: "https://placehold.co/320x220?text=Laptop",
       seller: "Laptop Pro",
       rating: 4.4,
       location: "Bloemfontein",
@@ -166,7 +162,7 @@ const Marketplace = () => {
       title: "Google Pixel 8 Pro",
       price: 12999,
       originalPrice: 17999,
-      image: "/placeholder.svg",
+      image: "https://placehold.co/320x220?text=Phone",
       seller: "Android Central",
       rating: 4.3,
       location: "Polokwane",
@@ -183,7 +179,7 @@ const Marketplace = () => {
       title: "Samsung Galaxy Tab S9",
       price: 11999,
       originalPrice: 15999,
-      image: "/placeholder.svg",
+      image: "https://placehold.co/320x220?text=Tablet",
       seller: "Galaxy Store",
       rating: 4.7,
       location: "Rustenburg",
@@ -389,7 +385,7 @@ const Marketplace = () => {
               </div>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
               {currentListings.map((listing) => (
                 <Card 
                   key={listing.id} 
@@ -397,15 +393,12 @@ const Marketplace = () => {
                   onClick={() => navigate(`/device/${listing.id}`)}
                 >
                   <div className="relative">
-                    <div className="w-full h-48 bg-muted flex items-center justify-center">
-                      <div className="text-center space-y-2">
-                        {listing.category === "phones" && <Smartphone className="w-12 h-12 mx-auto text-muted-foreground" />}
-                        {listing.category === "laptops" && <Laptop className="w-12 h-12 mx-auto text-muted-foreground" />}
-                        {listing.category === "tablets" && <Tablet className="w-12 h-12 mx-auto text-muted-foreground" />}
-                        {listing.category === "watches" && <Watch className="w-12 h-12 mx-auto text-muted-foreground" />}
-                        <p className="text-sm text-muted-foreground font-medium">{listing.category}</p>
-                      </div>
-                    </div>
+                    <img
+                      src={listing.image}
+                      alt={`${listing.title} - ${listing.category}`}
+                      loading="lazy"
+                      className="w-full aspect-[4/3] object-cover"
+                    />
                     <div className="absolute top-3 right-3">
                       <Button 
                         variant="ghost" 
@@ -424,63 +417,24 @@ const Marketplace = () => {
                     </div>
                   </div>
 
-                  <div className="p-6 space-y-4">
+                  <div className="p-4 space-y-3">
                     <div className="space-y-2">
-                      <h3 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors">
+                      <h3 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
                         {listing.title}
                       </h3>
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold text-primary">
+                        <span className="text-lg font-bold text-primary">
                           {formatPrice(listing.price)}
                         </span>
-                        <span className="text-sm text-muted-foreground line-through">
-                          {formatPrice(listing.originalPrice)}
-                        </span>
-                        <Badge variant="secondary" className="text-xs">
-                          {Math.round((1 - listing.price / listing.originalPrice) * 100)}% off
-                        </Badge>
                       </div>
                     </div>
 
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Condition:</span>
-                        <span className="font-medium">{listing.condition}</span>
+                      <div className="text-sm flex items-center gap-2 text-muted-foreground">
+                        <MapPin className="w-4 h-4" />
+                        <span>{listing.location}, {locationOptions.find(l => l.value === listing.province)?.label}</span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Warranty:</span>
-                        <span className="font-medium">{listing.warrantyMonths} months</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">{listing.location}, {locationOptions.find(l => l.value === listing.province)?.label}</span>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-current text-yellow-500" />
-                          <span className="text-sm font-medium">{listing.rating}</span>
-                        </div>
-                        <span className="text-sm text-muted-foreground">•</span>
-                        <span className="text-sm text-muted-foreground">{listing.seller}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Eye className="w-3 h-3" />
-                        {listing.views}
-                      </div>
-                    </div>
 
-                    <Button 
-                      className="w-full" 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/device/${listing.id}`);
-                      }}
-                    >
-                      View Details
-                    </Button>
                   </div>
                 </Card>
               ))}
