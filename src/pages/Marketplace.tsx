@@ -655,7 +655,7 @@ const allListings = [
                   <CarouselItem key={item.id} className="md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
                     <Card 
                       className="overflow-hidden hover:shadow-card transition-all duration-300 cursor-pointer"
-                      onClick={() => navigate(`/device/${item.id}`)}
+                      onClick={() => navigate(`/marketplace/product/${item.id}`)}
                     >
                       <img src={item.image} alt={`${item.title} - ${item.category}`} className="w-full aspect-[4/3] object-cover" loading="lazy" />
                       <div className="p-3 space-y-1">
@@ -705,7 +705,7 @@ const allListings = [
                 <Card 
                   key={listing.id} 
                   className="overflow-hidden hover:shadow-card transition-all duration-300 cursor-pointer group"
-                  onClick={() => navigate(`/device/${listing.id}`)}
+                  onClick={() => navigate(`/marketplace/product/${listing.id}`)}
                 >
                   <div className="relative">
                     <img
@@ -787,7 +787,7 @@ const allListings = [
                     <span>{quickViewItem.location}, {locationOptions.find(l => l.value === quickViewItem.province)?.label}</span>
                   </div>
                   <div className="flex gap-2">
-                    <Button className="flex-1" onClick={() => navigate(`/device/${quickViewItem.id}`)}>View Details</Button>
+                    <Button className="flex-1" onClick={() => navigate(`/marketplace/product/${quickViewItem.id}`)}>View Details</Button>
                     <Button variant="outline" onClick={() => setQuickViewItem(null)}>Close</Button>
                   </div>
                 </div>

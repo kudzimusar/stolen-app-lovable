@@ -56,6 +56,9 @@ import UserRepairHistory from "./pages/UserRepairHistory";
 import SecurityTesting from "./pages/SecurityTesting";
 import GeolocationTesting from "./pages/GeolocationTesting";
 import SystemStatus from "./pages/SystemStatus";
+import ProductDetail from "./pages/ProductDetail";
+import SellerProfile from "./pages/SellerProfile";
+import PostPurchase from "./pages/PostPurchase";
 
 const queryClient = new QueryClient();
 
@@ -120,6 +123,14 @@ const App = () => (
            <Route path="/security-testing" element={<SecurityTesting />} />
            <Route path="/geolocation-testing" element={<GeolocationTesting />} />
            <Route path="/system-status" element={<SystemStatus />} />
+
+           {/* Public marketplace detail routes */}
+           <Route path="/marketplace/product/:id" element={<ProductDetail />} />
+           <Route path="/seller/:sellerId" element={<SellerProfile />} />
+
+           {/* Checkout and post-purchase */}
+           <Route path="/checkout/:listingId" element={<ProtectedRoute><EscrowPayment /></ProtectedRoute>} />
+           <Route path="/order/:orderId/confirmation" element={<ProtectedRoute><PostPurchase /></ProtectedRoute>} />
            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
