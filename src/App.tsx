@@ -59,6 +59,8 @@ import SystemStatus from "./pages/SystemStatus";
 import ProductDetail from "./pages/ProductDetail";
 import SellerProfile from "./pages/SellerProfile";
 import PostPurchase from "./pages/PostPurchase";
+import Wishlist from "./pages/Wishlist";
+import TrustBadges from "./pages/TrustBadges";
 
 const queryClient = new QueryClient();
 
@@ -119,6 +121,8 @@ const App = () => (
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/stolen-reports" element={<StolenReports />} />
           <Route path="/why-stolen" element={<WhyStolen />} />
+          <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+          <Route path="/trust-badges" element={<TrustBadges />} />
           <Route path="/device-certificate/:deviceId" element={<DeviceCertificate />} />
            <Route path="/security-testing" element={<SecurityTesting />} />
            <Route path="/geolocation-testing" element={<GeolocationTesting />} />

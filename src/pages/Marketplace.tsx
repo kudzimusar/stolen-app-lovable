@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 import {
   Search,
   Heart,
@@ -51,6 +52,15 @@ const Marketplace = () => {
   const [sellerType, setSellerType] = useState("all");
   const [sortBy, setSortBy] = useState("relevance"); // relevance | price_asc | price_desc
   const [lostFoundOnly, setLostFoundOnly] = useState(false);
+  const [radiusKm, setRadiusKm] = useState(50);
+  const [warrantyOnly, setWarrantyOnly] = useState(false);
+  const [mapView, setMapView] = useState(false);
+
+  // Wishlist & compare
+  const [wishlist, setWishlist] = useState<any[]>(() => {
+    try { return JSON.parse(localStorage.getItem("wishlist") || "[]"); } catch { return []; }
+  });
+  const [compareIds, setCompareIds] = useState<number[]>([]);
 
   // Quick view state
   const [quickViewItem, setQuickViewItem] = useState<any | null>(null);
@@ -73,6 +83,11 @@ const Marketplace = () => {
     }
     canonical.href = window.location.href;
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("wishlist", JSON.stringify(wishlist));
+  }, [wishlist]);
+
   const categories = [
     { id: "all", label: "All", icon: <Search className="w-4 h-4" /> },
     { id: "phones", label: "Phones", icon: <Smartphone className="w-4 h-4" /> },
@@ -397,7 +412,8 @@ const allListings = [
       const matchesCondition = selectedCondition === "all" || listing.condition.toLowerCase() === selectedCondition.toLowerCase();
       const withinPrice = (priceMin === "" || listing.price >= priceMin) && (priceMax === "" || listing.price <= priceMax);
       const matchesLostFound = !lostFoundOnly || ["lost", "stolen"].includes(listing.stolenStatus);
-      return matchesSearch && matchesCategory && matchesLocation && matchesSeller && matchesCondition && withinPrice && matchesLostFound;
+      const matchesWarranty = !warrantyOnly || listing.warrantyMonths > 0;
+      return matchesSearch && matchesCategory && matchesLocation && matchesSeller && matchesCondition && withinPrice && matchesLostFound && matchesWarranty;
     });
 
     if (sortBy === "price_asc") data = [...data].sort((a, b) => a.price - b.price);
@@ -414,6 +430,7 @@ const allListings = [
     priceMin,
     priceMax,
     lostFoundOnly,
+    warrantyOnly,
     sortBy,
   ]);
 
@@ -475,7 +492,7 @@ const allListings = [
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" asChild>
-                <Link to="/profile">
+                <Link to="/wishlist">
                   <Heart className="w-4 h-4" />
                   Watchlist
                 </Link>
@@ -634,8 +651,10 @@ const allListings = [
               <p className="text-white/90 text-sm md:text-base">
                 Every device is blockchain-verified with complete ownership history
               </p>
-            </div>
-            <Shield className="w-10 h-10 md:w-12 md:h-12 text-white/80" />
+              </div>
+              <Button asChild variant="outline">
+                <Link to="/trust-badges">Learn More</Link>
+              </Button>
           </div>
         </Card>
 
@@ -721,10 +740,13 @@ const allListings = [
                         className="bg-background/80 backdrop-blur-sm hover:bg-background/90"
                         onClick={(e) => {
                           e.stopPropagation();
-                          // Add to wishlist logic
+                          setWishlist((prev) => {
+                            const exists = prev.some((w: any) => w.id === listing.id);
+                            return exists ? prev.filter((w: any) => w.id !== listing.id) : [...prev, listing];
+                          });
                         }}
                       >
-                        <Heart className="w-4 h-4" />
+                        <Heart className={`w-4 h-4 ${wishlist.some((w:any)=>w.id===listing.id) ? 'text-primary fill-current' : ''}`} />
                       </Button>
                     </div>
                     <div className="absolute top-3 left-3">
