@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Receipt, Truck, Shield } from "lucide-react";
+import { CheckCircle, Receipt, Truck, Shield, LifeBuoy, Wrench, Repeat, Gift, FileText } from "lucide-react";
 
 export default function PostPurchase() {
   const { orderId } = useParams();
@@ -48,6 +48,7 @@ export default function PostPurchase() {
         <section className="grid gap-4 md:grid-cols-3">
           <Card className="p-4 space-y-3">
             <div className="flex items-center gap-2"><Receipt className="w-4 h-4"/><h3 className="font-semibold">Receipt</h3></div>
+            <Button variant="outline" asChild><Link to={`/orders/${orderId}`}><FileText className="w-4 h-4 mr-1"/>View Order</Link></Button>
             <Button variant="outline" asChild><Link to="#">Download PDF</Link></Button>
           </Card>
           <Card className="p-4 space-y-3">
@@ -58,6 +59,29 @@ export default function PostPurchase() {
           <Card className="p-4 space-y-3">
             <div className="flex items-center gap-2"><Truck className="w-4 h-4"/><h3 className="font-semibold">Delivery</h3></div>
             <Button asChild><Link to="#">Track Delivery</Link></Button>
+          </Card>
+        </section>
+
+        <section className="grid gap-4 md:grid-cols-3">
+          <Card className="p-4 space-y-3">
+            <div className="flex items-center gap-2"><LifeBuoy className="w-4 h-4"/><h3 className="font-semibold">Support</h3></div>
+            <Button variant="outline" asChild><Link to="/support">Contact Support</Link></Button>
+            <Button variant="outline" asChild><Link to={`/orders/${orderId}`}>Return & Disputes</Link></Button>
+          </Card>
+          <Card className="p-4 space-y-3">
+            <div className="flex items-center gap-2"><Wrench className="w-4 h-4"/><h3 className="font-semibold">Device History</h3></div>
+            <Button variant="outline" asChild><Link to="/ownership-history">Ownership Log</Link></Button>
+            <Button variant="outline" asChild><Link to="/repairs/new">Log Repair</Link></Button>
+          </Card>
+          <Card className="p-4 space-y-3">
+            <div className="flex items-center gap-2"><Repeat className="w-4 h-4"/><h3 className="font-semibold">Next Actions</h3></div>
+            <Button variant="outline" asChild><Link to={`/relist/${orderId}`}>Relist Device</Link></Button>
+            <div className="grid grid-cols-2 gap-2">
+              <Button size="sm" variant="outline" asChild><Link to="/insurance-hub">Insurance</Link></Button>
+              <Button size="sm" variant="outline" asChild><Link to="/transfer-donate">Donate</Link></Button>
+              <Button size="sm" variant="outline" asChild><Link to="/stolen-reports">LE Tip</Link></Button>
+              <Button size="sm" variant="outline" asChild><Link to="/referrals">Refer & Earn</Link></Button>
+            </div>
           </Card>
         </section>
 

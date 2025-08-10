@@ -9,7 +9,8 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import PriceHistoryChart from "@/components/marketplace/PriceHistoryChart";
-import { MapPin, ShieldCheck, Clock, CheckCircle, AlertTriangle, Star, ArrowLeft, Info } from "lucide-react";
+import CompareModal from "@/components/marketplace/CompareModal";
+import { MapPin, ShieldCheck, Clock, CheckCircle, AlertTriangle, Star, ArrowLeft, Info, Heart } from "lucide-react";
 
 const images = [
   "https://placehold.co/800x600?text=Image+1",
@@ -45,6 +46,11 @@ export default function ProductDetail() {
   }, [id]);
 
   const price = 18999;
+  const [compareOpen, setCompareOpen] = useState(false);
+  const similar = [
+    { id: 2, title: "MacBook Pro M3 14-inch", price: 32999, location: "Cape Town" },
+    { id: 3, title: "Samsung Galaxy S24 Ultra", price: 14999, location: "Durban" }
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -105,9 +111,35 @@ export default function ProductDetail() {
                 </DialogContent>
               </Dialog>
               <Button variant="outline" asChild>
+                <Link to={`/ownership-history`}>Ownership History</Link>
+              </Button>
+              <Dialog open={compareOpen} onOpenChange={setCompareOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">Compare Similar</Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle>Compare Devices</DialogTitle>
+                  </DialogHeader>
+                  <CompareModal items={similar as any} />
+                </DialogContent>
+              </Dialog>
+              <Button variant="outline" asChild>
                 <Link to={`/seller/techdeals-pro`}>Contact Seller</Link>
               </Button>
-              <Button variant="ghost">Report Listing</Button>
+              <Button variant="outline" asChild>
+                <Link to={`/stolen-reports`}>Report Listing</Link>
+              </Button>
+              <Button variant="ghost" onClick={() => {
+                try {
+                  const raw = localStorage.getItem('wishlist') || '[]';
+                  const list = JSON.parse(raw);
+                  list.push({ id: Number(id), title: 'iPhone 15 Pro Max 256GB', price, image: images[0], location: 'Johannesburg', province: 'gauteng', condition: 'Like New', stolenStatus: 'clean' });
+                  localStorage.setItem('wishlist', JSON.stringify(list));
+                } catch {}
+              }}>
+                <Heart className="w-4 h-4 mr-1"/>Save for later
+              </Button>
             </div>
           </Card>
           <Card className="p-4 space-y-3">
@@ -160,6 +192,7 @@ export default function ProductDetail() {
               <Card className="p-4">
                 <h4 className="font-semibold mb-2">Location</h4>
                 <div className="rounded-md bg-muted aspect-[16/9] flex items-center justify-center text-muted-foreground">Map preview</div>
+                <div className="text-xs text-muted-foreground mt-2">Trust badges help you shop safely. <Link to="/trust-badges" className="underline">Learn more</Link></div>
               </Card>
             </TabsContent>
             <TabsContent value="history" className="space-y-3">

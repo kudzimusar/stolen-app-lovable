@@ -64,6 +64,9 @@ import TrustBadges from "./pages/TrustBadges";
 import SellerOnboarding from "./pages/SellerOnboarding";
 import BulkListing from "./pages/BulkListing";
 import ReferralRewards from "./pages/ReferralRewards";
+import OrderDetails from "./pages/OrderDetails";
+import RelistDevice from "./pages/RelistDevice";
+import RepairUpdate from "./pages/RepairUpdate";
 
 const queryClient = new QueryClient();
 
@@ -138,6 +141,9 @@ const App = () => (
            {/* Checkout and post-purchase */}
            <Route path="/checkout/:listingId" element={<ProtectedRoute><EscrowPayment /></ProtectedRoute>} />
            <Route path="/order/:orderId/confirmation" element={<ProtectedRoute><PostPurchase /></ProtectedRoute>} />
+           <Route path="/orders/:orderId" element={<ProtectedRoute><OrderDetails /></ProtectedRoute>} />
+           <Route path="/relist/:orderId" element={<ProtectedRoute><RelistDevice /></ProtectedRoute>} />
+           <Route path="/repairs/new" element={<ProtectedRoute><RepairUpdate /></ProtectedRoute>} />
 
            {/* Seller flows */}
            <Route path="/seller-onboarding" element={<ProtectedRoute><SellerOnboarding /></ProtectedRoute>} />

@@ -2,9 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { STOLENLogo } from "@/components/STOLENLogo";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft,
@@ -23,8 +22,12 @@ import {
 } from "lucide-react";
 
 const EscrowPayment = () => {
+  const navigate = useNavigate();
+  const { listingId } = useParams();
   const [paymentMethod, setPaymentMethod] = useState("s-pay");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [delivery, setDelivery] = useState<'courier' | 'in-person'>("courier");
+  const [terms, setTerms] = useState(false);
   const { toast } = useToast();
 
   // Mock transaction data
@@ -79,17 +82,14 @@ const EscrowPayment = () => {
 
   const handlePayment = async () => {
     setIsProcessing(true);
-    
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
+    await new Promise(resolve => setTimeout(resolve, 1500));
     toast({
       title: "Payment Successful!",
       description: "Funds are now held securely in escrow. The seller has been notified.",
       variant: "default"
     });
-    
     setIsProcessing(false);
+    navigate(`/order/${transaction.id}/confirmation`);
   };
 
   const totalAmount = transaction.price + transaction.fees.total;
@@ -165,7 +165,7 @@ const EscrowPayment = () => {
             <div className="space-y-2">
               <h3 className="font-semibold text-success">Escrow Protection Included</h3>
               <p className="text-sm text-muted-foreground">
-                Your payment is held securely until you confirm receipt of the device. 
+                Your payment is held securely until you confirm receipt of the device.
                 Coverage up to {transaction.protection.coverage} for {transaction.protection.duration}.
               </p>
               <ul className="text-sm space-y-1">
@@ -185,6 +185,19 @@ const EscrowPayment = () => {
             </div>
           </div>
         </Card>
+
+        {/* Delivery & Handover */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-2">Delivery & Handover</h2>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <Button variant={delivery==='courier'? 'default':'outline'} onClick={()=>setDelivery('courier')}>Courier Delivery</Button>
+            <Button variant={delivery==='in-person'? 'default':'outline'} onClick={()=>setDelivery('in-person')}>In‑Person Handover</Button>
+          </div>
+          <div className="text-sm text-muted-foreground mt-3">
+            If this is a donation, <Link to="/transfer-donate" className="underline">NGO verification</Link> will be required before handover.
+          </div>
+        </Card>
+
 
         {/* Payment Method Selection */}
         <Card className="p-6">
@@ -313,10 +326,14 @@ const EscrowPayment = () => {
 
         {/* Action Buttons */}
         <div className="space-y-4">
+          <div className="flex items-center gap-2 text-sm">
+            <input id="terms" type="checkbox" className="w-4 h-4" checked={terms} onChange={(e)=>setTerms(e.target.checked)} />
+            <label htmlFor="terms">I agree to the <Link to={`/orders/${transaction.id}`} className="underline">terms and return policy</Link></label>
+          </div>
           <Button 
             className="w-full h-12 text-lg"
             onClick={handlePayment}
-            disabled={isProcessing || (paymentMethod === 's-pay' && walletBalance < totalAmount)}
+            disabled={isProcessing || (paymentMethod === 's-pay' && walletBalance < totalAmount) || !terms}
           >
             {isProcessing ? (
               <div className="flex items-center gap-2">
@@ -332,13 +349,17 @@ const EscrowPayment = () => {
           </Button>
 
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="flex items-center gap-2">
-              <MessageCircle className="w-4 h-4" />
-              Contact Seller
+            <Button variant="outline" className="flex items-center gap-2" asChild>
+              <Link to="/seller/techdeals-pro">
+                <MessageCircle className="w-4 h-4" />
+                Contact Seller
+              </Link>
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              View Terms
+            <Button variant="outline" className="flex items-center gap-2" asChild>
+              <Link to={`/orders/${transaction.id}`}>
+                <FileText className="w-4 h-4" />
+                View Terms
+              </Link>
             </Button>
           </div>
         </div>
