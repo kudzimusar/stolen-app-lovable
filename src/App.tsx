@@ -61,6 +61,9 @@ import SellerProfile from "./pages/SellerProfile";
 import PostPurchase from "./pages/PostPurchase";
 import Wishlist from "./pages/Wishlist";
 import TrustBadges from "./pages/TrustBadges";
+import SellerOnboarding from "./pages/SellerOnboarding";
+import BulkListing from "./pages/BulkListing";
+import ReferralRewards from "./pages/ReferralRewards";
 
 const queryClient = new QueryClient();
 
@@ -135,6 +138,11 @@ const App = () => (
            {/* Checkout and post-purchase */}
            <Route path="/checkout/:listingId" element={<ProtectedRoute><EscrowPayment /></ProtectedRoute>} />
            <Route path="/order/:orderId/confirmation" element={<ProtectedRoute><PostPurchase /></ProtectedRoute>} />
+
+           {/* Seller flows */}
+           <Route path="/seller-onboarding" element={<ProtectedRoute><SellerOnboarding /></ProtectedRoute>} />
+           <Route path="/bulk-listings" element={<ProtectedRoute><BulkListing /></ProtectedRoute>} />
+           <Route path="/referrals" element={<ProtectedRoute><ReferralRewards /></ProtectedRoute>} />
            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

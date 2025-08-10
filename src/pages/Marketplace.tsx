@@ -14,6 +14,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
+import Map from "@/components/Map";
+import CompareModal from "@/components/marketplace/CompareModal";
 import {
   Search,
   Heart,
@@ -61,6 +64,7 @@ const Marketplace = () => {
     try { return JSON.parse(localStorage.getItem("wishlist") || "[]"); } catch { return []; }
   });
   const [compareIds, setCompareIds] = useState<number[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
 
   // Quick view state
   const [quickViewItem, setQuickViewItem] = useState<any | null>(null);
@@ -110,6 +114,19 @@ const Marketplace = () => {
     { value: "free-state", label: "Free State" },
     { value: "northern-cape", label: "Northern Cape" }
   ];
+
+  const provinceCoords: Record<string, [number, number]> = {
+    "gauteng": [-26.2041, 28.0473],
+    "western-cape": [-33.9249, 18.4241],
+    "kwazulu-natal": [-29.8587, 31.0218],
+    "eastern-cape": [-33.9608, 25.6022],
+    "mpumalanga": [-25.7677, 29.5339],
+    "limpopo": [-23.9045, 29.4689],
+    "north-west": [-25.6700, 27.2350],
+    "free-state": [-29.0852, 26.1596],
+    "northern-cape": [-28.7282, 24.7499],
+    "all": [-28.4793, 24.6727]
+  };
 
 const allListings = [
   {
@@ -438,6 +455,8 @@ const allListings = [
   const totalPages = Math.ceil(filteredListings.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentListings = filteredListings.slice(startIndex, startIndex + itemsPerPage);
+  const compareItems = allListings.filter((l) => compareIds.includes(l.id));
+  const mapMarkers = currentListings.map((l) => ({ position: provinceCoords[l.province] || provinceCoords['all'], popup: `${l.title} – ZAR ${l.price}` }));
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -498,7 +517,7 @@ const allListings = [
                 </Link>
               </Button>
               <Button variant="hero" size="sm" asChild>
-                <Link to="/device/register">
+                <Link to="/seller-onboarding">
                   Sell Device
                 </Link>
               </Button>
@@ -529,8 +548,7 @@ const allListings = [
               variant="hero" 
               size="xl" 
               className="text-base md:text-lg px-6 md:px-8 py-3 md:py-4"
-              onClick={() => navigate('/device/register')}
-            >
+              onClick={() => navigate('/seller-onboarding')}>
               <Plus className="w-5 h-5 mr-2" />
               List Your Device
             </Button>
@@ -619,6 +637,18 @@ const allListings = [
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Lost & Found only</span>
                       <Switch checked={lostFoundOnly} onCheckedChange={setLostFoundOnly} />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Warranty only</span>
+                      <Switch checked={warrantyOnly} onCheckedChange={setWarrantyOnly} />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="text-sm">Search radius: {radiusKm} km</div>
+                      <Slider value={[radiusKm]} min={10} max={500} step={10} onValueChange={(v) => setRadiusKm(v[0])} />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Map view</span>
+                      <Switch checked={mapView} onCheckedChange={setMapView} />
                     </div>
                   </div>
                 </SheetContent>
@@ -718,6 +748,10 @@ const allListings = [
                 </Button>
               </div>
             </Card>
+          ) : mapView ? (
+            <Card className="p-2">
+              <Map markers={mapMarkers} className="h-[60vh] w-full" />
+            </Card>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
               {currentListings.map((listing) => (
@@ -751,6 +785,16 @@ const allListings = [
                     </div>
                     <div className="absolute top-3 left-3">
                       {getStatusBadge(listing.stolenStatus)}
+                    </div>
+                    <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-background/80 backdrop-blur-sm px-2 py-1 rounded-md">
+                      <Checkbox
+                        checked={compareIds.includes(listing.id)}
+                        onCheckedChange={(checked) => {
+                          setCompareIds((ids) => checked ? [...ids, listing.id] : ids.filter((id) => id !== listing.id));
+                        }}
+                        id={`cmp-${listing.id}`}
+                      />
+                      <label htmlFor={`cmp-${listing.id}`} className="text-xs">Compare</label>
                     </div>
                     <div className="absolute bottom-3 right-3">
                       <Button
@@ -816,6 +860,23 @@ const allListings = [
               )}
             </DialogContent>
           </Dialog>
+
+          {/* Compare floating button and modal */}
+          {compareItems.length >= 2 && (
+            <div className="fixed bottom-24 right-4 z-40">
+              <Dialog open={compareOpen} onOpenChange={setCompareOpen}>
+                <Button variant="hero" onClick={() => setCompareOpen(true)}>
+                  Compare ({compareItems.length})
+                </Button>
+                <DialogContent className="max-w-4xl">
+                  <DialogHeader>
+                    <DialogTitle>Compare Devices</DialogTitle>
+                  </DialogHeader>
+                  <CompareModal items={compareItems} />
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (

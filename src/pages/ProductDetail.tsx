@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { MapPin, ShieldCheck, Clock, CheckCircle, AlertTriangle, Star, ArrowLeft } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import PriceHistoryChart from "@/components/marketplace/PriceHistoryChart";
+import { MapPin, ShieldCheck, Clock, CheckCircle, AlertTriangle, Star, ArrowLeft, Info } from "lucide-react";
 
 const images = [
   "https://placehold.co/800x600?text=Image+1",
@@ -84,7 +87,23 @@ export default function ProductDetail() {
             </div>
             <p className="text-2xl font-bold text-primary">ZAR {new Intl.NumberFormat('en-ZA').format(price)}</p>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={() => navigate(`/escrow-payment`)}>Buy Now (Escrow)</Button>
+              <Button onClick={() => navigate(`/checkout/${id}`)}>Buy Now (Escrow)</Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline">Preview Ownership Proof</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Blockchain Ownership Proof</DialogTitle>
+                  </DialogHeader>
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <div>Contract: 0xABC...123</div>
+                    <div>Token ID: #{id}</div>
+                    <div>Current owner: TechDeals Pro</div>
+                    <div>Last transfer: 2025-06-01 12:30</div>
+                  </div>
+                </DialogContent>
+              </Dialog>
               <Button variant="outline" asChild>
                 <Link to={`/seller/techdeals-pro`}>Contact Seller</Link>
               </Button>
@@ -126,6 +145,17 @@ export default function ProductDetail() {
                   <div><span className="text-muted-foreground">Serial Status:</span> Clean</div>
                   <div><span className="text-muted-foreground">Color:</span> Natural Titanium</div>
                 </div>
+              </Card>
+              <Card className="p-4">
+                <h4 className="font-semibold mb-2 flex items-center gap-2">Price History & Trends
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>Prices update weekly from marketplace aggregates.</TooltipContent>
+                  </Tooltip>
+                </h4>
+                <PriceHistoryChart />
               </Card>
               <Card className="p-4">
                 <h4 className="font-semibold mb-2">Location</h4>

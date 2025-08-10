@@ -264,6 +264,24 @@ const EscrowPayment = () => {
           )}
         </Card>
 
+        {/* Insurance Quote */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-2">Insurance Quote</h2>
+          <div className="text-sm text-muted-foreground mb-3">Protect your device from theft and damage. Instant quote based on device price.</div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div className="p-3 border rounded-lg">
+              <div className="font-medium">Basic Plan</div>
+              <div className="text-sm text-muted-foreground">R99/month • R5,000 coverage</div>
+              <Button size="sm" className="mt-2">Select</Button>
+            </div>
+            <div className="p-3 border rounded-lg">
+              <div className="font-medium">Plus Plan</div>
+              <div className="text-sm text-muted-foreground">R149/month • R10,000 coverage</div>
+              <Button size="sm" className="mt-2" variant="outline">Select</Button>
+            </div>
+          </div>
+        </Card>
+
         {/* Payment Progress */}
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4">Payment Process</h2>
