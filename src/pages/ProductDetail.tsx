@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import PriceHistoryChart from "@/components/marketplace/PriceHistoryChart";
 import CompareModal from "@/components/marketplace/CompareModal";
 import { MapPin, ShieldCheck, Clock, CheckCircle, AlertTriangle, Star, ArrowLeft, Info, Heart } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const images = [
   "https://placehold.co/800x600?text=Image+1",
@@ -30,6 +31,7 @@ const repairs = [
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     document.title = `Product Details | STOLEN – Listing #${id}`;
@@ -94,6 +96,18 @@ export default function ProductDetail() {
             <p className="text-2xl font-bold text-primary">ZAR {new Intl.NumberFormat('en-ZA').format(price)}</p>
             <div className="flex flex-wrap gap-2">
               <Button onClick={() => navigate(`/checkout/${id}`)}>Buy Now (Escrow)</Button>
+              <Button variant="outline" onClick={() => {
+                try {
+                  const raw = localStorage.getItem('cart') || '[]';
+                  const cart = JSON.parse(raw);
+                  cart.push({ id: Number(id), title: 'iPhone 15 Pro Max 256GB', price, image: images[0] });
+                  localStorage.setItem('cart', JSON.stringify(cart));
+                  toast({ title: 'Added to cart', description: 'Item added. Go to cart to checkout.' });
+                } catch {}
+              }}>Add to Cart</Button>
+              <Button variant="outline" asChild>
+                <Link to="/cart">Go to Cart</Link>
+              </Button>
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline">Preview Ownership Proof</Button>
@@ -125,7 +139,10 @@ export default function ProductDetail() {
                 </DialogContent>
               </Dialog>
               <Button variant="outline" asChild>
-                <Link to={`/seller/techdeals-pro`}>Contact Seller</Link>
+                <Link to="/insurance-hub">Insurance Quote</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link to={`/seller/techdeals-pro/contact`}>Contact Seller</Link>
               </Button>
               <Button variant="outline" asChild>
                 <Link to={`/stolen-reports`}>Report Listing</Link>
@@ -136,6 +153,7 @@ export default function ProductDetail() {
                   const list = JSON.parse(raw);
                   list.push({ id: Number(id), title: 'iPhone 15 Pro Max 256GB', price, image: images[0], location: 'Johannesburg', province: 'gauteng', condition: 'Like New', stolenStatus: 'clean' });
                   localStorage.setItem('wishlist', JSON.stringify(list));
+                  toast({ title: 'Saved', description: 'Added to your wishlist.' });
                 } catch {}
               }}>
                 <Heart className="w-4 h-4 mr-1"/>Save for later

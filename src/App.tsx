@@ -67,6 +67,8 @@ import ReferralRewards from "./pages/ReferralRewards";
 import OrderDetails from "./pages/OrderDetails";
 import RelistDevice from "./pages/RelistDevice";
 import RepairUpdate from "./pages/RepairUpdate";
+import Cart from "./pages/Cart";
+import ContactSeller from "./pages/ContactSeller";
 
 const queryClient = new QueryClient();
 
@@ -130,13 +132,15 @@ const App = () => (
           <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
           <Route path="/trust-badges" element={<TrustBadges />} />
           <Route path="/device-certificate/:deviceId" element={<DeviceCertificate />} />
-           <Route path="/security-testing" element={<SecurityTesting />} />
-           <Route path="/geolocation-testing" element={<GeolocationTesting />} />
-           <Route path="/system-status" element={<SystemStatus />} />
+          <Route path="/security-testing" element={<SecurityTesting />} />
+          <Route path="/geolocation-testing" element={<GeolocationTesting />} />
+          <Route path="/system-status" element={<SystemStatus />} />
+          <Route path="/cart" element={<Cart />} />
 
-           {/* Public marketplace detail routes */}
-           <Route path="/marketplace/product/:id" element={<ProductDetail />} />
-           <Route path="/seller/:sellerId" element={<SellerProfile />} />
+          {/* Public marketplace detail routes */}
+          <Route path="/marketplace/product/:id" element={<ProductDetail />} />
+          <Route path="/seller/:sellerId" element={<SellerProfile />} />
+          <Route path="/seller/:sellerId/contact" element={<ContactSeller />} />
 
            {/* Checkout and post-purchase */}
            <Route path="/checkout/:listingId" element={<ProtectedRoute><EscrowPayment /></ProtectedRoute>} />

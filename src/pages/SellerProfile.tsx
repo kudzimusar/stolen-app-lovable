@@ -51,8 +51,8 @@ export default function SellerProfile() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline">Message</Button>
-              <Button>Contact</Button>
+              <Button variant="outline" asChild><Link to={`/seller/${sellerId}/contact`}>Message</Link></Button>
+              <Button asChild><Link to={`/seller/${sellerId}/contact`}>Contact</Link></Button>
             </div>
           </Card>
         </section>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,15 @@ const EscrowPayment = () => {
   const [delivery, setDelivery] = useState<'courier' | 'in-person'>("courier");
   const [terms, setTerms] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    document.title = `Checkout Listing ${listingId} | STOLEN Escrow`;
+    const metaDesc = document.querySelector('meta[name="description"]') || (() => { const m = document.createElement('meta'); m.name = 'description'; document.head.appendChild(m); return m; })();
+    metaDesc.setAttribute('content', 'Secure escrow checkout with delivery or in-person handover options and insurance quotes.');
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
+    canonical.href = window.location.href;
+  }, [listingId]);
 
   // Mock transaction data
   const transaction = {
