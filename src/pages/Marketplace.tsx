@@ -71,6 +71,7 @@ const Marketplace = () => {
   const [insuranceReadyOnly, setInsuranceReadyOnly] = useState(false);
   const [availability, setAvailability] = useState<'marketplace'|'lostfound'|'donation'>("marketplace");
   const [mapView, setMapView] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Result pagination / load more
   const [useLoadMore, setUseLoadMore] = useState(true);
@@ -573,13 +574,15 @@ const allListings = [
 
           {/* Search and Filters */}
           <div className="grid gap-3 md:grid-cols-4 max-w-5xl mx-auto">
-            <div className="md:col-span-2 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search devices (e.g., iPhone 15 Pro)"
+            <div className="md:col-span-2">
+              <SearchTypeahead
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-12"
+                onChange={setSearchQuery}
+                onSelectPath={(p: TaxonomyNode[]) => {
+                  setTaxonomyPath(p);
+                  setSearchQuery(p[p.length - 1]?.name ?? "");
+                }}
+                onOpenFilters={() => setFiltersOpen(true)}
               />
             </div>
             <EnhancedSelect
@@ -604,7 +607,7 @@ const allListings = [
                 </DialogContent>
               </Dialog>
 
-              <Sheet>
+              <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
                 <SheetTrigger asChild>
                   <Button variant="outline" className="w-full md:w-auto">
                     <SlidersHorizontal className="w-4 h-4 mr-2" />
