@@ -17,6 +17,11 @@ import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import Map from "@/components/Map";
 import CompareModal from "@/components/marketplace/CompareModal";
+import SearchTypeahead from "@/components/marketplace/SearchTypeahead";
+import TaxonomyTree from "@/components/marketplace/TaxonomyTree";
+import BreadcrumbBar from "@/components/marketplace/BreadcrumbBar";
+import EmptyState from "@/components/marketplace/EmptyState";
+import { useTaxonomy, TaxonomyNode } from "@/hooks/useTaxonomy";
 import {
   Search,
   Heart,
@@ -42,11 +47,16 @@ import {
 
 const Marketplace = () => {
   const navigate = useNavigate();
+  const { tokensFromPath, search: taxonomySearch, roots } = useTaxonomy();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("gauteng");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
+
+  // Taxonomy & flows
+  const [taxonomyPath, setTaxonomyPath] = useState<TaxonomyNode[]>([]);
+  const [taxonomyOpen, setTaxonomyOpen] = useState(false);
 
   // Filters & controls
   const [priceMin, setPriceMin] = useState<number | "">("");
@@ -54,10 +64,17 @@ const Marketplace = () => {
   const [selectedCondition, setSelectedCondition] = useState("all");
   const [sellerType, setSellerType] = useState("all");
   const [sortBy, setSortBy] = useState("relevance"); // relevance | price_asc | price_desc
-  const [lostFoundOnly, setLostFoundOnly] = useState(false);
   const [radiusKm, setRadiusKm] = useState(50);
   const [warrantyOnly, setWarrantyOnly] = useState(false);
+  const [lostFoundOnly, setLostFoundOnly] = useState(false);
+  const [verifiedRepairOnly, setVerifiedRepairOnly] = useState(false);
+  const [insuranceReadyOnly, setInsuranceReadyOnly] = useState(false);
+  const [availability, setAvailability] = useState<'marketplace'|'lostfound'|'donation'>("marketplace");
   const [mapView, setMapView] = useState(false);
+
+  // Result pagination / load more
+  const [useLoadMore, setUseLoadMore] = useState(true);
+  const [itemsShown, setItemsShown] = useState(itemsPerPage);
 
   // Wishlist & compare
   const [wishlist, setWishlist] = useState<any[]>(() => {
