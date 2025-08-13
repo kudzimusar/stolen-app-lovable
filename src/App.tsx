@@ -69,6 +69,8 @@ import RelistDevice from "./pages/RelistDevice";
 import RepairUpdate from "./pages/RepairUpdate";
 import Cart from "./pages/Cart";
 import ContactSeller from "./pages/ContactSeller";
+import InsuranceQuote from "./pages/InsuranceQuote";
+import ReportListing from "./pages/ReportListing";
 
 const queryClient = new QueryClient();
 
@@ -121,13 +123,15 @@ const App = () => (
           <Route path="/device/check" element={<DeviceCheck />} />
           <Route path="/community-board" element={<CommunityBoard />} />
           <Route path="/lost-found-board" element={<CommunityBoard />} />
-          <Route path="/insurance-hub" element={<InsuranceHub />} />
+           <Route path="/insurance-hub" element={<InsuranceHub />} />
+           <Route path="/insurance-quote/:id" element={<InsuranceQuote />} />
           <Route path="/reverse-verify" element={<ReverseVerify />} />
           <Route path="/support" element={<Support />} />
           <Route path="/transfer-donate" element={<TransferDonate />} />
           <Route path="/learn" element={<Learn />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/stolen-reports" element={<StolenReports />} />
+          <Route path="/report-listing/:id" element={<ReportListing />} />
           <Route path="/why-stolen" element={<WhyStolen />} />
           <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
           <Route path="/trust-badges" element={<TrustBadges />} />

@@ -50,8 +50,8 @@ export default function ProductDetail() {
   const price = 18999;
   const [compareOpen, setCompareOpen] = useState(false);
   const similar = [
-    { id: 2, title: "MacBook Pro M3 14-inch", price: 32999, location: "Cape Town" },
-    { id: 3, title: "Samsung Galaxy S24 Ultra", price: 14999, location: "Durban" }
+    { id: 2, title: "MacBook Pro M3 14-inch", price: 32999, image: "https://placehold.co/320x220?text=Laptop", condition: "Excellent", warrantyMonths: 10 },
+    { id: 3, title: "Samsung Galaxy S24 Ultra", price: 14999, image: "https://placehold.co/320x220?text=Phone", condition: "Good", warrantyMonths: 6 }
   ];
 
   return (
@@ -139,13 +139,13 @@ export default function ProductDetail() {
                 </DialogContent>
               </Dialog>
               <Button variant="outline" asChild>
-                <Link to="/insurance-hub">Insurance Quote</Link>
+                <Link to={`/insurance-quote/${id}`}>Insurance Quote</Link>
               </Button>
               <Button variant="outline" asChild>
                 <Link to={`/seller/techdeals-pro/contact`}>Contact Seller</Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link to={`/stolen-reports`}>Report Listing</Link>
+                <Link to={`/report-listing/${id}`}>Report Listing</Link>
               </Button>
               <Button variant="ghost" onClick={() => {
                 try {
