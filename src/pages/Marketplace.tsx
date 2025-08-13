@@ -439,8 +439,10 @@ const allListings = [
 
   // Filter and search logic
   const filteredListings = useMemo(() => {
+    const tokens = tokensFromPath(taxonomyPath);
     let data = allListings.filter((listing) => {
-      const matchesSearch = listing.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const titleLc = listing.title.toLowerCase();
+      const matchesSearch = titleLc.includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === "all" || listing.category === selectedCategory;
       const matchesLocation = selectedLocation === "all" || listing.province === selectedLocation;
       const matchesSeller = sellerType === "all" || listing.sellerType === sellerType;
@@ -448,7 +450,8 @@ const allListings = [
       const withinPrice = (priceMin === "" || listing.price >= priceMin) && (priceMax === "" || listing.price <= priceMax);
       const matchesLostFound = !lostFoundOnly || ["lost", "stolen"].includes(listing.stolenStatus);
       const matchesWarranty = !warrantyOnly || listing.warrantyMonths > 0;
-      return matchesSearch && matchesCategory && matchesLocation && matchesSeller && matchesCondition && withinPrice && matchesLostFound && matchesWarranty;
+      const matchesTaxonomy = tokens.length === 0 || tokens.some((t) => titleLc.includes(t) || listing.category.toLowerCase().includes(t));
+      return matchesSearch && matchesCategory && matchesLocation && matchesSeller && matchesCondition && withinPrice && matchesLostFound && matchesWarranty && matchesTaxonomy;
     });
 
     if (sortBy === "price_asc") data = [...data].sort((a, b) => a.price - b.price);
@@ -467,6 +470,7 @@ const allListings = [
     lostFoundOnly,
     warrantyOnly,
     sortBy,
+    taxonomyPath,
   ]);
 
   // Pagination logic
@@ -619,6 +623,10 @@ const allListings = [
                     <SheetTitle>Filters & Sorting</SheetTitle>
                   </SheetHeader>
                   <div className="mt-4 space-y-4">
+                    <div>
+                      <div className="text-sm font-medium mb-2">Browse by taxonomy</div>
+                      <TaxonomyTree selectedPath={taxonomyPath} onSelectPath={(p) => setTaxonomyPath(p)} />
+                    </div>
                     <div className="grid grid-cols-2 gap-3">
                       <Input type="number" placeholder="Min (ZAR)" value={priceMin as any} onChange={(e) => setPriceMin(e.target.value ? Number(e.target.value) : "")} />
                       <Input type="number" placeholder="Max (ZAR)" value={priceMax as any} onChange={(e) => setPriceMax(e.target.value ? Number(e.target.value) : "")} />
@@ -676,6 +684,15 @@ const allListings = [
             </div>
           </div>
         </div>
+
+        <BreadcrumbBar
+          path={taxonomyPath}
+          onClear={() => { setTaxonomyPath([]); setSearchQuery(""); }}
+          verifiedRepairOnly={verifiedRepairOnly}
+          onVerifiedRepairOnly={setVerifiedRepairOnly}
+          insuranceReadyOnly={insuranceReadyOnly}
+          onInsuranceReadyOnly={setInsuranceReadyOnly}
+        />
 
         {/* Categories */}
         <div className="flex gap-2 overflow-x-auto pb-2">
