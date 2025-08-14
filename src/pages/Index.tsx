@@ -79,15 +79,15 @@ const Index = () => {
                     <QrCode className="w-4 h-4 sm:w-5 sm:h-5" />
                     Check Status
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
-                    onClick={() => navigate('/transfer-donate')}
-                    className="w-full sm:w-auto"
-                  >
-                    <ArrowRightLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-                    Transfer/Donate
-                  </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  onClick={() => navigate('/list-my-device')}
+                  className="w-full sm:w-auto"
+                >
+                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
+                  List Your Device
+                </Button>
                 </div>
               </div>
 

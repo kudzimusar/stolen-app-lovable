@@ -71,6 +71,9 @@ import Cart from "./pages/Cart";
 import ContactSeller from "./pages/ContactSeller";
 import InsuranceQuote from "./pages/InsuranceQuote";
 import ReportListing from "./pages/ReportListing";
+import HotDeals from "./pages/HotDeals";
+import HotDealsFeed from "./pages/HotDealsFeed";
+import ListMyDevice from "./pages/ListMyDevice";
 
 const queryClient = new QueryClient();
 
@@ -130,8 +133,11 @@ const App = () => (
           <Route path="/transfer-donate" element={<TransferDonate />} />
           <Route path="/learn" element={<Learn />} />
           <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/stolen-reports" element={<StolenReports />} />
-          <Route path="/report-listing/:id" element={<ReportListing />} />
+           <Route path="/stolen-reports" element={<StolenReports />} />
+           <Route path="/report-listing/:id" element={<ReportListing />} />
+           <Route path="/hot-deals" element={<ProtectedRoute><HotDeals /></ProtectedRoute>} />
+           <Route path="/hot-deals-feed" element={<HotDealsFeed />} />
+           <Route path="/list-my-device" element={<ProtectedRoute><ListMyDevice /></ProtectedRoute>} />
           <Route path="/why-stolen" element={<WhyStolen />} />
           <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
           <Route path="/trust-badges" element={<TrustBadges />} />

@@ -32,8 +32,8 @@ export const BottomNavigation = () => {
     {
       icon: Plus,
       label: "Sell",
-      href: "/seller-onboarding",
-      active: location.pathname === "/seller-onboarding",
+      href: "/list-my-device",
+      active: location.pathname === "/list-my-device" || location.pathname === "/seller-onboarding",
       highlight: true
     },
     {
