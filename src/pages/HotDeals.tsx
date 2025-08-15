@@ -94,7 +94,7 @@ const HotDeals = () => {
     });
 
     // In real app, would submit to API
-    navigate('/marketplace?tab=hot-deals');
+    navigate('/hot-deals-feed');
   };
 
   if (entryMode === 'selection') {
@@ -152,7 +152,7 @@ const HotDeals = () => {
             </div>
 
             <div className="pt-4">
-              <Link to="/marketplace">
+              <Link to="/hot-deals-feed">
                 <Button variant="outline" className="w-full">
                   Browse Hot Deals Instead
                 </Button>

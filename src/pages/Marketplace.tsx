@@ -42,7 +42,8 @@ import {
   QrCode,
   SlidersHorizontal,
   Eye,
-  ArrowUpDown
+  ArrowUpDown,
+  Flame as Fire
 } from "lucide-react";
 
 const Marketplace = () => {
@@ -533,13 +534,19 @@ const allListings = [
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" asChild>
+                <Link to="/hot-deals-feed">
+                  <Fire className="w-4 h-4" />
+                  Hot Deals
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
                 <Link to="/wishlist">
                   <Heart className="w-4 h-4" />
                   Watchlist
                 </Link>
               </Button>
               <Button variant="hero" size="sm" asChild>
-                <Link to="/seller-onboarding">
+                <Link to="/list-my-device">
                   Sell Device
                 </Link>
               </Button>
@@ -565,12 +572,20 @@ const allListings = [
           </div>
 
           {/* Primary CTA */}
-          <div className="text-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <Button 
+              variant="outline" 
+              size="xl" 
+              className="text-base md:text-lg px-6 md:px-8 py-3 md:py-4"
+              onClick={() => navigate('/hot-deals-feed')}>
+              <Fire className="w-5 h-5 mr-2" />
+              Browse Hot Deals
+            </Button>
             <Button 
               variant="hero" 
               size="xl" 
               className="text-base md:text-lg px-6 md:px-8 py-3 md:py-4"
-              onClick={() => navigate('/seller-onboarding')}>
+              onClick={() => navigate('/list-my-device')}>
               <Plus className="w-5 h-5 mr-2" />
               List Your Device
             </Button>
