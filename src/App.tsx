@@ -73,6 +73,9 @@ import InsuranceQuote from "./pages/InsuranceQuote";
 import ReportListing from "./pages/ReportListing";
 import HotDeals from "./pages/HotDeals";
 import HotDealsFeed from "./pages/HotDealsFeed";
+import HotDealsHub from "./pages/HotDealsHub";
+import HotBuyerRequest from "./pages/HotBuyerRequest";
+import HotDealsChatPage from "./pages/HotDealsChatPage";
 import ListMyDevice from "./pages/ListMyDevice";
 
 const queryClient = new QueryClient();
@@ -137,6 +140,9 @@ const App = () => (
            <Route path="/report-listing/:id" element={<ReportListing />} />
            <Route path="/hot-deals" element={<ProtectedRoute><HotDeals /></ProtectedRoute>} />
            <Route path="/hot-deals-feed" element={<HotDealsFeed />} />
+           <Route path="/hot-deals-hub" element={<ProtectedRoute><HotDealsHub /></ProtectedRoute>} />
+           <Route path="/hot-buyer-request" element={<ProtectedRoute><HotBuyerRequest /></ProtectedRoute>} />
+           <Route path="/hot-deals-chat/:dealId" element={<ProtectedRoute><HotDealsChatPage /></ProtectedRoute>} />
            <Route path="/list-my-device" element={<ProtectedRoute><ListMyDevice /></ProtectedRoute>} />
           <Route path="/why-stolen" element={<WhyStolen />} />
           <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />

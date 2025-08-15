@@ -243,7 +243,7 @@ export const AppHeader = ({
                 <div className="hidden md:flex items-center gap-4 lg:gap-6">
                   <Link to="/why-stolen" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Why STOLEN?</Link>
                   <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Features</a>
-                  <Link to="/hot-deals" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Quick Deals</Link>
+                  <Link to="/hot-deals-hub" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Quick Deals</Link>
                   <Link to="/marketplace" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Marketplace</Link>
                   <Link to="/support" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">Support</Link>
                   
