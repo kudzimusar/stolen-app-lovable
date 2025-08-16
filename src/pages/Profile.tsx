@@ -32,7 +32,8 @@ import {
   MapPin,
   Phone,
   Mail,
-  Calendar
+  Calendar,
+  TrendingUp
 } from "lucide-react";
 
 const Profile = () => {
@@ -457,6 +458,13 @@ const Profile = () => {
             <Link to="/device/register">
               <Smartphone className="w-4 h-4 mr-2" />
               Register New Device
+            </Link>
+          </Button>
+          
+          <Button variant="premium" className="w-full" asChild>
+            <Link to="/hot-deals-hub">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Create Hot Deal
             </Link>
           </Button>
         </Card>

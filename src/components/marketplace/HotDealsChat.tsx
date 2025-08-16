@@ -13,7 +13,8 @@ import {
   Clock,
   AlertTriangle,
   Heart,
-  Package
+  Package,
+  Zap
 } from "lucide-react";
 
 interface HotDealsChatProps {
@@ -56,6 +57,13 @@ const HotDealsChat = ({ dealId, onClose }: HotDealsChatProps) => {
         content: "🔒 This conversation is protected by STOLEN's anti-fraud AI scanning.",
         timestamp: new Date(Date.now() - 1000 * 60 * 15),
         type: "system"
+      },
+      {
+        id: 5,
+        sender: "ai-assistant",
+        content: "💡 AI Suggestion: Based on similar deals, R15,500 would be a competitive price for this condition.",
+        timestamp: new Date(Date.now() - 1000 * 60 * 10),
+        type: "ai-suggestion"
       }
     ]);
   }, [dealId]);
@@ -212,7 +220,7 @@ const HotDealsChat = ({ dealId, onClose }: HotDealsChatProps) => {
         </div>
         <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
           <ShieldCheck className="w-3 h-3" />
-          <span>Protected by AI fraud detection</span>
+          <span>Protected by AI fraud detection & real-time scanning</span>
         </div>
       </div>
     </div>

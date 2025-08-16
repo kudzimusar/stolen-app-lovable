@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { AppHeader } from "@/components/AppHeader";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import UrgencyBoost from "@/components/marketplace/UrgencyBoost";
+import AutoRelistOptions from "@/components/marketplace/AutoRelistOptions";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -319,7 +321,7 @@ const HotDeals = () => {
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-6">
             <Button 
               onClick={handleSubmitHotDeal}
               className="w-full"
@@ -328,6 +330,10 @@ const HotDeals = () => {
               <Fire className="w-4 h-4 mr-2" />
               Create Hot Deal
             </Button>
+            
+            <UrgencyBoost onBoostApplied={(type) => console.log('Boost applied:', type)} />
+            
+            <AutoRelistOptions onSettingsChange={(settings) => console.log('Auto-relist settings:', settings)} />
             
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />

@@ -105,6 +105,9 @@ export default function ProductDetail() {
                   toast({ title: 'Added to cart', description: 'Item added. Go to cart to checkout.' });
                 } catch {}
               }}>Add to Cart</Button>
+              <Button variant="premium" asChild>
+                <Link to="/hot-buyer-request">Quick Request</Link>
+              </Button>
               <Button variant="outline" asChild>
                 <Link to="/cart">Go to Cart</Link>
               </Button>

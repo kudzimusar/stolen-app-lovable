@@ -19,6 +19,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppHeader } from "@/components/AppHeader";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import DeviceHistoryIntegration from "@/components/marketplace/DeviceHistoryIntegration";
+import UrgencyBoost from "@/components/marketplace/UrgencyBoost";
+import SmartSuggestions from "@/components/marketplace/SmartSuggestions";
 
 const HotDealsHub = () => {
   const navigate = useNavigate();
@@ -236,13 +239,18 @@ const HotDealsHub = () => {
                         </div>
                       </div>
 
-                      <div className="text-right">
-                        <div className="flex items-center gap-1 mb-2">
+                      <div className="text-right space-y-2">
+                        <div className="flex items-center gap-1">
                           <Star className="w-4 h-4 fill-warning text-warning" />
                           <span className="text-sm font-medium">{deal.matchScore}% match</span>
                         </div>
                         <p className="text-sm text-muted-foreground">by {deal.seller}</p>
+                        <UrgencyBoost dealId={deal.id.toString()} />
                       </div>
+                    </div>
+                    
+                    <div className="mt-3">
+                      <DeviceHistoryIntegration deviceId={deal.id.toString()} />
                     </div>
                   </CardContent>
                 </Card>
@@ -317,6 +325,11 @@ const HotDealsHub = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      <SmartSuggestions
+        ownedDevices={[]}
+        currentProduct={null}
+      />
 
       <BottomNavigation />
     </div>

@@ -291,6 +291,12 @@ const MyDevices = () => {
                     {device.status === 'active' && (
                       <>
                         <Button variant="outline" size="sm" asChild>
+                          <Link to={`/hot-deals?deviceId=${device.id}`}>
+                            <Clock className="w-4 h-4 mr-1" />
+                            Hot Deal
+                          </Link>
+                        </Button>
+                        <Button variant="outline" size="sm" asChild>
                           <Link to="/device-transfer">
                             <Share className="w-4 h-4 mr-1" />
                             Transfer

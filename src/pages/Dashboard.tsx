@@ -56,6 +56,12 @@ const Dashboard = () => {
       variant: "hero" as const
     },
     {
+      icon: <TrendingUp className="w-5 h-5" />,
+      label: "Hot Deals",
+      href: "/hot-deals-hub",
+      variant: "premium" as const
+    },
+    {
       icon: <AlertTriangle className="w-5 h-5" />,
       label: "Report Lost",
       href: "/lost-found-report",
