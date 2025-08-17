@@ -24,7 +24,9 @@ import {
   Phone,
   Mail,
   MapPin,
-  Award
+  Award,
+  Shield,
+  Heart
 } from "lucide-react";
 
 const RepairShopDashboard = () => {
