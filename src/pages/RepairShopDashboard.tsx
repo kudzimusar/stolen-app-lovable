@@ -5,11 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { STOLENLogo } from "@/components/STOLENLogo";
+import { AppHeader } from "@/components/AppHeader";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {
-  ArrowLeft,
   Wrench,
   Search,
   Calendar,
@@ -177,31 +176,19 @@ const RepairShopDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to="/repair-shop-dashboard">
-                <Button variant="ghost" size="icon">
-                  <ArrowLeft className="w-5 h-5" />
-                </Button>
-              </Link>
-              <STOLENLogo />
-            </div>
-            <div className="flex items-center gap-2">
-              <Wrench className="w-5 h-5 text-primary" />
-              <span className="font-semibold">Repair Shop Dashboard</span>
-              <Badge className={getBadgeColor(shopStats.badgeTier)}>
-                <Award className="w-3 h-3 mr-1" />
-                {shopStats.badgeTier} STOLEN Certified
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Header with profile access */}
+      <AppHeader title="Repair Shop Dashboard" showLogo={true} />
 
       <div className="container mx-auto px-4 py-8 space-y-8">
+        <Card className="p-4 bg-warning/10 border-warning/20">
+          <div className="flex items-center gap-2">
+            <Badge className={getBadgeColor(shopStats.badgeTier)}>
+              <Award className="w-3 h-3 mr-1" />
+              {shopStats.badgeTier} STOLEN Certified
+            </Badge>
+            <span className="text-sm text-muted-foreground">Premium Repair Shop</span>
+          </div>
+        </Card>
         {/* Quick Actions / Repairer Features */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Card className="p-4 hover:shadow-lg transition-shadow">
