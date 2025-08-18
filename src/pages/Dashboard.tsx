@@ -92,6 +92,12 @@ const Dashboard = () => {
       variant: "outline" as const
     },
     {
+      icon: <Calendar className="w-5 h-5" />,
+      label: "Book Repair",
+      href: "/repair-booking",
+      variant: "outline" as const
+    },
+    {
       icon: <Wallet className="w-5 h-5" />,
       label: "S-Pay Wallet",
       href: "/wallet",

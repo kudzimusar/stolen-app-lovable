@@ -77,6 +77,10 @@ import HotDealsHub from "./pages/HotDealsHub";
 import HotBuyerRequest from "./pages/HotBuyerRequest";
 import HotDealsChatPage from "./pages/HotDealsChatPage";
 import ListMyDevice from "./pages/ListMyDevice";
+import RepairBooking from "./pages/RepairBooking";
+import RepairFraudDetection from "./pages/RepairFraudDetection";
+import RepairInsuranceIntegration from "./pages/RepairInsuranceIntegration";
+import RepairNGOPrograms from "./pages/RepairNGOPrograms";
 
 const queryClient = new QueryClient();
 
@@ -164,6 +168,12 @@ const App = () => (
            <Route path="/orders/:orderId" element={<ProtectedRoute><OrderDetails /></ProtectedRoute>} />
            <Route path="/relist/:orderId" element={<ProtectedRoute><RelistDevice /></ProtectedRoute>} />
            <Route path="/repairs/new" element={<ProtectedRoute><RepairUpdate /></ProtectedRoute>} />
+
+           {/* Repairer features */}
+           <Route path="/repair-booking" element={<ProtectedRoute><RepairBooking /></ProtectedRoute>} />
+           <Route path="/repair-fraud-detection" element={<ProtectedRoute><RepairFraudDetection /></ProtectedRoute>} />
+           <Route path="/repair-insurance-integration" element={<ProtectedRoute><RepairInsuranceIntegration /></ProtectedRoute>} />
+           <Route path="/repair-ngo-programs" element={<ProtectedRoute><RepairNGOPrograms /></ProtectedRoute>} />
 
            {/* Seller flows */}
            <Route path="/seller-onboarding" element={<ProtectedRoute><SellerOnboarding /></ProtectedRoute>} />

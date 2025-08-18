@@ -199,6 +199,49 @@ const RepairShopDashboard = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Quick Actions / Repairer Features */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card className="p-4 hover:shadow-lg transition-shadow">
+            <Link to="/repair-booking" className="block">
+              <div className="text-center space-y-2">
+                <Calendar className="w-8 h-8 text-primary mx-auto" />
+                <h3 className="font-medium">Repair Booking</h3>
+                <p className="text-xs text-muted-foreground">Find nearby users, book repairs & cost estimates</p>
+              </div>
+            </Link>
+          </Card>
+          
+          <Card className="p-4 hover:shadow-lg transition-shadow">
+            <Link to="/repair-fraud-detection" className="block">
+              <div className="text-center space-y-2">
+                <Shield className="w-8 h-8 text-primary mx-auto" />
+                <h3 className="font-medium">Fraud Detection</h3>
+                <p className="text-xs text-muted-foreground">Verify serials, detect tampering & flag suspicious devices</p>
+              </div>
+            </Link>
+          </Card>
+          
+          <Card className="p-4 hover:shadow-lg transition-shadow">
+            <Link to="/repair-insurance-integration" className="block">
+              <div className="text-center space-y-2">
+                <FileText className="w-8 h-8 text-primary mx-auto" />
+                <h3 className="font-medium">Insurance Claims</h3>
+                <p className="text-xs text-muted-foreground">Provide repair proof for insurance claims</p>
+              </div>
+            </Link>
+          </Card>
+          
+          <Card className="p-4 hover:shadow-lg transition-shadow">
+            <Link to="/repair-ngo-programs" className="block">
+              <div className="text-center space-y-2">
+                <Heart className="w-8 h-8 text-primary mx-auto" />
+                <h3 className="font-medium">NGO Programs</h3>
+                <p className="text-xs text-muted-foreground">Participate in donation refurbishment programs</p>
+              </div>
+            </Link>
+          </Card>
+        </div>
+
         {/* Performance Overview */}
         <div className="grid md:grid-cols-4 gap-4">
           <Card className="p-4 text-center">
@@ -500,6 +543,51 @@ const RepairShopDashboard = () => {
             </div>
           </div>
         </Card>
+
+        {/* Quick Access Links */}
+        <div className="grid md:grid-cols-2 gap-4 mt-8">
+          <Card className="p-4">
+            <h3 className="font-semibold mb-3 flex items-center gap-2">
+              <Wrench className="w-4 h-4" />
+              Repairer Tools
+            </h3>
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <Link to="/repair-booking">
+                  <Calendar className="w-4 h-4 mr-3" />
+                  Repair Booking System
+                </Link>
+              </Button>
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <Link to="/repair-fraud-detection">
+                  <Shield className="w-4 h-4 mr-3" />
+                  Fraud Detection Tools
+                </Link>
+              </Button>
+            </div>
+          </Card>
+          
+          <Card className="p-4">
+            <h3 className="font-semibold mb-3 flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Integrations
+            </h3>
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <Link to="/repair-insurance-integration">
+                  <FileText className="w-4 h-4 mr-3" />
+                  Insurance Claims
+                </Link>
+              </Button>
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <Link to="/repair-ngo-programs">
+                  <Heart className="w-4 h-4 mr-3" />
+                  NGO Programs
+                </Link>
+              </Button>
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );
