@@ -26,7 +26,10 @@ import {
   MapPin,
   Award,
   Shield,
-  Heart
+  Heart,
+  User,
+  Settings,
+  Bell
 } from "lucide-react";
 
 const RepairShopDashboard = () => {
@@ -588,7 +591,38 @@ const RepairShopDashboard = () => {
             </div>
           </Card>
         </div>
+
+        {/* Settings & Profile */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Settings & Profile</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Button variant="outline" className="justify-start" asChild>
+              <Link to="/repairer-profile">
+                <User className="w-4 h-4 mr-3" />
+                Manage Profile & Certificates
+              </Link>
+            </Button>
+            
+            <Button variant="outline" className="justify-start">
+              <Settings className="w-4 h-4 mr-3" />
+              Account Settings
+            </Button>
+            
+            <Button variant="outline" className="justify-start">
+              <Bell className="w-4 h-4 mr-3" />
+              Notification Preferences  
+            </Button>
+            
+            <Button variant="outline" className="justify-start">
+              <Shield className="w-4 h-4 mr-3" />
+              Security Settings
+            </Button>
+          </div>
+        </Card>
       </div>
+      
+      {/* Bottom padding for mobile navigation */}
+      <div className="h-20 md:h-0"></div>
     </div>
   );
 };

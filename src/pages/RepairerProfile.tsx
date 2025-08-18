@@ -273,6 +273,87 @@ const RepairerProfile = () => {
           </div>
         </Card>
 
+        {/* Certificates & Licenses */}
+        <Card className="p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Award className="w-5 h-5" />
+              Certificates & Licenses
+            </h2>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {/* Add certificate modal */}}
+            >
+              <Award className="w-4 h-4 mr-2" />
+              Add Certificate
+            </Button>
+          </div>
+          
+          <div className="space-y-3">
+            {[
+              {
+                name: "Apple Certified Technician",
+                issuer: "Apple Inc.",
+                issued: "2023-03-15",
+                expires: "2025-03-15",
+                number: "ACT-2023-SF-001",
+                status: "active"
+              },
+              {
+                name: "Samsung Authorized Service Provider",
+                issuer: "Samsung Electronics",
+                issued: "2022-08-20",
+                expires: "2024-08-20",
+                number: "SAM-ASP-2022-456",
+                status: "expires_soon"
+              },
+              {
+                name: "CompTIA A+ Certification",
+                issuer: "CompTIA",
+                issued: "2021-11-10",
+                expires: "Never",
+                number: "COMP-A+-789012",
+                status: "active"
+              }
+            ].map((cert, index) => (
+              <div key={index} className="p-4 border border-border rounded-lg">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium">{cert.name}</h3>
+                      <Badge 
+                        variant={cert.status === "active" ? "default" : "secondary"}
+                        className={
+                          cert.status === "active" 
+                            ? "bg-green-100 text-green-800" 
+                            : cert.status === "expires_soon"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-gray-100 text-gray-800"
+                        }
+                      >
+                        {cert.status === "active" ? "Active" : cert.status === "expires_soon" ? "Expires Soon" : "Inactive"}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Issued by {cert.issuer}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Certificate #{cert.number} • Issued: {cert.issued} • Expires: {cert.expires}
+                    </p>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm">
+                      <Edit3 className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm">
+                      View
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
         {/* Notification Settings */}
         <Card className="p-6 space-y-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">
