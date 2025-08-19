@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AppHeader } from "@/components/AppHeader";
+import { CalendarModal } from "@/components/CalendarModal";
+import { CommunicationModal } from "@/components/CommunicationModal";
+import { AppointmentBookingModal } from "@/components/AppointmentBookingModal";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -40,6 +43,11 @@ const RepairShopDashboard = () => {
     description: "",
     warrantyDays: "30"
   });
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isCommunicationOpen, setIsCommunicationOpen] = useState(false);
+  const [isAppointmentBookingOpen, setIsAppointmentBookingOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [communicationType, setCommunicationType] = useState<"call" | "email" | "message">("call");
   const { toast } = useToast();
 
   // Mock repair shop data
@@ -232,6 +240,43 @@ const RepairShopDashboard = () => {
           </Card>
         </div>
 
+        {/* Settings & Profile Quick Access */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <Card className="p-4 hover:shadow-lg transition-shadow">
+            <Link to="/repairer-profile" className="block">
+              <div className="flex items-center gap-3">
+                <User className="w-8 h-8 text-primary" />
+                <div>
+                  <h3 className="font-medium">Profile & Settings</h3>
+                  <p className="text-xs text-muted-foreground">Manage your shop info & certifications</p>
+                </div>
+              </div>
+            </Link>
+          </Card>
+          
+          <Card className="p-4 hover:shadow-lg transition-shadow">
+            <Link to="/repair-support" className="block">
+              <div className="flex items-center gap-3">
+                <Settings className="w-8 h-8 text-primary" />
+                <div>
+                  <h3 className="font-medium">Help & Support</h3>
+                  <p className="text-xs text-muted-foreground">Repairer-specific assistance & resources</p>
+                </div>
+              </div>
+            </Link>
+          </Card>
+
+          <Card className="p-4 hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-3">
+              <Bell className="w-8 h-8 text-primary" />
+              <div>
+                <h3 className="font-medium">Notifications</h3>
+                <p className="text-xs text-muted-foreground">3 new appointment requests</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
         {/* Performance Overview */}
         <div className="grid md:grid-cols-4 gap-4">
           <Card className="p-4 text-center">
@@ -368,7 +413,11 @@ const RepairShopDashboard = () => {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Today's Appointments</h2>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsCalendarOpen(true)}
+              >
                 <Calendar className="w-4 h-4 mr-2" />
                 View Calendar
               </Button>
@@ -391,10 +440,38 @@ const RepairShopDashboard = () => {
                       </div>
                     </div>
                     <div className="flex gap-1">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setSelectedCustomer({
+                            name: appointment.customer,
+                            phone: appointment.phone,
+                            email: `${appointment.customer.toLowerCase().replace(' ', '.')}@email.com`,
+                            device: appointment.device,
+                            issue: appointment.issue
+                          });
+                          setCommunicationType("call");
+                          setIsCommunicationOpen(true);
+                        }}
+                      >
                         <Phone className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setSelectedCustomer({
+                            name: appointment.customer,
+                            phone: appointment.phone,
+                            email: `${appointment.customer.toLowerCase().replace(' ', '.')}@email.com`,
+                            device: appointment.device,
+                            issue: appointment.issue
+                          });
+                          setCommunicationType("email");
+                          setIsCommunicationOpen(true);
+                        }}
+                      >
                         <Mail className="w-4 h-4" />
                       </Button>
                     </div>
@@ -403,7 +480,11 @@ const RepairShopDashboard = () => {
               ))}
             </div>
 
-            <Button variant="outline" className="w-full mt-4">
+            <Button 
+              variant="outline" 
+              className="w-full mt-4"
+              onClick={() => setIsAppointmentBookingOpen(true)}
+            >
               Book New Appointment
             </Button>
           </Card>

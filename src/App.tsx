@@ -82,6 +82,7 @@ import RepairBooking from "./pages/RepairBooking";
 import RepairFraudDetection from "./pages/RepairFraudDetection";
 import RepairInsuranceIntegration from "./pages/RepairInsuranceIntegration";
 import RepairNGOPrograms from "./pages/RepairNGOPrograms";
+import RepairSupport from "./pages/RepairSupport";
 
 const queryClient = new QueryClient();
 
@@ -180,7 +181,7 @@ const App = () => (
            <Route path="/repair-booking" element={<ProtectedRoute><RepairBooking /></ProtectedRoute>} />
            <Route path="/repair-fraud-detection" element={<ProtectedRoute><RepairFraudDetection /></ProtectedRoute>} />
            <Route path="/repair-insurance-integration" element={<ProtectedRoute><RepairInsuranceIntegration /></ProtectedRoute>} />
-           <Route path="/repair-ngo-programs" element={<ProtectedRoute><RepairNGOPrograms /></ProtectedRoute>} />
+           <Route path="/repair-support" element={<ProtectedRoute><RepairSupport /></ProtectedRoute>} />
 
            {/* Seller flows */}
            <Route path="/seller-onboarding" element={<ProtectedRoute><SellerOnboarding /></ProtectedRoute>} />
