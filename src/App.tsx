@@ -83,6 +83,11 @@ import RepairFraudDetection from "./pages/RepairFraudDetection";
 import RepairInsuranceIntegration from "./pages/RepairInsuranceIntegration";
 import RepairNGOPrograms from "./pages/RepairNGOPrograms";
 import RepairSupport from "./pages/RepairSupport";
+import RepairCertificates from "./pages/RepairCertificates";
+import RepairAnalytics from "./pages/RepairAnalytics";
+import RepairCustomers from "./pages/RepairCustomers";
+import RepairInventory from "./pages/RepairInventory";
+import RepairFraudDetection from "./pages/RepairFraudDetection";
 
 const queryClient = new QueryClient();
 
