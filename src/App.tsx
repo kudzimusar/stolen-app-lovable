@@ -87,6 +87,10 @@ import RepairCertificates from "./pages/RepairCertificates";
 import RepairAnalytics from "./pages/RepairAnalytics";
 import RepairCustomers from "./pages/RepairCustomers";
 import RepairInventory from "./pages/RepairInventory";
+import RepairOrderFlow from "./pages/RepairOrderFlow";
+import RepairHistoryManagement from "./pages/RepairHistoryManagement";
+import DisputeMediationCenter from "./pages/DisputeMediationCenter";
+import RepairMarketplace from "./pages/RepairMarketplace";
 
 const queryClient = new QueryClient();
 
@@ -190,6 +194,10 @@ const App = () => (
            <Route path="/repair-analytics" element={<ProtectedRoute><RepairAnalytics /></ProtectedRoute>} />
            <Route path="/repair-customers" element={<ProtectedRoute><RepairCustomers /></ProtectedRoute>} />
            <Route path="/repair-inventory" element={<ProtectedRoute><RepairInventory /></ProtectedRoute>} />
+           <Route path="/repair-order-flow" element={<ProtectedRoute><RepairOrderFlow /></ProtectedRoute>} />
+           <Route path="/repair-history-management" element={<ProtectedRoute><RepairHistoryManagement /></ProtectedRoute>} />
+           <Route path="/dispute-mediation" element={<ProtectedRoute><DisputeMediationCenter /></ProtectedRoute>} />
+           <Route path="/repair-marketplace" element={<ProtectedRoute><RepairMarketplace /></ProtectedRoute>} />
 
            {/* Seller flows */}
            <Route path="/seller-onboarding" element={<ProtectedRoute><SellerOnboarding /></ProtectedRoute>} />
