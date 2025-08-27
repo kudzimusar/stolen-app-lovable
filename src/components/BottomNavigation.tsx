@@ -13,42 +13,85 @@ import { cn } from "@/lib/utils";
 export const BottomNavigation = () => {
   const location = useLocation();
   
-  // Mock authentication state - in real app would come from auth context
+  // Mock authentication state and user role - in real app would come from auth context
   const isLoggedIn = true; // This should come from auth context
+  const userRole = "repair_shop"; // Mock role - should come from auth context
   
-  const navItems = [
-    {
-      icon: Home,
-      label: "Home",
-      href: "/dashboard",
-      active: location.pathname === "/dashboard"
-    },
-    {
-      icon: Search,
-      label: "Check",
-      href: "/device/check",
-      active: location.pathname === "/device/check"
-    },
-    {
-      icon: Plus,
-      label: "Sell",
-      href: "/list-my-device",
-      active: location.pathname === "/list-my-device" || location.pathname === "/seller-onboarding",
-      highlight: true
-    },
-    {
-      icon: ShoppingCart,
-      label: "Market",
-      href: "/marketplace",
-      active: location.pathname === "/marketplace"
-    },
-    {
-      icon: User,
-      label: "Profile",
-      href: "/profile",
-      active: location.pathname === "/profile"
+  // Role-specific navigation items
+  const getNavItems = () => {
+    if (userRole === "repair_shop") {
+      return [
+        {
+          icon: Home,
+          label: "Dashboard",
+          href: "/repair-shop-dashboard",
+          active: location.pathname === "/repair-shop-dashboard"
+        },
+        {
+          icon: Search,
+          label: "Fraud Check",
+          href: "/repair-fraud-detection",
+          active: location.pathname === "/repair-fraud-detection"
+        },
+        {
+          icon: Plus,
+          label: "Log Repair",
+          href: "/log-new-repair",
+          active: location.pathname === "/log-new-repair",
+          highlight: true
+        },
+        {
+          icon: ShoppingCart,
+          label: "Parts",
+          href: "/repair-inventory",
+          active: location.pathname === "/repair-inventory"
+        },
+        {
+          icon: User,
+          label: "Profile",
+          href: "/repairer-profile",
+          active: location.pathname === "/repairer-profile"
+        }
+      ];
     }
-  ];
+    
+    // Default individual user navigation
+    return [
+      {
+        icon: Home,
+        label: "Home",
+        href: "/dashboard",
+        active: location.pathname === "/dashboard"
+      },
+      {
+        icon: Search,
+        label: "Check",
+        href: "/device/check",
+        active: location.pathname === "/device/check"
+      },
+      {
+        icon: Plus,
+        label: "Sell",
+        href: "/list-my-device",
+        active: location.pathname === "/list-my-device" || location.pathname === "/seller-onboarding",
+        highlight: true
+      },
+      {
+        icon: ShoppingCart,
+        label: "Market",
+        href: "/marketplace",
+        active: location.pathname === "/marketplace"
+      },
+      {
+        icon: User,
+        label: "Profile",
+        href: "/profile",
+        active: location.pathname === "/profile"
+      }
+    ];
+  };
+
+  const navItems = getNavItems();
 
   // Don't show on landing page, splash screen, or role-based dashboards
   const roleBasedPaths = ["/retailer-dashboard", "/repair-shop-dashboard", "/insurance-dashboard", "/law-enforcement-dashboard", "/ngo-dashboard"];

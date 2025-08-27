@@ -200,11 +200,11 @@ const RepairShopDashboard = () => {
         {/* Quick Actions / Repairer Features */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Card className="p-4 hover:shadow-lg transition-shadow">
-            <Link to="/repair-booking" className="block">
+            <Link to="/log-new-repair" className="block">
               <div className="text-center space-y-2">
                 <Calendar className="w-8 h-8 text-primary mx-auto" />
-                <h3 className="font-medium">Repair Booking</h3>
-                <p className="text-xs text-muted-foreground">Find nearby users, book repairs & cost estimates</p>
+                <h3 className="font-medium">Log New Repair</h3>
+                <p className="text-xs text-muted-foreground">Register walk-in customer repairs & log to blockchain</p>
               </div>
             </Link>
           </Card>
@@ -267,13 +267,15 @@ const RepairShopDashboard = () => {
           </Card>
 
           <Card className="p-4 hover:shadow-lg transition-shadow">
-            <div className="flex items-center gap-3">
-              <Bell className="w-8 h-8 text-primary" />
-              <div>
-                <h3 className="font-medium">Notifications</h3>
-                <p className="text-xs text-muted-foreground">3 new appointment requests</p>
+            <Link to="/repairer-notifications" className="block">
+              <div className="flex items-center gap-3">
+                <Bell className="w-8 h-8 text-primary" />
+                <div>
+                  <h3 className="font-medium">Notifications</h3>
+                  <p className="text-xs text-muted-foreground">3 new appointment requests</p>
+                </div>
               </div>
-            </div>
+            </Link>
           </Card>
         </div>
 

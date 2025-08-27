@@ -91,6 +91,10 @@ import RepairOrderFlow from "./pages/RepairOrderFlow";
 import RepairHistoryManagement from "./pages/RepairHistoryManagement";
 import DisputeMediationCenter from "./pages/DisputeMediationCenter";
 import RepairMarketplace from "./pages/RepairMarketplace";
+import RepairerNotifications from "./pages/RepairerNotifications";
+import IndividualNotifications from "./pages/IndividualNotifications";
+import CompanyProfile from "./pages/CompanyProfile";
+import LogNewRepair from "./pages/LogNewRepair";
 
 const queryClient = new QueryClient();
 
@@ -197,7 +201,11 @@ const App = () => (
            <Route path="/repair-order-flow" element={<ProtectedRoute><RepairOrderFlow /></ProtectedRoute>} />
            <Route path="/repair-history-management" element={<ProtectedRoute><RepairHistoryManagement /></ProtectedRoute>} />
            <Route path="/dispute-mediation" element={<ProtectedRoute><DisputeMediationCenter /></ProtectedRoute>} />
-           <Route path="/repair-marketplace" element={<ProtectedRoute><RepairMarketplace /></ProtectedRoute>} />
+            <Route path="/repair-marketplace" element={<ProtectedRoute><RepairMarketplace /></ProtectedRoute>} />
+            <Route path="/repairer-notifications" element={<ProtectedRoute><RepairerNotifications /></ProtectedRoute>} />
+            <Route path="/individual-notifications" element={<ProtectedRoute><IndividualNotifications /></ProtectedRoute>} />
+            <Route path="/company-profile" element={<ProtectedRoute><CompanyProfile /></ProtectedRoute>} />
+            <Route path="/log-new-repair" element={<ProtectedRoute><LogNewRepair /></ProtectedRoute>} />
 
            {/* Seller flows */}
            <Route path="/seller-onboarding" element={<ProtectedRoute><SellerOnboarding /></ProtectedRoute>} />
