@@ -95,6 +95,19 @@ import RepairerNotifications from "./pages/RepairerNotifications";
 import IndividualNotifications from "./pages/IndividualNotifications";
 import CompanyProfile from "./pages/CompanyProfile";
 import LogNewRepair from "./pages/LogNewRepair";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
+import AdminSystem from "./pages/AdminSystem";
+import AdminReports from "./pages/AdminReports";
+import AdminProfile from "./pages/AdminProfile";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import ApiDocumentation from "./pages/ApiDocumentation";
+import PaymentDashboard from "./pages/PaymentDashboard";
+import PaymentTransactions from "./pages/PaymentTransactions";
+import PaymentFraud from "./pages/PaymentFraud";
+import PaymentAnalytics from "./pages/PaymentAnalytics";
+import PaymentProfile from "./pages/PaymentProfile";
 
 const queryClient = new QueryClient();
 
@@ -171,6 +184,9 @@ const App = () => (
           <Route path="/why-stolen" element={<WhyStolen />} />
           <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
           <Route path="/trust-badges" element={<TrustBadges />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/api-documentation" element={<ApiDocumentation />} />
           <Route path="/device-certificate/:deviceId" element={<DeviceCertificate />} />
           <Route path="/security-testing" element={<SecurityTesting />} />
           <Route path="/geolocation-testing" element={<GeolocationTesting />} />
@@ -206,6 +222,20 @@ const App = () => (
             <Route path="/individual-notifications" element={<ProtectedRoute><IndividualNotifications /></ProtectedRoute>} />
             <Route path="/company-profile" element={<ProtectedRoute><CompanyProfile /></ProtectedRoute>} />
             <Route path="/log-new-repair" element={<ProtectedRoute><LogNewRepair /></ProtectedRoute>} />
+
+           {/* Platform Administrator routes */}
+           <Route path="/admin-dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+           <Route path="/admin-users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
+           <Route path="/admin-system" element={<ProtectedRoute><AdminSystem /></ProtectedRoute>} />
+           <Route path="/admin-reports" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
+           <Route path="/admin-profile" element={<ProtectedRoute><AdminProfile /></ProtectedRoute>} />
+
+           {/* Banks/Payment Gateways routes */}
+           <Route path="/payment-dashboard" element={<ProtectedRoute><PaymentDashboard /></ProtectedRoute>} />
+           <Route path="/payment-transactions" element={<ProtectedRoute><PaymentTransactions /></ProtectedRoute>} />
+           <Route path="/payment-fraud" element={<ProtectedRoute><PaymentFraud /></ProtectedRoute>} />
+           <Route path="/payment-analytics" element={<ProtectedRoute><PaymentAnalytics /></ProtectedRoute>} />
+           <Route path="/payment-profile" element={<ProtectedRoute><PaymentProfile /></ProtectedRoute>} />
 
            {/* Seller flows */}
            <Route path="/seller-onboarding" element={<ProtectedRoute><SellerOnboarding /></ProtectedRoute>} />
