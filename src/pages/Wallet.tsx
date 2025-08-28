@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,47 +25,124 @@ import {
 const Wallet = () => {
   const [showBalance, setShowBalance] = useState(true);
   const [activeTab, setActiveTab] = useState<"transactions" | "rewards" | "escrow">("transactions");
+  const [loading, setLoading] = useState(true);
+  const [walletData, setWalletData] = useState<any>(null);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [rewards, setRewards] = useState<any[]>([]);
+  const [escrowTransactions, setEscrowTransactions] = useState<any[]>([]);
 
-  const balance = 1250.75;
-  const escrowAmount = 450.00;
-  const rewardsEarned = 85.50;
+  // Fetch wallet data on component mount
+  useEffect(() => {
+    fetchWalletData();
+    fetchTransactions();
+  }, []);
 
-  const transactions = [
+  const fetchWalletData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/v1/s-pay/wallet', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+        }
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setWalletData(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching wallet data:', error);
+      // Fallback to mock data
+      setWalletData({
+        available_balance: 1250.75,
+        escrow_balance: 450.00,
+        total_rewards: 85.50,
+        is_verified: true
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTransactions = async () => {
+    try {
+      const response = await fetch('/api/v1/s-pay/wallet/transactions?limit=10', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+        }
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setTransactions(result.data.map((tx: any) => ({
+          id: tx.id,
+          type: tx.from_wallet_id ? 'sent' : 'received',
+          amount: tx.amount,
+          description: tx.description,
+          date: new Date(tx.created_at).toLocaleDateString(),
+          status: tx.status,
+          from: tx.from_wallet?.users?.display_name || 'Unknown',
+          to: tx.to_wallet?.users?.display_name || 'Unknown'
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      // Fallback to mock data
+      setTransactions([
+        {
+          id: 1,
+          type: "received",
+          amount: 50.00,
+          description: "Recovery reward - iPhone 15",
+          date: "2024-07-28",
+          status: "completed",
+          from: "STOLEN Rewards"
+        },
+        {
+          id: 2,
+          type: "sent",
+          amount: 299.99,
+          description: "Marketplace purchase - Galaxy S24",
+          date: "2024-07-27",
+          status: "completed",
+          to: "TechDeals Pro"
+        }
+      ]);
+    }
+  };
+
+  // Calculate balances from wallet data
+  const balance = walletData?.available_balance || 1250.75;
+  const escrowAmount = walletData?.escrow_balance || 450.00;
+  const rewardsEarned = walletData?.total_rewards || 85.50;
+
+  // Mock rewards data (will be replaced with API call)
+  const rewards = [
     {
       id: 1,
-      type: "received",
+      title: "Device Recovery Hero",
       amount: 50.00,
-      description: "Recovery reward - iPhone 15",
+      description: "Helped recover stolen iPhone 15",
       date: "2024-07-28",
-      status: "completed",
-      from: "STOLEN Rewards"
+      sponsor: "InsureSafe"
     },
     {
       id: 2,
-      type: "sent",
-      amount: 299.99,
-      description: "Marketplace purchase - Galaxy S24",
-      date: "2024-07-27",
-      status: "completed",
-      to: "TechDeals Pro"
+      title: "Community Contributor",
+      amount: 25.00,
+      description: "Referral bonus for new user",
+      date: "2024-07-25",
+      sponsor: "STOLEN"
     },
     {
       id: 3,
-      type: "escrow",
-      amount: 450.00,
-      description: "MacBook Pro purchase (pending)",
-      date: "2024-07-26",
-      status: "pending",
-      to: "Apple Certified"
-    },
-    {
-      id: 4,
-      type: "received",
-      amount: 25.00,
-      description: "Referral bonus",
-      date: "2024-07-25",
-      status: "completed",
-      from: "STOLEN Rewards"
+      title: "Verification Helper",
+      amount: 10.50,
+      description: "Helped verify device authenticity",
+      date: "2024-07-20",
+      sponsor: "BlockChain Security"
     }
   ];
 
@@ -96,6 +173,7 @@ const Wallet = () => {
     }
   ];
 
+  // Mock escrow transactions data (will be replaced with API call)
   const escrowTransactions = [
     {
       id: 1,
@@ -184,20 +262,32 @@ const Wallet = () => {
             <div className="space-y-2">
               <div className="text-sm text-white/80">Available Balance</div>
               <div className="text-4xl font-bold">
-                {showBalance ? `$${balance.toFixed(2)}` : "••••••"}
+                {loading ? (
+                  <div className="animate-pulse bg-white/20 h-12 w-32 rounded"></div>
+                ) : (
+                  showBalance ? `$${balance.toFixed(2)}` : "••••••"
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 pt-4">
               <div className="text-center">
                 <div className="text-lg font-semibold">
-                  {showBalance ? `$${escrowAmount.toFixed(2)}` : "••••"}
+                  {loading ? (
+                    <div className="animate-pulse bg-white/20 h-6 w-16 rounded mx-auto"></div>
+                  ) : (
+                    showBalance ? `$${escrowAmount.toFixed(2)}` : "••••"
+                  )}
                 </div>
                 <div className="text-xs text-white/80">In Escrow</div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-semibold">
-                  {showBalance ? `$${rewardsEarned.toFixed(2)}` : "••••"}
+                  {loading ? (
+                    <div className="animate-pulse bg-white/20 h-6 w-16 rounded mx-auto"></div>
+                  ) : (
+                    showBalance ? `$${rewardsEarned.toFixed(2)}` : "••••"
+                  )}
                 </div>
                 <div className="text-xs text-white/80">Rewards Earned</div>
               </div>

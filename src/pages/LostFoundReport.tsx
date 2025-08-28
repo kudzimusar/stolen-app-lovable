@@ -41,15 +41,81 @@ const LostFoundReport = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    toast({
-      title: `${reportType === "lost" ? "Lost" : "Found"} Device Reported`,
-      description: "Your report has been submitted to the community.",
-    });
-    
-    navigate("/lost-found-board");
+    try {
+      // Get user's current location if available
+      let userLocation = null;
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 60000
+            });
+          });
+          userLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+        } catch (error) {
+          console.log("Could not get user location:", error);
+        }
+      }
+
+      // Prepare report data
+      const reportData = {
+        report_type: reportType,
+        device_category: formData.deviceName.split(' ')[0] || 'Unknown', // Extract category from device name
+        device_model: formData.deviceName,
+        serial_number: formData.serial || null,
+        description: formData.description,
+        location_lat: userLocation?.lat || null,
+        location_lng: userLocation?.lng || null,
+        location_address: formData.lastKnownLocation,
+        incident_date: new Date().toISOString(),
+        reward_amount: formData.reward ? parseFloat(formData.reward.replace(/[^0-9.]/g, '')) : null,
+        contact_preferences: {
+          method: formData.contactMethod,
+          public: formData.publicPost
+        },
+        privacy_settings: {
+          anonymous: false,
+          location_precision: 'approximate'
+        }
+      };
+
+      // Submit to API
+      const response = await fetch('/api/v1/lost-found/reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+        },
+        body: JSON.stringify(reportData)
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to submit report');
+      }
+
+      toast({
+        title: `${reportType === "lost" ? "Lost" : "Found"} Device Reported`,
+        description: `Your report has been submitted to the community. ${result.matches} potential matches found.`,
+      });
+      
+      navigate("/lost-found-board");
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to submit report. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

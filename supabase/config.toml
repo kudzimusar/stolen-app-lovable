@@ -12,6 +12,12 @@ verify_jwt = true
 [functions.report-found]
 verify_jwt = false
 
+[functions.lost-found-reports]
+verify_jwt = true
+
+[functions.community-tips]
+verify_jwt = false
+
 [functions.law-enforcement-access]
 verify_jwt = true
 

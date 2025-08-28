@@ -25,7 +25,28 @@ import {
   TrendingUp,
   ArrowUpRight,
   HeartHandshake,
-  QrCode
+  QrCode,
+  Zap,
+  Brain,
+  Target,
+  Activity,
+  Cpu,
+  Database,
+  Network,
+  Code,
+  Globe,
+  Lock,
+  BarChart3,
+  PieChart,
+  LineChart,
+  TrendingDown,
+  CheckSquare,
+  XCircle,
+  Eye,
+  Clock,
+  Star,
+  Heart,
+  Gift
 } from "lucide-react";
 
 const Dashboard = () => {
@@ -36,7 +57,31 @@ const Dashboard = () => {
       serial: "ABC123DEF456",
       status: "verified",
       registeredDate: "2024-01-15",
-      location: "Cape Town, WC"
+      location: "Cape Town, WC",
+      // Enhanced metrics
+      performance: {
+        loadingTime: 0.8,
+        verificationSpeed: 0.6,
+        trustScore: 94.2,
+        lastVerified: "2 hours ago"
+      },
+      reverseVerification: {
+        integrated: true,
+        lastCheck: "1 hour ago",
+        fraudScore: 8,
+        marketplaceAlerts: 0
+      },
+      // Phase 5 Production Metrics
+      productionMetrics: {
+        deploymentStatus: "live",
+        uptime: 99.9,
+        lastDeployment: "2024-01-25 14:30:00",
+        version: "v2.1.0",
+        environment: "production",
+        monitoring: "active",
+        alerts: 0,
+        performance: "excellent"
+      }
     },
     {
       id: 2,
@@ -44,7 +89,20 @@ const Dashboard = () => {
       serial: "XYZ789GHI012",
       status: "needs-attention",
       registeredDate: "2024-02-20",
-      location: "Johannesburg, GP"
+      location: "Johannesburg, GP",
+      // Enhanced metrics
+      performance: {
+        loadingTime: 1.2,
+        verificationSpeed: 0.9,
+        trustScore: 87.5,
+        lastVerified: "1 day ago"
+      },
+      reverseVerification: {
+        integrated: true,
+        lastCheck: "2 days ago",
+        fraudScore: 23,
+        marketplaceAlerts: 1
+      }
     }
   ];
 
@@ -97,6 +155,31 @@ const Dashboard = () => {
       href: "/wallet",
       variant: "secure" as const
     },
+    // Phase 5 Production Features
+    {
+      icon: <Certificate className="w-5 h-5" />,
+      label: "Production Status",
+      href: "/production-status",
+      variant: "outline" as const
+    },
+    {
+      icon: <Activity className="w-5 h-5" />,
+      label: "System Health",
+      href: "/system-health",
+      variant: "outline" as const
+    },
+    {
+      icon: <Target className="w-5 h-5" />,
+      label: "End-to-End Tests",
+      href: "/e2e-tests",
+      variant: "outline" as const
+    },
+    {
+      icon: <Award className="w-5 h-5" />,
+      label: "Quality Assurance",
+      href: "/qa-dashboard",
+      variant: "outline" as const
+    }
     {
       icon: <ShoppingCart className="w-5 h-5" />,
       label: "Marketplace",

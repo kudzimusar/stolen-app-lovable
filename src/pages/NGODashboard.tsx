@@ -6,7 +6,30 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Package, CheckCircle, FileText, Download, Search, Calendar } from "lucide-react";
+import { 
+  Package, 
+  CheckCircle, 
+  FileText, 
+  Download, 
+  Search, 
+  Calendar,
+  Heart,
+  Users,
+  Target,
+  TrendingUp,
+  Globe,
+  Award,
+  BarChart3,
+  Activity,
+  Gift,
+  DollarSign,
+  Eye,
+  Share2,
+  MapPin,
+  Clock,
+  Star,
+  Zap
+} from "lucide-react";
 
 const NGODashboard = () => {
   const [selectedDevice, setSelectedDevice] = useState<string>("");
@@ -58,46 +81,145 @@ const NGODashboard = () => {
           </Badge>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Devices Received</p>
+                  <p className="text-2xl font-bold text-primary">24</p>
+                </div>
                 <Package className="h-8 w-8 text-primary" />
-                <div>
-                  <p className="text-2xl font-bold">24</p>
-                  <p className="text-sm text-muted-foreground">Devices Received</p>
-                </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-8 w-8 text-green-600" />
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold">18</p>
-                  <p className="text-sm text-muted-foreground">Delivered</p>
+                  <p className="text-sm font-medium text-muted-foreground">Delivered</p>
+                  <p className="text-2xl font-bold text-success">18</p>
                 </div>
+                <CheckCircle className="h-8 w-8 text-success" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <FileText className="h-8 w-8 text-blue-600" />
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold">$12,400</p>
-                  <p className="text-sm text-muted-foreground">Total Value</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Value</p>
+                  <p className="text-2xl font-bold text-warning">$12,400</p>
                 </div>
+                <DollarSign className="h-8 w-8 text-warning" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Impact Score</p>
+                  <p className="text-2xl font-bold text-info">94%</p>
+                </div>
+                <Target className="h-8 w-8 text-info" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Enhanced Impact Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Heart className="w-5 h-5 text-red-500" />
+                Donation Management
+              </CardTitle>
+              <CardDescription>
+                Comprehensive donation tracking and management
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Active Donations</span>
+                  <Badge variant="secondary">6 Pending</Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Monthly Donations</span>
+                  <span className="font-semibold">$3,200</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Donor Satisfaction</span>
+                  <div className="flex items-center gap-1">
+                    <span className="font-semibold">4.8</span>
+                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-blue-500" />
+                Impact Measurement
+              </CardTitle>
+              <CardDescription>
+                Program effectiveness and community impact
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Beneficiaries Served</span>
+                  <span className="font-semibold">156</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Program Success Rate</span>
+                  <span className="font-semibold text-success">92%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Community Reach</span>
+                  <span className="font-semibold">3 Cities</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-green-500" />
+                Community Outreach
+              </CardTitle>
+              <CardDescription>
+                Education and awareness initiatives
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Awareness Events</span>
+                  <span className="font-semibold">12</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Educational Programs</span>
+                  <span className="font-semibold">8</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Volunteer Hours</span>
+                  <span className="font-semibold">240h</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
                 <Calendar className="h-8 w-8 text-purple-600" />
                 <div>
                   <p className="text-2xl font-bold">6</p>

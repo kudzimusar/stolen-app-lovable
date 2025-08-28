@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { STOLENLogo } from "@/components/STOLENLogo";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 import {
   ArrowLeft,
   Shield,
@@ -36,9 +37,8 @@ import {
   Globe,
   Lock
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
-const InsuranceDashboard = () => {
+const InsuranceDashboardEnhanced = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [claimForm, setClaimForm] = useState({
     deviceId: "",
@@ -513,4 +513,4 @@ const InsuranceDashboard = () => {
   );
 };
 
-export default InsuranceDashboard;
+export default InsuranceDashboardEnhanced;

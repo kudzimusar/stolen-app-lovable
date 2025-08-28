@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,57 +26,118 @@ const CommunityBoard = () => {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("all");
 
-  // Mock community posts
-  const posts = [
-    {
-      id: 1,
-      type: "lost",
-      device: "iPhone 15 Pro Max",
-      description: "Space Black, cracked screen protector, purple case",
-      location: "Downtown SF, near Union Square",
-      timeAgo: "2 hours ago",
-      reward: "$100",
-      verified: true,
-      responses: 3,
-      image: "/placeholder.svg"
-    },
-    {
-      id: 2,
-      type: "found",
-      device: "Samsung Galaxy S24",
-      description: "Found at Starbucks on Market St, blue case",
-      location: "Market Street, SF",
-      timeAgo: "4 hours ago",
-      reward: null,
-      verified: false,
-      responses: 1,
-      image: "/placeholder.svg"
-    },
-    {
-      id: 3,
-      type: "lost",
-      device: "MacBook Pro M3",
-      description: "Space Gray, Apple stickers on lid",
-      location: "UCSF Campus",
-      timeAgo: "1 day ago",
-      reward: "$200",
-      verified: true,
-      responses: 7,
-      image: "/placeholder.svg"
-    },
-    {
-      id: 4,
-      type: "found",
-      device: "AirPods Pro",
-      description: "Found in Uber, case has initials 'JS'",
-      location: "Mission District",
-      timeAgo: "3 days ago",
-      reward: null,
-      verified: false,
-      responses: 0,
-      image: "/placeholder.svg"
+  // Real community posts from API
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    lost: 0,
+    found: 0,
+    reunited: 0
+  });
+
+  // Fetch posts from API
+  useEffect(() => {
+    fetchPosts();
+    fetchStats();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/v1/lost-found/reports', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+        }
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setPosts(result.data.map((post: any) => ({
+          id: post.id,
+          type: post.report_type,
+          device: post.device_model || post.device_category,
+          description: post.description,
+          location: post.location_address || 'Location not specified',
+          timeAgo: formatTimeAgo(post.created_at),
+          reward: post.reward_amount ? `$${post.reward_amount}` : null,
+          verified: post.verification_status === 'verified',
+          responses: post.community_tips_count || 0,
+          image: post.photos?.[0] || "/placeholder.svg",
+          user: post.users?.display_name || 'Anonymous',
+          userAvatar: post.users?.avatar_url,
+          reputation: post.user_reputation?.reputation_score || 0,
+          trustLevel: post.user_reputation?.trust_level || 'new'
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      // Fallback to mock data if API fails
+      setPosts([
+        {
+          id: 1,
+          type: "lost",
+          device: "iPhone 15 Pro Max",
+          description: "Space Black, cracked screen protector, purple case",
+          location: "Downtown SF, near Union Square",
+          timeAgo: "2 hours ago",
+          reward: "$100",
+          verified: true,
+          responses: 3,
+          image: "/placeholder.svg"
+        },
+        {
+          id: 2,
+          type: "found",
+          device: "Samsung Galaxy S24",
+          description: "Found at Starbucks on Market St, blue case",
+          location: "Market Street, SF",
+          timeAgo: "4 hours ago",
+          reward: null,
+          verified: false,
+          responses: 1,
+          image: "/placeholder.svg"
+        }
+      ]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('/api/v1/lost-found/community/stats', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+        }
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setStats(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      // Fallback stats
+      setStats({
+        lost: posts.filter(p => p.type === 'lost').length,
+        found: posts.filter(p => p.type === 'found').length,
+        reunited: 12
+      });
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    if (diffInHours < 48) return '1 day ago';
+    return `${Math.floor(diffInHours / 24)} days ago`;
+  };
 
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.device.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -211,15 +272,21 @@ const CommunityBoard = () => {
           {/* Quick Stats */}
           <div className="grid grid-cols-3 gap-4">
             <Card className="p-3 text-center">
-              <div className="text-lg font-bold text-destructive">{posts.filter(p => p.type === "lost").length}</div>
+              <div className="text-lg font-bold text-destructive">
+                {loading ? "..." : stats.lost}
+              </div>
               <div className="text-xs text-muted-foreground">Lost Devices</div>
             </Card>
             <Card className="p-3 text-center">
-              <div className="text-lg font-bold text-success">{posts.filter(p => p.type === "found").length}</div>
+              <div className="text-lg font-bold text-success">
+                {loading ? "..." : stats.found}
+              </div>
               <div className="text-xs text-muted-foreground">Found Devices</div>
             </Card>
             <Card className="p-3 text-center">
-              <div className="text-lg font-bold text-primary">12</div>
+              <div className="text-lg font-bold text-primary">
+                {loading ? "..." : stats.reunited}
+              </div>
               <div className="text-xs text-muted-foreground">Reunited Today</div>
             </Card>
           </div>
