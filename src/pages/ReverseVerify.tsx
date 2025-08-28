@@ -3,15 +3,44 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Shield, Clock, User, AlertTriangle, Share2, Flag } from "lucide-react";
+import { 
+  Search, 
+  Shield, 
+  Clock, 
+  User, 
+  AlertTriangle, 
+  Share2, 
+  Flag, 
+  QrCode, 
+  Camera, 
+  FileImage, 
+  Zap, 
+  TrendingUp, 
+  Award, 
+  Download, 
+  Copy, 
+  Check, 
+  Globe,
+  Database,
+  Lock
+} from "lucide-react";
 
 const ReverseVerify = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [deviceData, setDeviceData] = useState(null);
+  const [searchMethod, setSearchMethod] = useState("manual");
+  const [isLoading, setIsLoading] = useState(false);
+  const [verificationStep, setVerificationStep] = useState(0);
+  const [apiResponse, setApiResponse] = useState(null);
+  const [copiedText, setCopiedText] = useState("");
   const { toast } = useToast();
 
-  // Mock device data
+  // Enhanced mock device data with full API response structure
   const mockDevice = {
     id: "dev_123456",
     name: "iPhone 15 Pro",
@@ -24,7 +53,38 @@ const ReverseVerify = () => {
     lastTransfer: "2024-01-15",
     transfers: 1,
     location: "San Francisco, CA",
-    verificationScore: 98
+    verificationScore: 98,
+    riskLevel: "low",
+    confidence: 0.98,
+    blockchainHash: "0x1234567890abcdef...",
+    lastVerification: "2024-01-20 14:30 PST",
+    apiResponseTime: 145,
+    flags: [],
+    trustBadge: {
+      id: "tb_123456",
+      status: "verified",
+      expires: "2025-01-15"
+    }
+  };
+
+  // API response simulation
+  const mockApiResponse = {
+    success: true,
+    device: mockDevice,
+    recommendations: {
+      action: "proceed",
+      confidence: 0.98,
+      riskLevel: "low"
+    },
+    metadata: {
+      requestId: "req_123456789",
+      processingTime: 145,
+      apiVersion: "v1.0",
+      rateLimit: {
+        remaining: 99,
+        resetTime: "2024-01-21 00:00:00 PST"
+      }
+    }
   };
 
   const ownershipTimeline = [
@@ -45,7 +105,7 @@ const ReverseVerify = () => {
     }
   ];
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!searchQuery.trim()) {
       toast({
         title: "Enter Device Information",
@@ -55,11 +115,67 @@ const ReverseVerify = () => {
       return;
     }
 
-    // Simulate search
-    setDeviceData(mockDevice);
+    setIsLoading(true);
+    setVerificationStep(0);
+    
+    // Simulate enhanced verification process
+    const steps = [
+      "Parsing device identifier...",
+      "Querying blockchain registry...", 
+      "Analyzing ownership history...",
+      "Running fraud detection...",
+      "Generating verification report..."
+    ];
+
+    for (let i = 0; i < steps.length; i++) {
+      setTimeout(() => {
+        setVerificationStep(i + 1);
+        if (i === steps.length - 1) {
+          setDeviceData(mockDevice);
+          setApiResponse(mockApiResponse);
+          setIsLoading(false);
+          toast({
+            title: "Verification Complete",
+            description: `Device verified in ${mockApiResponse.metadata.processingTime}ms with 98% confidence.`
+          });
+        }
+      }, (i + 1) * 400);
+    }
+  };
+
+  const handleQRScan = () => {
     toast({
-      title: "Device Found",
-      description: "Device information retrieved from blockchain registry."
+      title: "QR Scanner",
+      description: "QR code scanning feature would be implemented here with camera access."
+    });
+  };
+
+  const handleOCRScan = () => {
+    toast({
+      title: "OCR Scanner", 
+      description: "Document OCR scanning would be implemented here for receipt/invoice processing."
+    });
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedText(label);
+    setTimeout(() => setCopiedText(""), 2000);
+    toast({
+      title: "Copied to Clipboard",
+      description: `${label} copied successfully.`
+    });
+  };
+
+  const generateTrustBadge = () => {
+    const badgeCode = `<iframe src="https://api.stolen.com/v1/trust-badge/${mockDevice.id}" width="200" height="100" frameborder="0"></iframe>`;
+    copyToClipboard(badgeCode, "Trust Badge Code");
+  };
+
+  const downloadCertificate = () => {
+    toast({
+      title: "Certificate Generated",
+      description: "PDF verification certificate download would start here."
     });
   };
 
@@ -95,41 +211,164 @@ const ReverseVerify = () => {
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">Reverse Device Verification</h1>
-          <p className="text-muted-foreground">
-            Verify any device's authenticity and ownership history on the STOLEN network
+        <div className="text-center space-y-4 mb-8">
+          <div className="flex justify-center items-center gap-2 mb-4">
+            <Shield className="w-8 h-8 text-primary" />
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground">Reverse Verification Tool</h1>
+          </div>
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+            STOLEN's proprietary verification technology. The most advanced device authentication system 
+            trusted by millions worldwide.
           </p>
+          
+          {/* Trust Indicators */}
+          <div className="flex justify-center items-center gap-6 text-sm text-muted-foreground mt-6">
+            <div className="flex items-center gap-1">
+              <Zap className="w-4 h-4 text-primary" />
+              <span>&lt;200ms Response</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Shield className="w-4 h-4 text-primary" />
+              <span>99.5% Accuracy</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Globe className="w-4 h-4 text-primary" />
+              <span>Global Database</span>
+            </div>
+          </div>
         </div>
 
-        {/* Search Card */}
+        {/* Enhanced Search Interface */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Search className="h-5 w-5" />
-              <span>Device Lookup</span>
+              <span>Device Verification</span>
             </CardTitle>
             <CardDescription>
-              Enter a serial number, IMEI, or device ID to verify its status
+              Multiple verification methods: manual entry, QR scan, or document OCR
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex space-x-2">
-              <Input
-                placeholder="Enter serial number, IMEI, or device ID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1"
-              />
-              <Button onClick={handleSearch}>
-                <Search className="h-4 w-4 mr-2" />
-                Verify
-              </Button>
-            </div>
+            <Tabs value={searchMethod} onValueChange={setSearchMethod} className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="manual">Manual Entry</TabsTrigger>
+                <TabsTrigger value="qr">QR Code</TabsTrigger>
+                <TabsTrigger value="ocr">Document OCR</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="manual" className="space-y-4">
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Input
+                    placeholder="Enter serial number, IMEI, device ID, or QR data..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1"
+                    disabled={isLoading}
+                  />
+                  <Button onClick={handleSearch} disabled={isLoading} className="sm:min-w-[120px]">
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Verifying...
+                      </>
+                    ) : (
+                      <>
+                        <Search className="h-4 w-4 mr-2" />
+                        Verify Device
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="qr" className="space-y-4">
+                <div className="text-center py-8 border-2 border-dashed border-muted-foreground/25 rounded-lg">
+                  <QrCode className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground mb-4">Scan QR code from device or packaging</p>
+                  <Button onClick={handleQRScan} variant="outline">
+                    <Camera className="w-4 h-4 mr-2" />
+                    Open QR Scanner
+                  </Button>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="ocr" className="space-y-4">
+                <div className="text-center py-8 border-2 border-dashed border-muted-foreground/25 rounded-lg">
+                  <FileImage className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground mb-4">Upload receipt or invoice for automatic data extraction</p>
+                  <Button onClick={handleOCRScan} variant="outline">
+                    <FileImage className="w-4 h-4 mr-2" />
+                    Upload Document
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
+            
+            {/* Real-time Verification Progress */}
+            {isLoading && (
+              <div className="mt-6 space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span>Verification Progress</span>
+                  <span>{Math.round((verificationStep / 5) * 100)}%</span>
+                </div>
+                <Progress value={(verificationStep / 5) * 100} className="h-2" />
+                <div className="text-sm text-muted-foreground">
+                  {verificationStep === 0 && "Initializing verification..."}
+                  {verificationStep === 1 && "Parsing device identifier..."}
+                  {verificationStep === 2 && "Querying blockchain registry..."}
+                  {verificationStep === 3 && "Analyzing ownership history..."}
+                  {verificationStep === 4 && "Running fraud detection..."}
+                  {verificationStep === 5 && "Generating verification report..."}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Device Information */}
+        {/* API Response Information */}
+        {apiResponse && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5" />
+                API Response Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                  <Label className="text-muted-foreground">Response Time</Label>
+                  <p className="font-semibold">{apiResponse.metadata.processingTime}ms</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Request ID</Label>
+                  <div className="flex items-center gap-2">
+                    <code className="text-xs bg-muted px-1 rounded">{apiResponse.metadata.requestId}</code>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => copyToClipboard(apiResponse.metadata.requestId, "Request ID")}
+                      className="h-6 w-6 p-0"
+                    >
+                      {copiedText === "Request ID" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">API Version</Label>
+                  <p className="font-semibold">{apiResponse.metadata.apiVersion}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Rate Limit</Label>
+                  <p className="font-semibold">{apiResponse.metadata.rateLimit.remaining} remaining</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* Enhanced Device Information */}
         {deviceData && (
           <>
             <Card className="border-l-4 border-l-green-500">
@@ -139,14 +378,22 @@ const ReverseVerify = () => {
                     <Shield className="h-6 w-6 text-green-600" />
                     <span>Device Verified</span>
                   </CardTitle>
-                  <div className="flex space-x-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button variant="outline" size="sm" onClick={handleShareDevice}>
                       <Share2 className="h-4 w-4 mr-2" />
-                      Share
+                      Share Certificate
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={downloadCertificate}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Download PDF
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={generateTrustBadge}>
+                      <Award className="h-4 w-4 mr-2" />
+                      Get Trust Badge
                     </Button>
                     <Button variant="outline" size="sm" onClick={handleReportDevice}>
                       <Flag className="h-4 w-4 mr-2" />
-                      Report
+                      Report Issue
                     </Button>
                   </div>
                 </div>
@@ -176,9 +423,34 @@ const ReverseVerify = () => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Verification Score</span>
-                        <span className="text-sm font-semibold text-green-600">
-                          {mockDevice.verificationScore}%
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-green-600">
+                            {mockDevice.verificationScore}%
+                          </span>
+                          <Badge variant="outline" className="text-xs">
+                            {mockDevice.riskLevel}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Confidence</span>
+                        <span className="text-sm font-semibold">
+                          {Math.round(mockDevice.confidence * 100)}%
                         </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Blockchain Hash</span>
+                        <div className="flex items-center gap-2">
+                          <code className="text-xs bg-muted px-1 rounded">{mockDevice.blockchainHash.substring(0, 12)}...</code>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => copyToClipboard(mockDevice.blockchainHash, "Blockchain Hash")}
+                            className="h-6 w-6 p-0"
+                          >
+                            {copiedText === "Blockchain Hash" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -201,6 +473,16 @@ const ReverseVerify = () => {
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Location</span>
                         <span className="text-sm">{mockDevice.location}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Last Verified</span>
+                        <span className="text-sm">{mockDevice.lastVerification}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Trust Badge</span>
+                        <Badge className="bg-primary text-primary-foreground text-xs">
+                          Active until {mockDevice.trustBadge.expires}
+                        </Badge>
                       </div>
                     </div>
                   </div>
@@ -250,17 +532,103 @@ const ReverseVerify = () => {
               </CardContent>
             </Card>
 
-            {/* Security Notice */}
-            <Card className="bg-blue-50 border-blue-200">
-              <CardContent className="p-4">
-                <div className="flex items-start space-x-3">
-                  <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+            {/* Enhanced Security & Trust Information */}
+            <div className="grid gap-4 md:grid-cols-2">
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="p-4">
+                  <div className="flex items-start space-x-3">
+                    <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-blue-900">Blockchain Verified</h4>
+                      <p className="text-sm text-blue-700 mt-1">
+                        This device's ownership history is secured on the blockchain and cannot be 
+                        tampered with. All transfers and registrations are permanently recorded.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-green-50 border-green-200">
+                <CardContent className="p-4">
+                  <div className="flex items-start space-x-3">
+                    <Lock className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-green-900">AI Fraud Detection</h4>
+                      <p className="text-sm text-green-700 mt-1">
+                        Advanced machine learning algorithms have analyzed this device and found 
+                        no suspicious patterns or fraud indicators.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* API Integration Examples */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="w-5 h-5" />
+                  API Integration
+                </CardTitle>
+                <CardDescription>
+                  Integrate this verification into your platform
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
                   <div>
-                    <h4 className="font-medium text-blue-900">Blockchain Verified</h4>
-                    <p className="text-sm text-blue-700 mt-1">
-                      This device's ownership history is secured on the blockchain and cannot be 
-                      tampered with. All transfers and registrations are permanently recorded.
-                    </p>
+                    <Label className="text-sm font-medium">REST API Call</Label>
+                    <div className="bg-muted/50 p-3 rounded-lg mt-2">
+                      <code className="text-xs">
+                        curl -X GET "https://api.stolen.com/v1/verify/device/{mockDevice.id}" \
+                        <br />  -H "Authorization: Bearer YOUR_API_KEY" \
+                        <br />  -H "Content-Type: application/json"
+                      </code>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => copyToClipboard(
+                          `curl -X GET "https://api.stolen.com/v1/verify/device/${mockDevice.id}" -H "Authorization: Bearer YOUR_API_KEY" -H "Content-Type: application/json"`,
+                          "API Call"
+                        )}
+                        className="mt-2 h-6"
+                      >
+                        {copiedText === "API Call" ? <Check className="w-3 h-3 mr-1" /> : <Copy className="w-3 h-3 mr-1" />}
+                        Copy
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm font-medium">Trust Badge Widget</Label>
+                    <div className="bg-muted/50 p-3 rounded-lg mt-2">
+                      <code className="text-xs">
+                        &lt;iframe src="https://api.stolen.com/v1/trust-badge/{mockDevice.id}" 
+                        <br />  width="200" height="100" frameborder="0"&gt;&lt;/iframe&gt;
+                      </code>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={generateTrustBadge}
+                        className="mt-2 h-6"
+                      >
+                        {copiedText === "Trust Badge Code" ? <Check className="w-3 h-3 mr-1" /> : <Copy className="w-3 h-3 mr-1" />}
+                        Copy Widget
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <a href="/api-documentation" target="_blank">
+                        View Full API Docs
+                      </a>
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      Get API Key
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -268,8 +636,54 @@ const ReverseVerify = () => {
           </>
         )}
 
+        {/* Bulk Verification Tool */}
+        {!deviceData && !isLoading && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Bulk Verification
+              </CardTitle>
+              <CardDescription>
+                Verify multiple devices at once - perfect for retailers and repair shops
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="text-center py-8 border-2 border-dashed border-muted-foreground/25 rounded-lg">
+                  <Database className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground mb-4">Upload CSV file with device identifiers</p>
+                  <Button variant="outline">
+                    <FileImage className="w-4 h-4 mr-2" />
+                    Upload CSV File
+                  </Button>
+                </div>
+                
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium mb-2">Supported formats:</p>
+                  <ul className="space-y-1">
+                    <li>• Serial numbers (one per line)</li>
+                    <li>• IMEI numbers (15 digits)</li>
+                    <li>• Device IDs (dev_xxxxxx format)</li>
+                    <li>• Mixed identifier types</li>
+                  </ul>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    Download Sample CSV
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    API Documentation
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
         {/* No Results State */}
-        {!deviceData && searchQuery && (
+        {!deviceData && searchQuery && !isLoading && (
           <Card className="bg-gray-50 border-gray-200">
             <CardContent className="p-6 text-center">
               <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -280,14 +694,79 @@ const ReverseVerify = () => {
               <ul className="text-sm text-gray-600 text-left max-w-md mx-auto space-y-1">
                 <li>• The device hasn't been registered yet</li>
                 <li>• The search information is incorrect</li>
-                <li>• The device may be counterfeit</li>
+                <li>• The device may be counterfeit or stolen</li>
+                <li>• The identifier format is not recognized</li>
               </ul>
-              <Button variant="outline" className="mt-4" onClick={handleReportDevice}>
-                Report Suspicious Device
-              </Button>
+              <div className="flex gap-2 justify-center mt-4">
+                <Button variant="outline" onClick={handleReportDevice}>
+                  Report Suspicious Device
+                </Button>
+                <Button variant="outline">
+                  Request Device Registration
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
+        
+        {/* Statistics and Trust Indicators */}
+        {!deviceData && !isLoading && (
+          <div className="grid gap-4 md:grid-cols-3 mt-8">
+            <Card className="text-center">
+              <CardContent className="p-6">
+                <div className="text-2xl font-bold text-primary mb-2">50M+</div>
+                <p className="text-sm text-muted-foreground">Devices in Registry</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="text-center">
+              <CardContent className="p-6">
+                <div className="text-2xl font-bold text-primary mb-2">99.5%</div>
+                <p className="text-sm text-muted-foreground">Verification Accuracy</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="text-center">
+              <CardContent className="p-6">
+                <div className="text-2xl font-bold text-primary mb-2">&lt;200ms</div>
+                <p className="text-sm text-muted-foreground">Average Response Time</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+        {/* Revenue and Partnership Information */}
+        <Card className="bg-gradient-hero text-white mt-8">
+          <CardContent className="p-6">
+            <div className="text-center space-y-4">
+              <h3 className="text-xl font-bold">Integrate STOLEN Verification</h3>
+              <p className="text-white/90">
+                Join hundreds of businesses using our API to prevent fraud and build trust
+              </p>
+              <div className="flex justify-center gap-4 text-sm">
+                <div className="text-center">
+                  <div className="font-bold">$0.10</div>
+                  <div className="text-white/80">per verification</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold">100+</div>
+                  <div className="text-white/80">integrations</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold">99.9%</div>
+                  <div className="text-white/80">API uptime</div>
+                </div>
+              </div>
+              <div className="flex justify-center gap-2">
+                <Button variant="secondary">
+                  Start Free Trial
+                </Button>
+                <Button variant="outline" className="border-white text-black bg-white hover:bg-white/90">
+                  View Pricing
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

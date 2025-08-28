@@ -15,7 +15,11 @@ import {
   Building,
   Wrench,
   Gavel,
-  Users
+  Users,
+  Settings,
+  CreditCard,
+  TrendingUp,
+  Database
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -201,6 +205,76 @@ export const BottomNavigation = () => {
             label: "Profile",
             href: "/ngo-profile",
             active: location.pathname === "/ngo-profile"
+          }
+        ];
+
+      case "platform_admin":
+        return [
+          {
+            icon: Home,
+            label: "Dashboard",
+            href: "/admin-dashboard",
+            active: location.pathname === "/admin-dashboard"
+          },
+          {
+            icon: Users,
+            label: "Users",
+            href: "/admin-users",
+            active: location.pathname === "/admin-users"
+          },
+          {
+            icon: Settings,
+            label: "System",
+            href: "/admin-system",
+            active: location.pathname === "/admin-system",
+            highlight: true
+          },
+          {
+            icon: BarChart3,
+            label: "Reports",
+            href: "/admin-reports",
+            active: location.pathname === "/admin-reports"
+          },
+          {
+            icon: User,
+            label: "Profile",
+            href: "/admin-profile",
+            active: location.pathname === "/admin-profile"
+          }
+        ];
+
+      case "payment_gateway":
+        return [
+          {
+            icon: Home,
+            label: "Dashboard",
+            href: "/payment-dashboard",
+            active: location.pathname === "/payment-dashboard"
+          },
+          {
+            icon: CreditCard,
+            label: "Transactions",
+            href: "/payment-transactions",
+            active: location.pathname === "/payment-transactions"
+          },
+          {
+            icon: Shield,
+            label: "Fraud",
+            href: "/payment-fraud",
+            active: location.pathname === "/payment-fraud",
+            highlight: true
+          },
+          {
+            icon: TrendingUp,
+            label: "Analytics",
+            href: "/payment-analytics",
+            active: location.pathname === "/payment-analytics"
+          },
+          {
+            icon: User,
+            label: "Profile",
+            href: "/payment-profile",
+            active: location.pathname === "/payment-profile"
           }
         ];
 
