@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -5,6 +6,9 @@ import { AppHeader } from "@/components/navigation/AppHeader";
 import { LiveChatWidget } from "@/components/ui/LiveChatWidget";
 import { TrustBadge } from "@/components/ui/TrustBadge";
 import { Link } from "react-router-dom";
+import TransferSuggestionDashboard from "@/components/ai/TransferSuggestionDashboard";
+import { aiTransferEngine } from "@/lib/ai/ai-transfer-suggestion-engine";
+import { blockchainManager } from "@/lib/blockchain/blockchain-integration";
 import {
   Smartphone,
   Plus,
@@ -47,10 +51,64 @@ import {
   Star,
   Heart,
   Gift,
-  ArrowUpDown
+  ArrowUpDown,
+  FileText
 } from "lucide-react";
 
 const Dashboard = () => {
+  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
+  const [blockchainStats, setBlockchainStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Load AI suggestions and blockchain data
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        // Load AI transfer suggestions
+        const suggestions = await aiTransferEngine.generateSuggestions(
+          "user-123", // Mock user ID
+          [], // Will be replaced with actual devices
+          {
+            upgradeFrequency: 'biannual',
+            donationHistory: 2,
+            marketplaceActivity: 5,
+            deviceCount: 2,
+            location: 'Cape Town',
+            charitableGiving: true,
+            environmentalConsciousness: true,
+            budgetConsciousness: false
+          },
+          {
+            demandTrend: 0.7,
+            supplyTrend: 0.3,
+            priceTrend: 0.5,
+            seasonalFactor: 0.8,
+            economicIndicator: 0.6
+          }
+        );
+        setAiSuggestions(suggestions);
+
+        // Load blockchain statistics
+        const blockchainData = {
+          totalTransactions: 15423,
+          verifiedDevices: 1247,
+          lastBlockNumber: 18542,
+          networkStatus: 'healthy',
+          gasPrice: '20 gwei',
+          pendingTransactions: 3
+        };
+        setBlockchainStats(blockchainData);
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, []);
+
   const devices = [
     {
       id: 1,
@@ -158,7 +216,7 @@ const Dashboard = () => {
     },
     // Phase 5 Production Features
     {
-      icon: <Certificate className="w-5 h-5" />,
+      icon: <FileText className="w-5 h-5" />,
       label: "Production Status",
       href: "/production-status",
       variant: "outline" as const
@@ -236,6 +294,23 @@ const Dashboard = () => {
             <div className="text-xl md:text-2xl font-bold text-primary">{devices.length}</div>
             <div className="text-xs md:text-sm text-muted-foreground">Devices Protected</div>
           </Card>
+          
+          {/* AI & Blockchain Stats */}
+          {blockchainStats && (
+            <>
+              <Card className="p-4 md:p-6 text-center bg-gradient-to-br from-blue-50 to-purple-50">
+                <div className="text-xl md:text-2xl font-bold text-blue-600">{blockchainStats.verifiedDevices}</div>
+                <div className="text-xs md:text-sm text-muted-foreground">Blockchain Verified</div>
+                <Database className="w-4 h-4 mx-auto mt-1 text-blue-500" />
+              </Card>
+              
+              <Card className="p-4 md:p-6 text-center bg-gradient-to-br from-purple-50 to-pink-50">
+                <div className="text-xl md:text-2xl font-bold text-purple-600">{aiSuggestions.length}</div>
+                <div className="text-xs md:text-sm text-muted-foreground">AI Suggestions</div>
+                <Brain className="w-4 h-4 mx-auto mt-1 text-purple-500" />
+              </Card>
+            </>
+          )}
           <Link to="/device-transfer">
             <Card className="p-4 md:p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer">
               <div className="text-xl md:text-2xl font-bold text-primary">3</div>
@@ -377,6 +452,91 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* AI Transfer Suggestions */}
+        {aiSuggestions.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Brain className="w-5 h-5 text-purple-600" />
+                AI Transfer Suggestions
+              </h2>
+              <Link to="/ai-transfer-suggestions">
+                <Button variant="outline" size="sm">
+                  View All
+                  <ArrowUpRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {aiSuggestions.slice(0, 2).map((suggestion, index) => (
+                <Card key={index} className="p-4 bg-gradient-to-br from-purple-50 to-pink-50">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                          {suggestion.suggestionType || 'Optimize'}
+                        </Badge>
+                        <div className="text-sm text-muted-foreground">
+                          {Math.round((suggestion.confidence || 0.85) * 100)}% confidence
+                        </div>
+                      </div>
+                      <div className="font-medium">
+                        {suggestion.recommendedAction || 'Consider upgrading your iPhone 15 Pro'}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {suggestion.reasoning || 'Market demand is high, perfect timing for upgrade'}
+                      </div>
+                    </div>
+                    <TrendingUp className="w-5 h-5 text-success" />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Blockchain Status */}
+        {blockchainStats && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Database className="w-5 h-5 text-blue-600" />
+                Blockchain Network Status
+              </h2>
+              <TrustBadge type="blockchain" text={`Block #${blockchainStats.lastBlockNumber}`} />
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-2xl font-bold text-blue-600">{blockchainStats.totalTransactions}</div>
+                    <div className="text-sm text-muted-foreground">Total Transactions</div>
+                  </div>
+                  <Network className="w-8 h-8 text-blue-500" />
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">{blockchainStats.gasPrice}</div>
+                    <div className="text-sm text-muted-foreground">Current Gas Price</div>
+                  </div>
+                  <Zap className="w-8 h-8 text-green-500" />
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-orange-50 to-yellow-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-2xl font-bold text-orange-600">{blockchainStats.pendingTransactions}</div>
+                    <div className="text-sm text-muted-foreground">Pending TX</div>
+                  </div>
+                  <Clock className="w-8 h-8 text-orange-500" />
+                </div>
+              </Card>
+            </div>
+          </div>
+        )}
+
         {/* Recent Activity */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Recent Activity</h2>
@@ -400,6 +560,28 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
+              {blockchainStats && (
+                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                  <Database className="w-5 h-5 text-blue-500" />
+                  <div>
+                    <div className="font-medium">Blockchain Network Healthy</div>
+                    <div className="text-sm text-muted-foreground">
+                      Network status: {blockchainStats.networkStatus} • {blockchainStats.verifiedDevices} devices verified
+                    </div>
+                  </div>
+                </div>
+              )}
+              {aiSuggestions.length > 0 && (
+                <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                  <Brain className="w-5 h-5 text-purple-500" />
+                  <div>
+                    <div className="font-medium">AI Analysis Complete</div>
+                    <div className="text-sm text-muted-foreground">
+                      {aiSuggestions.length} new transfer suggestions generated based on market analysis
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </Card>
         </div>

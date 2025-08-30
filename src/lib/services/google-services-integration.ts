@@ -1,7 +1,7 @@
 // Google Services Integration for STOLEN Platform
 // Comprehensive integration of Google Maps, Gemini AI, and Google Studio
 
-import { geminiAI } from './gemini-ai-service';
+import { geminiAI } from '../ai/gemini-ai-service';
 
 export interface GoogleServicesConfig {
   mapsApiKey: string;

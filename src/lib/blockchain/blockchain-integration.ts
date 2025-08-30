@@ -321,7 +321,7 @@ class BlockchainManager {
 
   private getRpcUrl(network: string): string {
     const rpcUrls = {
-      ethereum: import.meta.env.VITE_ETHEREUM_RPC_URL || 'https://mainnet.infura.io/v3/YOUR_PROJECT_ID',
+      ethereum: import.meta.env.VITE_ETHEREUM_RPC_URL || 'https://eth.llamarpc.com',
       polygon: import.meta.env.VITE_POLYGON_RPC_URL || 'https://polygon-rpc.com',
       bsc: import.meta.env.VITE_BSC_RPC_URL || 'https://bsc-dataseed.binance.org'
     };

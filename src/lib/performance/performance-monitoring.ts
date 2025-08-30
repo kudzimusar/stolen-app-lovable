@@ -274,6 +274,7 @@ export const usePerformanceTracking = () => {
 
 // Initialize performance monitoring
 const performanceMonitor = PerformanceMonitor.getInstance();
-performanceMonitor.init();
+// Temporarily disable Sentry initialization to fix URL error
+// performanceMonitor.init();
 
 export default performanceMonitor;

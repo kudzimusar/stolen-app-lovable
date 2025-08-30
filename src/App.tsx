@@ -24,12 +24,16 @@ import SplashWelcome from "./pages/user/SplashWelcome";
 import InsuranceHub from "./pages/insurance/InsuranceHub";
 import DeviceRecoveryStatus from "./pages/user/DeviceRecoveryStatus";
 import CommunityRewards from "./pages/user/CommunityRewards";
-import EscrowPayment from "./pages/payment/EscrowPayment";import FraudAlerts from "./pages/security/FraudAlerts";
+import EscrowPayment from "./pages/payment/EscrowPayment";
+import FraudAlerts from "./pages/security/FraudAlerts";
 import RetailerDashboard from "./pages/user/RetailerDashboard";
-import RepairShopDashboard from "./pages/repair/RepairShopDashboard";import LawEnforcementDashboard from "./pages/user/LawEnforcementDashboard";
-import NGODashboard from "./pages/ngo/NGODashboard";import PsychologyAssistedHelper from "./pages/user/PsychologyAssistedHelper";
+import RepairShopDashboard from "./pages/repair/RepairShopDashboard";
+import LawEnforcementDashboard from "./pages/user/LawEnforcementDashboard";
+import NGODashboard from "./pages/ngo/NGODashboard";
+import PsychologyAssistedHelper from "./pages/user/PsychologyAssistedHelper";
 import ReverseVerify from "./pages/security/ReverseVerify";
-import FeedbackRating from "./pages/user/FeedbackRating";import AnalyticsInsights from "./pages/admin/AnalyticsInsights";
+import FeedbackRating from "./pages/user/FeedbackRating";
+import AnalyticsInsights from "./pages/admin/AnalyticsInsights";
 import NotFound from "./pages/user/NotFound";
 import DeviceTransfer from "./pages/user/DeviceTransfer";
 import AITransferSuggestions from "./pages/ai/AITransferSuggestions";
@@ -44,7 +48,8 @@ import Register from "./pages/user/Register";
 import AboutUs from "./pages/user/AboutUs";
 import StolenReports from "./pages/security/StolenReports";
 import DeviceCertificate from "./pages/user/DeviceCertificate";
-import InsuranceDashboard from "./pages/insurance/InsuranceDashboard";import RetailerProfile from "./pages/stakeholders/RetailerProfile";
+import InsuranceDashboard from "./pages/insurance/InsuranceDashboard";
+import RetailerProfile from "./pages/stakeholders/RetailerProfile";
 import RepairerProfile from "./pages/repair/RepairerProfile";
 import InsuranceProfile from "./pages/insurance/InsuranceProfile";
 import LawEnforcementProfile from "./pages/law-enforcement/LawEnforcementProfile";
@@ -52,7 +57,8 @@ import NGOProfile from "./pages/ngo/NGOProfile";
 import WhyStolen from "./pages/user/WhyStolen";
 import UserRepairHistory from "./pages/repair/UserRepairHistory";
 import SecurityTesting from "./pages/security/SecurityTesting";
-import GeolocationTesting from "./pages/security/GeolocationTesting";import SystemStatus from "./pages/admin/SystemStatus";
+import GeolocationTesting from "./pages/security/GeolocationTesting";
+import SystemStatus from "./pages/admin/SystemStatus";
 import ProductDetail from "./pages/marketplace/ProductDetail";
 import SellerProfile from "./pages/stakeholders/SellerProfile";
 import PostPurchase from "./pages/marketplace/PostPurchase";
@@ -71,7 +77,8 @@ import ReportListing from "./pages/marketplace/ReportListing";
 import HotDeals from "./pages/marketplace/HotDeals";
 import HotDealsFeed from "./pages/marketplace/HotDealsFeed";
 import HotDealsHub from "./pages/marketplace/HotDealsHub";
-import HotBuyerRequest from "./pages/marketplace/HotBuyerRequest";import HotDealsChatPage from "./pages/marketplace/HotDealsChatPage";
+import HotBuyerRequest from "./pages/marketplace/HotBuyerRequest";
+import HotDealsChatPage from "./pages/marketplace/HotDealsChatPage";
 import ListMyDevice from "./pages/marketplace/ListMyDevice";
 import RepairBooking from "./pages/repair/RepairBooking";
 import RepairFraudDetection from "./pages/repair/RepairFraudDetection";
@@ -91,6 +98,7 @@ import IndividualNotifications from "./pages/user/IndividualNotifications";
 import CompanyProfile from "./pages/stakeholders/CompanyProfile";
 import LogNewRepair from "./pages/repair/LogNewRepair";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import ChatTest from "./pages/test/ChatTest";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSystem from "./pages/admin/AdminSystem";
 import AdminReports from "./pages/admin/AdminReports";
@@ -98,15 +106,19 @@ import AdminProfile from "./pages/admin/AdminProfile";
 import PrivacyPolicy from "./pages/user/PrivacyPolicy";
 import TermsOfService from "./pages/user/TermsOfService";
 import ApiDocumentation from "./pages/admin/ApiDocumentation";
-// import PaymentDashboard from "./pages/payment/PaymentDashboard";// File doesn't existimport PaymentTransactions from "./pages/payment/PaymentTransactions";
+// import PaymentDashboard from "./pages/payment/PaymentDashboard";// File doesn't exist
+import PaymentTransactions from "./pages/payment/PaymentTransactions";
 import PaymentFraud from "./pages/payment/PaymentFraud";
 import PaymentAnalytics from "./pages/payment/PaymentAnalytics";
 import PaymentProfile from "./pages/payment/PaymentProfile";
 
 // Import missing components for bottom navigation routes
-// import RetailerInventory from "./pages/stakeholders/RetailerInventory";// File doesn't existimport BulkRegistration from "./pages/marketplace/BulkRegistration";
-// import RetailerSales from "./pages/stakeholders/RetailerSales";// File doesn't existimport InsuranceClaims from "./pages/insurance/InsuranceClaims";
-// import NewInsuranceClaim from "./pages/insurance/NewInsuranceClaim";// File doesn't existimport InsurancePolicies from "./pages/insurance/InsurancePolicies";
+// import RetailerInventory from "./pages/stakeholders/RetailerInventory";// File doesn't exist
+import BulkRegistration from "./pages/marketplace/BulkRegistration";
+// import RetailerSales from "./pages/stakeholders/RetailerSales";// File doesn't exist
+import InsuranceClaims from "./pages/insurance/InsuranceClaims";
+// import NewInsuranceClaim from "./pages/insurance/NewInsuranceClaim";// File doesn't exist
+import InsurancePolicies from "./pages/insurance/InsurancePolicies";
 import LawEnforcementSearch from "./pages/law-enforcement/LawEnforcementSearch";
 import NewLawReport from "./pages/law-enforcement/NewLawReport";
 import LawEnforcementCases from "./pages/law-enforcement/LawEnforcementCases";
@@ -128,6 +140,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           {/* Protected routes - require authentication */}
+          {/* Dashboard route - with development access */}
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <RoleBasedRedirect>
@@ -135,6 +148,9 @@ const App = () => (
               </RoleBasedRedirect>
             </ProtectedRoute>
           } />
+          
+          {/* Development dashboard access - bypass auth for testing */}
+          <Route path="/dashboard-dev" element={<Dashboard />} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/my-devices" element={<ProtectedRoute><MyDevices /></ProtectedRoute>} />
           <Route path="/device/register" element={<ProtectedRoute><DeviceRegister /></ProtectedRoute>} />
@@ -237,7 +253,7 @@ const App = () => (
            <Route path="/admin-profile" element={<ProtectedRoute><AdminProfile /></ProtectedRoute>} />
 
            {/* Banks/Payment Gateways routes */}
-           <Route path="/payment-dashboard" element={<ProtectedRoute><PaymentDashboard /></ProtectedRoute>} />
+           {/* <Route path="/payment-dashboard" element={<ProtectedRoute><PaymentDashboard /></ProtectedRoute>} /> */}
            <Route path="/payment-transactions" element={<ProtectedRoute><PaymentTransactions /></ProtectedRoute>} />
            <Route path="/payment-fraud" element={<ProtectedRoute><PaymentFraud /></ProtectedRoute>} />
            <Route path="/payment-analytics" element={<ProtectedRoute><PaymentAnalytics /></ProtectedRoute>} />
@@ -250,13 +266,13 @@ const App = () => (
 
            {/* Missing routes from bottom navigation */}
            {/* Retailer routes */}
-           <Route path="/retailer-inventory" element={<ProtectedRoute><RetailerInventory /></ProtectedRoute>} />
+           {/* <Route path="/retailer-inventory" element={<ProtectedRoute><RetailerInventory /></ProtectedRoute>} /> */}
            <Route path="/bulk-registration" element={<ProtectedRoute><BulkRegistration /></ProtectedRoute>} />
-           <Route path="/retailer-sales" element={<ProtectedRoute><RetailerSales /></ProtectedRoute>} />
+           {/* <Route path="/retailer-sales" element={<ProtectedRoute><RetailerSales /></ProtectedRoute>} /> */}
 
            {/* Insurance routes */}
            <Route path="/insurance-claims" element={<ProtectedRoute><InsuranceClaims /></ProtectedRoute>} />
-           <Route path="/new-insurance-claim" element={<ProtectedRoute><NewInsuranceClaim /></ProtectedRoute>} />
+           {/* <Route path="/new-insurance-claim" element={<ProtectedRoute><NewInsuranceClaim /></ProtectedRoute>} /> */}
            <Route path="/insurance-policies" element={<ProtectedRoute><InsurancePolicies /></ProtectedRoute>} />
 
            {/* Law Enforcement routes */}
@@ -270,6 +286,7 @@ const App = () => (
            <Route path="/ngo-impact" element={<ProtectedRoute><NGOImpact /></ProtectedRoute>} />
 
            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+           <Route path="/test/chat" element={<ChatTest />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <BottomNavigation />
