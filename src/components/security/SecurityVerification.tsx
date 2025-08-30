@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Shield, Phone, Mail, Camera, Fingerprint, AlertTriangle, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { checkIMEIDatabase, verifyReceiptOCR, detectOSTampering, attestDevice, generateDeviceFingerprint, logSecurityEvent } from "@/lib/security";
+import { checkIMEIDatabase, verifyReceiptOCR, detectOSTampering, attestDevice, generateDeviceFingerprint, logSecurityEvent } from "@/lib/security/security";
 
 interface SecurityVerificationProps {
   onVerificationComplete?: (results: any) => void;

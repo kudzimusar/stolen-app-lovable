@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { STOLENLogo } from "@/components/STOLENLogo";
+import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -36,7 +36,7 @@ import {
   Globe,
   Lock
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 const InsuranceDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");

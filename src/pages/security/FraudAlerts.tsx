@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { STOLENLogo } from "@/components/STOLENLogo";
+import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {

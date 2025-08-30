@@ -17,7 +17,7 @@ export class LocalAIService {
   
   constructor() {
     this.config = {
-      baseURL: process.env.OLLAMA_URL || 'http://localhost:11434',
+      baseURL: import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434',
       model: 'llama2',
       temperature: 0.7,
       maxTokens: 1000

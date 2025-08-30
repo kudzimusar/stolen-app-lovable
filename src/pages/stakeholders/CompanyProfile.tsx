@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { STOLENLogo } from "@/components/STOLENLogo";
-import { TrustBadge } from "@/components/TrustBadge";
-import { BackButton } from "@/components/BackButton";
+import { STOLENLogo } from "@/components/ui/STOLENLogo";
+import { TrustBadge } from "@/components/ui/TrustBadge";
+import { BackButton } from "@/components/navigation/BackButton";
 import { Link } from "react-router-dom";
 import {
   Building2,

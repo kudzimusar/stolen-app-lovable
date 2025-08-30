@@ -8,7 +8,7 @@ import {
   DEVICE_CONDITIONS, 
   SA_CITIES, 
   SA_PROVINCES 
-} from "@/components/EnhancedSelect";
+} from "@/components/forms/EnhancedSelect";
 
 interface FormField {
   id: string;

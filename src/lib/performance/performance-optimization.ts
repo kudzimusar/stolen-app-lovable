@@ -472,9 +472,9 @@ const defaultConfig: PerformanceConfig = {
 export const performanceOptimizer = new PerformanceOptimizationManager(
   defaultConfig,
   [
-    'https://api1.stolen.com',
-    'https://api2.stolen.com',
-    'https://api3.stolen.com'
+    'https://demo.supabase.co',
+    'https://api.github.com',
+    'https://jsonplaceholder.typicode.com'
   ]
 );
 

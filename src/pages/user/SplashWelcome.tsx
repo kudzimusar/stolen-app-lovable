@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { STOLENLogo } from "@/components/STOLENLogo";
+import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";

@@ -21,7 +21,7 @@ export class PerformanceMonitor {
     if (this.isInitialized) return;
 
     Sentry.init({
-      dsn: process.env.VITE_SENTRY_DSN || 'your-sentry-dsn',
+      dsn: import.meta.env.VITE_SENTRY_DSN || 'your-sentry-dsn',
       integrations: [
         new BrowserTracing({
           routingInstrumentation: Sentry.reactRouterV6Instrumentation(
@@ -32,7 +32,7 @@ export class PerformanceMonitor {
       tracesSampleRate: 0.1, // Sample 10% of transactions
       replaysSessionSampleRate: 0.1,
       replaysOnErrorSampleRate: 1.0,
-      environment: process.env.NODE_ENV || 'development',
+      environment: import.meta.env.MODE || 'development',
     });
 
     this.isInitialized = true;
@@ -57,7 +57,7 @@ export class PerformanceMonitor {
     }
 
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.MODE === 'development') {
       console.log(`📊 API Call: ${endpoint} - ${duration}ms - ${status}`);
     }
   }

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AppHeader } from "@/components/AppHeader";
+import { AppHeader } from "@/components/navigation/AppHeader";
 import {
   TrendingUp,
   TrendingDown,

@@ -8,8 +8,8 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, Phone, Mail, Camera, Fingerprint, AlertTriangle, CheckCircle, Eye, Brain, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { SecurityVerification } from "@/components/SecurityVerification";
-import { AppHeader } from "@/components/AppHeader";
+import { SecurityVerification } from "@/components/security/SecurityVerification";
+import { AppHeader } from "@/components/navigation/AppHeader";
 import { 
   generateDeviceFingerprint, 
   checkIMEIDatabase, 
@@ -18,7 +18,7 @@ import {
   attestDevice, 
   logSecurityEvent,
   analyzeBehavior 
-} from "@/lib/security";
+} from "@/lib/security/security";
 
 export default function SecurityTesting() {
   const [testResults, setTestResults] = useState<any>({});

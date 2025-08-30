@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AppHeader } from "@/components/AppHeader";
-import { BackButton } from "@/components/BackButton";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { BackButton } from "@/components/navigation/BackButton";
 import { Shield, Globe, Users, Award, Target, Eye, Sparkles, Zap, Heart } from "lucide-react";
 
 const AboutUs = () => {

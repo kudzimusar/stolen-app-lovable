@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { STOLENLogo } from "@/components/STOLENLogo";
+import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -18,7 +18,7 @@ import {
   FileText,
   Shield
 } from "lucide-react";
-import Map from "@/components/Map";
+import Map from "@/components/ui/Map";
 import { useToast } from "@/hooks/use-toast";
 
 const LostFoundReport = () => {

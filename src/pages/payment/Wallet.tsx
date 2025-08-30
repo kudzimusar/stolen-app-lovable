@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import TransactionDetailsModal from "@/components/TransactionDetailsModal";
-import PaymentMethodManager from "@/components/PaymentMethodManager";
-import WithdrawalRequestForm from "@/components/WithdrawalRequestForm";
-import SABankingIntegration from "@/components/SABankingIntegration";
-import SecurityEnhancement from "@/components/SecurityEnhancement";
+import TransactionDetailsModal from "@/components/modals/TransactionDetailsModal";
+import PaymentMethodManager from "@/components/payment/PaymentMethodManager";
+import WithdrawalRequestForm from "@/components/payment/WithdrawalRequestForm";
+import SABankingIntegration from "@/components/payment/SABankingIntegration";
+import SecurityEnhancement from "@/components/security/SecurityEnhancement";
 import { Badge } from "@/components/ui/badge";
-import { STOLENLogo } from "@/components/STOLENLogo";
-import { BackButton } from "@/components/BackButton";
+import { STOLENLogo } from "@/components/ui/STOLENLogo";
+import { BackButton } from "@/components/navigation/BackButton";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,

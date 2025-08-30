@@ -423,14 +423,14 @@ class ReverseVerificationAPI {
 
 // Export singleton instance
 export const reverseVerificationAPI = new ReverseVerificationAPI({
-  apiKey: process.env.REACT_APP_API_KEY || 'demo-key',
-  baseUrl: process.env.REACT_APP_API_BASE_URL || 'https://api.stolen.com',
+  apiKey: import.meta.env.VITE_API_KEY || 'demo-key',
+  baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://api.stolen.com',
   rateLimit: {
     requestsPerMinute: 60,
     requestsPerHour: 1000,
     requestsPerDay: 10000
   },
-  webhookUrl: process.env.REACT_APP_WEBHOOK_URL,
+  webhookUrl: import.meta.env.VITE_WEBHOOK_URL,
   marketplaceIntegrations: {
     ebay: true,
     amazon: true,

@@ -4,7 +4,7 @@ import cacheManager from '../lib/redis';
 import performanceMonitor from '../lib/performance-monitoring';
 import searchService from '../lib/search-optimization';
 import apiService from '../lib/api-optimization';
-import backgroundJobs from '../lib/background-jobs';
+import backgroundJobs from '../lib/optimization/background-jobs-browser';
 import imageService from '../lib/image-optimization';
 
 /**

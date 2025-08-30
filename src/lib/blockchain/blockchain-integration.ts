@@ -315,15 +315,15 @@ class BlockchainManager {
     );
     
     // Initialize wallet (in production, use secure key management)
-    const privateKey = process.env.BLOCKCHAIN_PRIVATE_KEY || '0x0000000000000000000000000000000000000000000000000000000000000000';
+    const privateKey = import.meta.env.VITE_BLOCKCHAIN_PRIVATE_KEY || '0x0000000000000000000000000000000000000000000000000000000000000000';
     this.wallet = new ethers.Wallet(privateKey, this.provider);
   }
 
   private getRpcUrl(network: string): string {
     const rpcUrls = {
-      ethereum: process.env.ETHEREUM_RPC_URL || 'https://mainnet.infura.io/v3/YOUR_PROJECT_ID',
-      polygon: process.env.POLYGON_RPC_URL || 'https://polygon-rpc.com',
-      bsc: process.env.BSC_RPC_URL || 'https://bsc-dataseed.binance.org'
+      ethereum: import.meta.env.VITE_ETHEREUM_RPC_URL || 'https://mainnet.infura.io/v3/YOUR_PROJECT_ID',
+      polygon: import.meta.env.VITE_POLYGON_RPC_URL || 'https://polygon-rpc.com',
+      bsc: import.meta.env.VITE_BSC_RPC_URL || 'https://bsc-dataseed.binance.org'
     };
     return rpcUrls[network as keyof typeof rpcUrls] || rpcUrls.ethereum;
   }
@@ -573,21 +573,21 @@ class SmartContractFactory {
     const configs = {
       ethereum: {
         network: 'ethereum' as const,
-        contractAddress: process.env.ETHEREUM_DEVICE_REGISTRY_ADDRESS || '0x0000000000000000000000000000000000000000',
+        contractAddress: import.meta.env.VITE_ETHEREUM_DEVICE_REGISTRY_ADDRESS || '0x0000000000000000000000000000000000000000',
         abi: DEVICE_REGISTRY_ABI,
         gasLimit: 300000,
         gasPrice: '20'
       },
       polygon: {
         network: 'polygon' as const,
-        contractAddress: process.env.POLYGON_DEVICE_REGISTRY_ADDRESS || '0x0000000000000000000000000000000000000000',
+        contractAddress: import.meta.env.VITE_POLYGON_DEVICE_REGISTRY_ADDRESS || '0x0000000000000000000000000000000000000000',
         abi: DEVICE_REGISTRY_ABI,
         gasLimit: 300000,
         gasPrice: '30'
       },
       bsc: {
         network: 'bsc' as const,
-        contractAddress: process.env.BSC_DEVICE_REGISTRY_ADDRESS || '0x0000000000000000000000000000000000000000',
+        contractAddress: import.meta.env.VITE_BSC_DEVICE_REGISTRY_ADDRESS || '0x0000000000000000000000000000000000000000',
         abi: DEVICE_REGISTRY_ABI,
         gasLimit: 300000,
         gasPrice: '5'

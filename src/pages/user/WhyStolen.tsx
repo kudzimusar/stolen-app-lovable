@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { STOLENLogo } from "@/components/STOLENLogo";
-import { BackButton } from "@/components/BackButton";
+import { STOLENLogo } from "@/components/ui/STOLENLogo";
+import { BackButton } from "@/components/navigation/BackButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   Shield, 

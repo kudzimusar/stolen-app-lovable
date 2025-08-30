@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { AppHeader } from "@/components/AppHeader";
+import { AppHeader } from "@/components/navigation/AppHeader";
 import { useToast } from "@/hooks/use-toast";
 import {
   Users,

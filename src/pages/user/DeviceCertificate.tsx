@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BackButton } from "@/components/BackButton";
+import { BackButton } from "@/components/navigation/BackButton";
 import { Shield, Download, Home, CheckCircle, Calendar, User, Smartphone } from "lucide-react";
 
 const DeviceCertificate = () => {

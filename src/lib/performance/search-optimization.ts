@@ -3,8 +3,8 @@ import cacheManager from './redis';
 
 // Initialize Algolia client
 const searchClient = algoliasearch(
-  process.env.VITE_ALGOLIA_APP_ID || 'your-app-id',
-  process.env.VITE_ALGOLIA_SEARCH_KEY || 'your-search-key'
+  import.meta.env.VITE_ALGOLIA_APP_ID || 'your-app-id',
+  import.meta.env.VITE_ALGOLIA_SEARCH_KEY || 'your-search-key'
 );
 
 // Search indices

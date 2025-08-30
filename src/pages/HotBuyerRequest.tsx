@@ -18,8 +18,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
-import { AppHeader } from "@/components/AppHeader";
-import { BottomNavigation } from "@/components/BottomNavigation";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { BottomNavigation } from "@/components/navigation/BottomNavigation";
 import { useToast } from "@/hooks/use-toast";
 
 const HotBuyerRequest = () => {

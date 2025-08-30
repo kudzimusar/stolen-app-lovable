@@ -21,15 +21,15 @@ import TransferSuggestionCard from './TransferSuggestionCard';
 import { 
   aiTransferEngine, 
   TransferSuggestion 
-} from '@/lib/ai-transfer-suggestion-engine';
+} from '@/lib/ai/ai-transfer-suggestion-engine';
 import { 
   smartPromptEngine, 
   TransferPrompt 
-} from '@/lib/smart-transfer-prompt-engine';
+} from '@/lib/ai/smart-transfer-prompt-engine';
 import { 
   timingOptimizer, 
   TransferTiming 
-} from '@/lib/transfer-timing-optimizer';
+} from '@/lib/ai/transfer-timing-optimizer';
 
 interface TransferSuggestionDashboardProps {
   userId: string;

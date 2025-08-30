@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AppHeader } from "@/components/AppHeader";
-import { BackButton } from "@/components/BackButton";
-import { QRScanner } from "@/components/QRScanner";
-import { TrustBadge } from "@/components/TrustBadge";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { BackButton } from "@/components/navigation/BackButton";
+import { QRScanner } from "@/components/ui/QRScanner";
+import { TrustBadge } from "@/components/ui/TrustBadge";
 import {
   Search,
   QrCode,

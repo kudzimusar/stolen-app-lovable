@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { EnhancedSelect } from "@/components/EnhancedSelect";
+import { EnhancedSelect } from "@/components/forms/EnhancedSelect";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MapPin, Loader2, Navigation, Globe } from "lucide-react";
-import { geoService, LocationData, SA_PROVINCES, SA_CITIES_BY_PROVINCE, DEFAULT_LOCATION } from "@/lib/geolocation";
+import { geoService, LocationData, SA_PROVINCES, SA_CITIES_BY_PROVINCE, DEFAULT_LOCATION } from "@/lib/geolocation/geolocation";
 import { useToast } from "@/hooks/use-toast";
 
 interface LocationSelectorProps {

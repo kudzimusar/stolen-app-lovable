@@ -2,12 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { STOLENLogo } from "@/components/STOLENLogo";
-import { AppHeader } from "@/components/AppHeader";
-import { LiveChatWidget } from "@/components/LiveChatWidget";
-import { FeatureCard } from "@/components/FeatureCard";
-import { TrustBadge } from "@/components/TrustBadge";
-import { DeviceRegistrationForm } from "@/components/DeviceRegistrationForm";
+import { STOLENLogo } from "@/components/ui/STOLENLogo";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { LiveChatWidget } from "@/components/ui/LiveChatWidget";
+import { FeatureCard } from "@/components/ui/FeatureCard";
+import { TrustBadge } from "@/components/ui/TrustBadge";
+import { DeviceRegistrationForm } from "@/components/forms/DeviceRegistrationForm";
 import { Link } from "react-router-dom";
 import { 
   Shield, 

@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { STOLENLogo } from "@/components/STOLENLogo";
-import { EnhancedSelect } from "@/components/EnhancedSelect";
+import { STOLENLogo } from "@/components/ui/STOLENLogo";
+import { EnhancedSelect } from "@/components/forms/EnhancedSelect";
 import { Checkbox } from "@/components/ui/checkbox";
-import { LocationSelector } from "@/components/LocationSelector";
+import { LocationSelector } from "@/components/ui/LocationSelector";
 import { Link, useNavigate } from "react-router-dom";
 import { 
   UserPlus, 
@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { LocationData, DEFAULT_LOCATION } from "@/lib/geolocation";
+import { LocationData, DEFAULT_LOCATION } from "@/lib/geolocation/geolocation";
 
 const Register = () => {
   const navigate = useNavigate();

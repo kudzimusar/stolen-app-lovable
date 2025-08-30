@@ -7,9 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AppHeader } from "@/components/AppHeader";
-import { BackButton } from "@/components/BackButton";
-import { TrustBadge } from "@/components/TrustBadge";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { BackButton } from "@/components/navigation/BackButton";
+import { TrustBadge } from "@/components/ui/TrustBadge";
 import { useToast } from "@/hooks/use-toast";
 import { 
   MapPin, 

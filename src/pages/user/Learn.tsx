@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { AppHeader } from "@/components/AppHeader";
-import { BackButton } from "@/components/BackButton";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { BackButton } from "@/components/navigation/BackButton";
 import { 
   Search, 
   Play,

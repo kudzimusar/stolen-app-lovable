@@ -8,8 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
-import { AppHeader } from "@/components/AppHeader";
-import { DocumentDownloader } from "@/components/DocumentDownloader";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { DocumentDownloader } from "@/components/ui/DocumentDownloader";
 import { 
   Recycle, 
   Gift, 

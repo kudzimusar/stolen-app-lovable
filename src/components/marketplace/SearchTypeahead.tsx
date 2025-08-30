@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { QRScanner } from "@/components/QRScanner";
+import { QRScanner } from "@/components/ui/QRScanner";
 import { Mic, QrCode, Search, SlidersHorizontal } from "lucide-react";
 import { SearchResult, TaxonomyNode, useTaxonomy } from "@/hooks/useTaxonomy";
 

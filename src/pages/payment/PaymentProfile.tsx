@@ -27,7 +27,7 @@ import {
   Download,
   Zap
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 const PaymentProfile = () => {
   const [isEditing, setIsEditing] = useState(false);

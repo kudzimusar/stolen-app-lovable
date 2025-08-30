@@ -6,8 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
-import { AppHeader } from "@/components/AppHeader";
-import { QRScanner } from "@/components/QRScanner";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { QRScanner } from "@/components/ui/QRScanner";
 import { 
   ArrowLeft, 
   Smartphone, 

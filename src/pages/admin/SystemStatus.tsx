@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AppHeader } from "@/components/AppHeader";
+import { AppHeader } from "@/components/navigation/AppHeader";
 import { CheckCircle, XCircle, AlertTriangle, Loader2 } from "lucide-react";
-import { generateDeviceFingerprint, checkIMEIDatabase } from "@/lib/security";
-import { geoService } from "@/lib/geolocation";
+import { generateDeviceFingerprint, checkIMEIDatabase } from "@/lib/security/security";
+import { geoService } from "@/lib/geolocation/geolocation";
 
 interface StatusCheck {
   name: string;

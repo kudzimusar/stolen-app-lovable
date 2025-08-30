@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AppHeader } from "@/components/AppHeader";
-import { LiveChatWidget } from "@/components/LiveChatWidget";
-import { TrustBadge } from "@/components/TrustBadge";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { LiveChatWidget } from "@/components/ui/LiveChatWidget";
+import { TrustBadge } from "@/components/ui/TrustBadge";
 import { Link } from "react-router-dom";
 import {
   Smartphone,

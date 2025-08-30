@@ -23,7 +23,7 @@ import {
   Edit,
   Trash2
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 const AdminUsers = () => {
   const [searchTerm, setSearchTerm] = useState("");

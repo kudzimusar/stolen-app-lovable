@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { STOLENLogo } from "@/components/STOLENLogo";
-import { HamburgerMenu } from "@/components/HamburgerMenu";
+import { STOLENLogo } from "@/components/ui/STOLENLogo";
+import { HamburgerMenu } from "@/components/navigation/HamburgerMenu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft, Menu, Bell, Settings, User, LogOut } from "lucide-react";
-import { BackButton } from "@/components/BackButton";
+import { BackButton } from "@/components/navigation/BackButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { User as SupabaseUser } from "@supabase/supabase-js";

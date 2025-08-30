@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
-import { AppHeader } from "@/components/AppHeader";
-import { DocumentDownloader } from "@/components/DocumentDownloader";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { DocumentDownloader } from "@/components/ui/DocumentDownloader";
 import { 
   Search, 
   Calendar, 

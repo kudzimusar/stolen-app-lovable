@@ -8,8 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { AppHeader } from "@/components/AppHeader";
-import { BackButton } from "@/components/BackButton";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { BackButton } from "@/components/navigation/BackButton";
 import { useToast } from "@/hooks/use-toast";
 import {
   MessageSquare,

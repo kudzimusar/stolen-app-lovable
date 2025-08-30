@@ -4,9 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AppHeader } from "@/components/AppHeader";
-import { SecurityEnhancements } from "@/components/SecurityEnhancements";
-import { LocationSelector } from "@/components/LocationSelector";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { SecurityEnhancements } from "@/components/security/SecurityEnhancements";
+import { LocationSelector } from "@/components/ui/LocationSelector";
 import { 
   MapPin, 
   Navigation, 
@@ -21,7 +21,7 @@ import {
   Phone,
   Banknote
 } from "lucide-react";
-import { geoService, LocationData, DEFAULT_LOCATION } from "@/lib/geolocation";
+import { geoService, LocationData, DEFAULT_LOCATION } from "@/lib/geolocation/geolocation";
 import { useToast } from "@/hooks/use-toast";
 
 export default function GeolocationTesting() {

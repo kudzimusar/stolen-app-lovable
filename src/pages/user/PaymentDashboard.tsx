@@ -20,7 +20,7 @@ import {
   RefreshCw,
   Download
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 const PaymentDashboard = () => {
   const [timeRange, setTimeRange] = useState("24h");

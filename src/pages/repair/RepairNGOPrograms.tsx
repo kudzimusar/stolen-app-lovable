@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AppHeader } from "@/components/AppHeader";
-import { BackButton } from "@/components/BackButton";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { BackButton } from "@/components/navigation/BackButton";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Heart, 

@@ -320,6 +320,6 @@ export class APIClient {
 
 // Export default API client instance
 export const apiClient = new APIClient(
-  process.env.REACT_APP_API_BASE_URL || 'https://api.stolen.com',
-  process.env.REACT_APP_API_KEY || ''
+  import.meta.env.VITE_API_BASE_URL || 'https://api.stolen.com',
+  import.meta.env.VITE_API_KEY || ''
 );

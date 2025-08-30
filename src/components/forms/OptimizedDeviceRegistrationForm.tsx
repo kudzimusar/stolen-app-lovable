@@ -6,10 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { QrCode, Upload, MapPin, FileText, Shield, AlertTriangle, CheckCircle } from "lucide-react";
-import { TrustBadge } from "./TrustBadge";
+import { TrustBadge } from "@/components/ui/TrustBadge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { checkIMEIDatabase, verifyReceiptOCR, generateDeviceFingerprint, logSecurityEvent, analyzeBehavior } from "@/lib/security";
+import { checkIMEIDatabase, verifyReceiptOCR, generateDeviceFingerprint, logSecurityEvent, analyzeBehavior } from "@/lib/security/security";
 
 // Import performance optimization hooks
 import { 

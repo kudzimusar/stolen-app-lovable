@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AppHeader } from "@/components/AppHeader";
-import { BottomNavigation } from "@/components/BottomNavigation";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { BottomNavigation } from "@/components/navigation/BottomNavigation";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { 

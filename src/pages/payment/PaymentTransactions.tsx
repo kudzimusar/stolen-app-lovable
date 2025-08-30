@@ -23,7 +23,7 @@ import {
   Banknote,
   Globe
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 const PaymentTransactions = () => {
   const [searchTerm, setSearchTerm] = useState("");

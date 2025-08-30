@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { STOLENLogo } from "@/components/STOLENLogo";
+import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import {
   ArrowLeft,
   Activity,
@@ -35,8 +35,8 @@ import {
   Download,
   Upload
 } from "lucide-react";
-import { performanceOptimizer } from "@/lib/performance-optimization";
-import { reverseVerificationAPI } from "@/lib/reverse-verification-api";
+import { performanceMonitor } from "@/lib/performance/performance-optimization-browser";
+import { reverseVerificationAPI } from "@/lib/services/reverse-verification-api";
 
 const PerformanceDashboard = () => {
   const [performanceStats, setPerformanceStats] = useState<any>(null);

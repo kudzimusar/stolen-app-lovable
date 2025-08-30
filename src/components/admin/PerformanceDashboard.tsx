@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import performanceMonitor from '@/lib/performance-monitoring';
 import cacheManager from '@/lib/redis';
-import backgroundJobs from '@/lib/background-jobs';
+import backgroundJobs from '@/lib/optimization/background-jobs-browser';
 import apiService from '@/lib/api-optimization';
 
 interface PerformanceStats {

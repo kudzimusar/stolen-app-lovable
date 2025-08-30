@@ -31,11 +31,11 @@ import {
   Brain,
   Link
 } from "lucide-react";
-import { authService, apiClient, APIAuthMiddleware } from "@/lib/auth";
-import { reverseVerificationAPI } from "@/lib/reverse-verification-api";
-import { performanceOptimizer } from "@/lib/performance-optimization";
-import { blockchainManager } from "@/lib/blockchain-integration";
-import { aiMLSystem } from "@/lib/ai-ml-system";
+import { authService, apiClient, APIAuthMiddleware } from "@/lib/security/auth";
+import { reverseVerificationAPI } from "@/lib/services/reverse-verification-api";
+import { performanceMonitor } from "@/lib/performance/performance-optimization-browser";
+import { blockchainManager } from "@/lib/blockchain/blockchain-integration-browser";
+import { aiMLSystem } from "@/lib/ai/ai-ml-system";
 
 const ReverseVerify = () => {
   const [searchQuery, setSearchQuery] = useState("");

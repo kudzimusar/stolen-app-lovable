@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AppHeader } from "@/components/AppHeader";
+import { AppHeader } from "@/components/navigation/AppHeader";
 import { 
   Search, 
   AlertTriangle, 

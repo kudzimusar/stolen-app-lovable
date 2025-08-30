@@ -22,7 +22,7 @@ import {
   Building,
   Database
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 const AdminReports = () => {
   const [dateRange, setDateRange] = useState("30d");

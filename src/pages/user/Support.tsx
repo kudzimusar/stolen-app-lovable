@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { STOLENLogo } from "@/components/STOLENLogo";
-import { BackButton } from "@/components/BackButton";
+import { STOLENLogo } from "@/components/ui/STOLENLogo";
+import { BackButton } from "@/components/navigation/BackButton";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,

@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AppHeader } from "@/components/AppHeader";
-import { DocumentDownloader } from "@/components/DocumentDownloader";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { DocumentDownloader } from "@/components/ui/DocumentDownloader";
 import { 
   Shield, 
   Calendar,
