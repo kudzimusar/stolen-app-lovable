@@ -24,5 +24,20 @@ verify_jwt = true
 [functions.s-pay-transfer]
 verify_jwt = true
 
+[functions.s-pay-enhanced]
+verify_jwt = true
+
+[functions.ai-fraud-detection]
+verify_jwt = true
+
+[functions.mfa-authentication]
+verify_jwt = true
+
+[functions.real-time-verification]
+verify_jwt = true
+
+[functions.advanced-rate-limiting]
+verify_jwt = true
+
 [functions.trigger-ai-analysis]
 verify_jwt = true

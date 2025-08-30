@@ -15,6 +15,7 @@ import DeviceRegister from "./pages/DeviceRegister";
 import DeviceDetails from "./pages/DeviceDetails";
 import LostFoundReport from "./pages/LostFoundReport";
 import CommunityBoard from "./pages/CommunityBoard";
+import LostFoundBoard from "./pages/LostFoundBoard";
 import Profile from "./pages/Profile";
 import Wallet from "./pages/Wallet";
 import Support from "./pages/Support";
@@ -35,6 +36,7 @@ import FeedbackRating from "./pages/FeedbackRating";
 import AnalyticsInsights from "./pages/AnalyticsInsights";
 import NotFound from "./pages/NotFound";
 import DeviceTransfer from "./pages/DeviceTransfer";
+import AITransferSuggestions from "./pages/AITransferSuggestions";
 import OwnershipHistory from "./pages/OwnershipHistory";
 import FraudDatabase from "./pages/FraudDatabase";
 import MyDevices from "./pages/MyDevices";
@@ -109,6 +111,20 @@ import PaymentFraud from "./pages/PaymentFraud";
 import PaymentAnalytics from "./pages/PaymentAnalytics";
 import PaymentProfile from "./pages/PaymentProfile";
 
+// Import missing components for bottom navigation routes
+import RetailerInventory from "./pages/RetailerInventory";
+import BulkRegistration from "./pages/BulkRegistration";
+import RetailerSales from "./pages/RetailerSales";
+import InsuranceClaims from "./pages/InsuranceClaims";
+import NewInsuranceClaim from "./pages/NewInsuranceClaim";
+import InsurancePolicies from "./pages/InsurancePolicies";
+import LawEnforcementSearch from "./pages/LawEnforcementSearch";
+import NewLawReport from "./pages/NewLawReport";
+import LawEnforcementCases from "./pages/LawEnforcementCases";
+import NGODonations from "./pages/NGODonations";
+import NewDonationRequest from "./pages/NewDonationRequest";
+import NGOImpact from "./pages/NGOImpact";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -154,6 +170,7 @@ const App = () => (
           <Route path="/ngo-profile" element={<ProtectedRoute><NGOProfile /></ProtectedRoute>} />
           <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
           <Route path="/device-transfer" element={<ProtectedRoute><DeviceTransfer /></ProtectedRoute>} />
+          <Route path="/ai-transfer-suggestions" element={<ProtectedRoute><AITransferSuggestions /></ProtectedRoute>} />
           <Route path="/ownership-history" element={<ProtectedRoute><OwnershipHistory /></ProtectedRoute>} />
           <Route path="/fraud-database" element={<ProtectedRoute><FraudDatabase /></ProtectedRoute>} />
           <Route path="/device-lifecycle-manager" element={<ProtectedRoute><DeviceLifecycleManager /></ProtectedRoute>} />
@@ -165,7 +182,7 @@ const App = () => (
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/device/check" element={<DeviceCheck />} />
           <Route path="/community-board" element={<CommunityBoard />} />
-          <Route path="/lost-found-board" element={<CommunityBoard />} />
+          <Route path="/lost-found-board" element={<LostFoundBoard />} />
            <Route path="/insurance-hub" element={<InsuranceHub />} />
            <Route path="/insurance-quote/:id" element={<InsuranceQuote />} />
           <Route path="/reverse-verify" element={<ReverseVerify />} />
@@ -176,7 +193,7 @@ const App = () => (
            <Route path="/stolen-reports" element={<StolenReports />} />
            <Route path="/report-listing/:id" element={<ReportListing />} />
            <Route path="/hot-deals" element={<ProtectedRoute><HotDeals /></ProtectedRoute>} />
-           <Route path="/hot-deals-feed" element={<HotDealsFeed />} />
+           <Route path="/hot-deals-feed" element={<ProtectedRoute><HotDealsFeed /></ProtectedRoute>} />
            <Route path="/hot-deals-hub" element={<ProtectedRoute><HotDealsHub /></ProtectedRoute>} />
            <Route path="/hot-buyer-request" element={<ProtectedRoute><HotBuyerRequest /></ProtectedRoute>} />
            <Route path="/hot-deals-chat/:dealId" element={<ProtectedRoute><HotDealsChatPage /></ProtectedRoute>} />
@@ -241,6 +258,28 @@ const App = () => (
            <Route path="/seller-onboarding" element={<ProtectedRoute><SellerOnboarding /></ProtectedRoute>} />
            <Route path="/bulk-listings" element={<ProtectedRoute><BulkListing /></ProtectedRoute>} />
            <Route path="/referrals" element={<ProtectedRoute><ReferralRewards /></ProtectedRoute>} />
+
+           {/* Missing routes from bottom navigation */}
+           {/* Retailer routes */}
+           <Route path="/retailer-inventory" element={<ProtectedRoute><RetailerInventory /></ProtectedRoute>} />
+           <Route path="/bulk-registration" element={<ProtectedRoute><BulkRegistration /></ProtectedRoute>} />
+           <Route path="/retailer-sales" element={<ProtectedRoute><RetailerSales /></ProtectedRoute>} />
+
+           {/* Insurance routes */}
+           <Route path="/insurance-claims" element={<ProtectedRoute><InsuranceClaims /></ProtectedRoute>} />
+           <Route path="/new-insurance-claim" element={<ProtectedRoute><NewInsuranceClaim /></ProtectedRoute>} />
+           <Route path="/insurance-policies" element={<ProtectedRoute><InsurancePolicies /></ProtectedRoute>} />
+
+           {/* Law Enforcement routes */}
+           <Route path="/law-enforcement-search" element={<ProtectedRoute><LawEnforcementSearch /></ProtectedRoute>} />
+           <Route path="/new-law-report" element={<ProtectedRoute><NewLawReport /></ProtectedRoute>} />
+           <Route path="/law-enforcement-cases" element={<ProtectedRoute><LawEnforcementCases /></ProtectedRoute>} />
+
+           {/* NGO routes */}
+           <Route path="/ngo-donations" element={<ProtectedRoute><NGODonations /></ProtectedRoute>} />
+           <Route path="/new-donation-request" element={<ProtectedRoute><NewDonationRequest /></ProtectedRoute>} />
+           <Route path="/ngo-impact" element={<ProtectedRoute><NGOImpact /></ProtectedRoute>} />
+
            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
