@@ -48,12 +48,12 @@ import {
 } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 
-// Import advanced technology components
-import { aiTransferEngine } from "@/lib/ai/ai-transfer-suggestion-engine";
-import { smartPromptEngine } from "@/lib/ai/smart-transfer-prompt-engine";
-import { timingOptimizer } from "@/lib/ai/transfer-timing-optimizer";
-import { blockchainManager } from "@/lib/blockchain/blockchain-integration";
-import { PerformanceMonitor } from "@/lib/performance/performance-monitoring";
+// Import advanced technology components (temporarily disabled for debugging)
+// import { aiTransferEngine } from "@/lib/ai/ai-transfer-suggestion-engine";
+// import { smartPromptEngine } from "@/lib/ai/smart-transfer-prompt-engine";
+// import { timingOptimizer } from "@/lib/ai/transfer-timing-optimizer";
+// import { blockchainManager } from "@/lib/blockchain/blockchain-integration";
+// import { PerformanceMonitor } from "@/lib/performance/performance-monitoring";
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
 
 const Index = () => {
@@ -439,7 +439,7 @@ const Index = () => {
                   <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 text-accent" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-accent">$30B+</h3>
+                  <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-accent">R500B+</h3>
                   <p className="text-lg sm:text-xl font-semibold text-foreground">
                     yearly tech theft costs
                   </p>

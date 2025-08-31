@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, memo, useCallback } from "react";
+import { useOptimizedApiCall, usePerformanceMonitoring, useDebouncedSearch } from "@/hooks/usePerformanceOptimization";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -21,6 +22,8 @@ import SearchTypeahead from "@/components/marketplace/SearchTypeahead";
 import TaxonomyTree from "@/components/marketplace/TaxonomyTree";
 import BreadcrumbBar from "@/components/marketplace/BreadcrumbBar";
 import EmptyState from "@/components/marketplace/EmptyState";
+import { AIRecommendations } from "@/components/marketplace/AIRecommendations";
+import { MarketplaceAIAssistant } from "@/components/marketplace/MarketplaceAIAssistant";
 import { useTaxonomy, TaxonomyNode } from "@/hooks/useTaxonomy";
 import {
   Search,
@@ -48,6 +51,9 @@ import {
 
 const Marketplace = () => {
   const navigate = useNavigate();
+  
+  // Performance monitoring
+  usePerformanceMonitoring('marketplace');
   const { tokensFromPath, search: taxonomySearch, roots } = useTaxonomy();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -153,7 +159,7 @@ const allListings = [
     title: "iPhone 15 Pro Max 256GB",
     price: 18999,
     originalPrice: 24999,
-    image: "https://placehold.co/320x220?text=Phone",
+    image: "",
     seller: "TechDeals Pro",
     sellerType: "retailer",
     rating: 4.8,
@@ -171,7 +177,7 @@ const allListings = [
     title: "MacBook Pro M3 14-inch",
     price: 32999,
     originalPrice: 45999,
-    image: "https://placehold.co/320x220?text=Laptop",
+    image: "",
     seller: "Apple Certified",
     sellerType: "retailer",
     rating: 4.9,
@@ -189,7 +195,7 @@ const allListings = [
     title: "Samsung Galaxy S24 Ultra",
     price: 14999,
     originalPrice: 22999,
-    image: "https://placehold.co/320x220?text=Phone",
+    image: "",
     seller: "MobilePro",
     sellerType: "retailer",
     rating: 4.7,
@@ -207,7 +213,7 @@ const allListings = [
     title: "iPad Pro 12.9-inch M2",
     price: 16999,
     originalPrice: 21999,
-    image: "https://placehold.co/320x220?text=Tablet",
+    image: "",
     seller: "iDevice Store",
     sellerType: "retailer",
     rating: 4.6,
@@ -225,7 +231,7 @@ const allListings = [
     title: "Apple Watch Series 9",
     price: 6999,
     originalPrice: 8999,
-    image: "https://placehold.co/320x220?text=Watch",
+    image: "",
     seller: "Watch World",
     sellerType: "retailer",
     rating: 4.5,
@@ -243,7 +249,7 @@ const allListings = [
     title: "Dell XPS 13 Intel i7",
     price: 19999,
     originalPrice: 28999,
-    image: "https://placehold.co/320x220?text=Laptop",
+    image: "",
     seller: "Laptop Pro",
     sellerType: "retailer",
     rating: 4.4,
@@ -261,7 +267,7 @@ const allListings = [
     title: "Google Pixel 8 Pro",
     price: 12999,
     originalPrice: 17999,
-    image: "https://placehold.co/320x220?text=Phone",
+    image: "",
     seller: "Private Seller",
     sellerType: "private",
     rating: 4.3,
@@ -279,7 +285,7 @@ const allListings = [
     title: "Samsung Galaxy Tab S9",
     price: 11999,
     originalPrice: 15999,
-    image: "https://placehold.co/320x220?text=Tablet",
+    image: "",
     seller: "Galaxy Store",
     sellerType: "retailer",
     rating: 4.7,
@@ -297,7 +303,7 @@ const allListings = [
     title: "Canon EOS R6 Mark II",
     price: 23999,
     originalPrice: 28999,
-    image: "https://placehold.co/320x220?text=Camera",
+    image: "",
     seller: "CamPro SA",
     sellerType: "retailer",
     rating: 4.8,
@@ -315,7 +321,7 @@ const allListings = [
     title: "Xbox Series X 1TB",
     price: 8999,
     originalPrice: 10999,
-    image: "https://placehold.co/320x220?text=Console",
+    image: "",
     seller: "Private Seller",
     sellerType: "private",
     rating: 4.2,
@@ -333,7 +339,7 @@ const allListings = [
     title: "Lenovo ThinkPad X1 Carbon",
     price: 16999,
     originalPrice: 21999,
-    image: "https://placehold.co/320x220?text=Laptop",
+    image: "",
     seller: "BizTech",
     sellerType: "retailer",
     rating: 4.6,
@@ -351,7 +357,7 @@ const allListings = [
     title: "iPhone 13 Mini 128GB",
     price: 6999,
     originalPrice: 9999,
-    image: "https://placehold.co/320x220?text=Phone",
+    image: "",
     seller: "Private Seller",
     sellerType: "private",
     rating: 4.1,
@@ -369,7 +375,7 @@ const allListings = [
     title: "GoPro HERO12 Black",
     price: 6499,
     originalPrice: 7999,
-    image: "https://placehold.co/320x220?text=Camera",
+    image: "",
     seller: "Adventure Hub",
     sellerType: "retailer",
     rating: 4.5,
@@ -387,7 +393,7 @@ const allListings = [
     title: "Nintendo Switch OLED",
     price: 6499,
     originalPrice: 7499,
-    image: "https://placehold.co/320x220?text=Console",
+    image: "",
     seller: "GameWorld",
     sellerType: "retailer",
     rating: 4.7,
@@ -405,7 +411,7 @@ const allListings = [
     title: "Apple AirPods Pro (2nd gen)",
     price: 3499,
     originalPrice: 4299,
-    image: "https://placehold.co/320x220?text=Accessories",
+    image: "",
     seller: "Private Seller",
     sellerType: "private",
     rating: 4.3,
@@ -423,7 +429,7 @@ const allListings = [
     title: "Huawei MatePad 11",
     price: 5999,
     originalPrice: 7999,
-    image: "https://placehold.co/320x220?text=Tablet",
+    image: "",
     seller: "GadgetZone",
     sellerType: "retailer",
     rating: 4.2,
@@ -555,45 +561,45 @@ const allListings = [
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className="container mx-auto px-4 py-4 space-y-6">
         {/* Mobile Back Navigation - Fallback */}
         <div className="md:hidden mb-4">
           <BackButton />
         </div>
         {/* Header Section */}
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl md:text-4xl font-bold text-gradient bg-gradient-primary bg-clip-text text-transparent">
-              Marketplace
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground">
-              Buy and sell verified electronics with confidence
-            </p>
+        <div className="space-y-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="text-center lg:text-left">
+              <h1 className="text-2xl md:text-3xl font-bold text-gradient bg-gradient-primary bg-clip-text text-transparent">
+                Marketplace
+              </h1>
+              <p className="text-sm md:text-base text-muted-foreground">
+                Buy and sell verified electronics with confidence
+              </p>
+            </div>
+            
+            {/* Quick Actions in Header */}
+            <div className="flex gap-2 justify-center lg:justify-end">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/hot-deals-feed')}>
+                <Fire className="w-4 h-4 mr-2" />
+                Hot Deals
+              </Button>
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={() => navigate('/list-my-device')}>
+                <Plus className="w-4 h-4 mr-2" />
+                List Device
+              </Button>
+            </div>
           </div>
 
-          {/* Primary CTA */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <Button 
-              variant="outline" 
-              size="xl" 
-              className="text-base md:text-lg px-6 md:px-8 py-3 md:py-4"
-              onClick={() => navigate('/hot-deals-feed')}>
-              <Fire className="w-5 h-5 mr-2" />
-              Browse Hot Deals
-            </Button>
-            <Button 
-              variant="hero" 
-              size="xl" 
-              className="text-base md:text-lg px-6 md:px-8 py-3 md:py-4"
-              onClick={() => navigate('/list-my-device')}>
-              <Plus className="w-5 h-5 mr-2" />
-              List Your Device
-            </Button>
-          </div>
-
-          {/* Search and Filters */}
-          <div className="grid gap-3 md:grid-cols-4 max-w-5xl mx-auto">
-            <div className="md:col-span-2">
+          {/* Enhanced Search and Filters */}
+          <div className="grid gap-3 md:grid-cols-6 lg:grid-cols-8 max-w-7xl mx-auto">
+            <div className="md:col-span-3 lg:col-span-4">
               <SearchTypeahead
                 value={searchQuery}
                 onChange={setSearchQuery}
@@ -604,18 +610,20 @@ const allListings = [
                 onOpenFilters={() => setFiltersOpen(true)}
               />
             </div>
-            <EnhancedSelect
-              placeholder="Select Location"
-              options={locationOptions}
-              value={selectedLocation}
-              onValueChange={(val) => { setSelectedLocation(val); setCurrentPage(1); }}
-            />
-            <div className="flex gap-2">
+            <div className="md:col-span-2 lg:col-span-2">
+              <EnhancedSelect
+                placeholder="Select Location"
+                options={locationOptions}
+                value={selectedLocation}
+                onValueChange={(val) => { setSelectedLocation(val); setCurrentPage(1); }}
+              />
+            </div>
+            <div className="md:col-span-1 lg:col-span-2 flex gap-2">
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="w-full md:w-auto">
                     <QrCode className="w-4 h-4 mr-2" />
-                    Scan Serial / QR
+                    Scan QR
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -740,6 +748,18 @@ const allListings = [
           </div>
         </Card>
 
+        {/* AI Recommendations */}
+        <AIRecommendations 
+          userId="user-123" 
+          context="home"
+          userPreferences={{
+            categories: [selectedCategory !== 'all' ? selectedCategory : 'phones'],
+            priceRange: { min: priceMin || 0, max: priceMax || 100000 },
+            locations: [selectedLocation !== 'all' ? selectedLocation : 'gauteng']
+          }}
+          limit={6}
+        />
+
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold">Featured Listings</h2>
@@ -758,7 +778,9 @@ const allListings = [
                       className="overflow-hidden hover:shadow-card transition-all duration-300 cursor-pointer"
                       onClick={() => navigate(`/marketplace/product/${item.id}`)}
                     >
-                      <img src={item.image} alt={`${item.title} - ${item.category}`} className="w-full aspect-[4/3] object-cover" loading="lazy" />
+                      <div className="w-full aspect-[4/3] bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+                        <Package className="w-12 h-12 text-muted-foreground" />
+                      </div>
                       <div className="p-3 space-y-1">
                         <div className="flex items-center justify-between">
                           <h3 className="text-sm font-semibold line-clamp-1">{item.title}</h3>
@@ -813,12 +835,9 @@ const allListings = [
                   onClick={() => navigate(`/marketplace/product/${listing.id}`)}
                 >
                   <div className="relative">
-                    <img
-                      src={listing.image}
-                      alt={`${listing.title} - ${listing.category}`}
-                      loading="lazy"
-                      className="w-full aspect-[4/3] object-cover"
-                    />
+                    <div className="w-full aspect-[4/3] bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+                      <Package className="w-16 h-16 text-muted-foreground" />
+                    </div>
                     <div className="absolute top-3 right-3 flex gap-2">
                       <Button 
                         variant="ghost" 
@@ -895,7 +914,9 @@ const allListings = [
                   <DialogHeader>
                     <DialogTitle className="text-base">{quickViewItem.title}</DialogTitle>
                   </DialogHeader>
-                  <img src={quickViewItem.image} alt={quickViewItem.title} className="w-full rounded-md aspect-[4/3] object-cover" />
+                  <div className="w-full rounded-md aspect-[4/3] bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
+                    <Package className="w-20 h-20 text-muted-foreground" />
+                  </div>
                   <div className="flex items-center justify-between">
                     <div className="text-primary font-bold text-lg">{formatPrice(quickViewItem.price)}</div>
                     {getStatusBadge(quickViewItem.stolenStatus)}
@@ -967,6 +988,18 @@ const allListings = [
         </div>
 
       </div>
+
+      {/* AI Assistant */}
+      <MarketplaceAIAssistant 
+        currentPage="marketplace"
+        userContext={{
+          preferences: {
+            categories: [selectedCategory !== 'all' ? selectedCategory : ''],
+            priceRange: { min: priceMin || 0, max: priceMax || 100000 },
+            locations: [selectedLocation !== 'all' ? selectedLocation : '']
+          }
+        }}
+      />
     </div>
   );
 };

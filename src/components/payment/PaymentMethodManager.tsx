@@ -19,6 +19,7 @@ import {
   Star
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { apiEndpointsService } from "@/lib/services/api-endpoints-service";
 
 interface PaymentMethod {
   id: string;
@@ -74,6 +75,20 @@ const PaymentMethodManager: React.FC<PaymentMethodManagerProps> = ({
       
       if (result.success) {
         setPaymentMethods(result.data);
+      } else {
+        // Use API endpoints service for real payment methods
+        const response = await apiEndpointsService.paymentMethodsList(userId);
+        if (response.success) {
+          setPaymentMethods(response.data.map((method: any) => ({
+            id: method.id,
+            method_type: method.type,
+            method_name: method.name,
+            method_data: method.details,
+            is_default: method.isDefault,
+            is_verified: method.isVerified,
+            created_at: new Date().toISOString()
+          })));
+        }
       }
     } catch (error) {
       console.error('Error fetching payment methods:', error);
@@ -82,8 +97,8 @@ const PaymentMethodManager: React.FC<PaymentMethodManagerProps> = ({
         {
           id: '1',
           method_type: 'bank_account',
-          method_name: 'Chase Bank Account',
-          method_data: { last4: '1234', bank_name: 'Chase Bank' },
+          method_name: 'FNB Cheque Account',
+          method_data: { last4: '1234', bank_name: 'First National Bank', branch_code: '250655' },
           is_default: true,
           is_verified: true,
           created_at: '2024-01-01T00:00:00Z'
@@ -91,8 +106,8 @@ const PaymentMethodManager: React.FC<PaymentMethodManagerProps> = ({
         {
           id: '2',
           method_type: 'credit_card',
-          method_name: 'Visa Card',
-          method_data: { last4: '5678', card_type: 'Visa' },
+          method_name: 'Standard Bank Visa Card',
+          method_data: { last4: '5678', card_type: 'Visa', bank_name: 'Standard Bank' },
           is_default: false,
           is_verified: true,
           created_at: '2024-01-15T00:00:00Z'

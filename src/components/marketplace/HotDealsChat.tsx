@@ -117,7 +117,7 @@ const HotDealsChat = ({ dealId, onClose }: HotDealsChatProps) => {
               ←
             </Button>
             <Avatar className="w-10 h-10">
-              <AvatarImage src="https://placehold.co/40x40?text=TP" />
+              <AvatarImage src="" />
               <AvatarFallback>TP</AvatarFallback>
             </Avatar>
             <div className="flex-1">
@@ -151,7 +151,7 @@ const HotDealsChat = ({ dealId, onClose }: HotDealsChatProps) => {
       <div className="border-b border-border p-4 bg-muted/30">
         <div className="flex items-center gap-4">
           <img 
-            src="https://placehold.co/60x60?text=iPhone" 
+            src="" 
             alt={dealInfo.title}
             className="w-15 h-15 rounded-lg object-cover"
           />

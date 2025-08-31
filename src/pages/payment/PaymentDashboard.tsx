@@ -10,7 +10,7 @@ const PaymentDashboard = () => {
   const stats = {
     totalTransactions: 1234,
     pendingPayments: 23,
-    monthlyRevenue: "$156,789",
+    monthlyRevenue: "R2,847,651",
     successRate: "98.5%"
   };
 

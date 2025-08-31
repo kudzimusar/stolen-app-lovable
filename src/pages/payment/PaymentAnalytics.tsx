@@ -22,7 +22,7 @@ import {
   Clock,
   Zap
 } from "lucide-react";
-import { cn } from "@/lib/utils/utils";
+import { cn } from "@/lib/utils";
 
 const PaymentAnalytics = () => {
   const [timeRange, setTimeRange] = useState("30d");

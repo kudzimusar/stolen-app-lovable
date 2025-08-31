@@ -137,7 +137,7 @@ const PaymentHistory = () => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-primary">$45.50</p>
+                  <p className="text-2xl font-bold text-primary">R826.75</p>
                   <p className="text-sm text-muted-foreground">Total Spent</p>
                 </div>
                 <div className="text-center">

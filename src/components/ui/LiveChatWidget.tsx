@@ -4,13 +4,14 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, X, Send, Bot, User, Loader2, Sparkles, Shield, Smartphone, ShoppingCart, Search, HelpCircle, Zap } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, Loader2, Sparkles, Shield, Smartphone, ShoppingCart, Search, HelpCircle, Zap, Move } from "lucide-react";
 import { localAIService } from "@/lib/ai/local-ai-service";
 import { geminiAI } from "@/lib/ai/gemini-ai-service";
 import { GoogleServicesIntegration } from "@/lib/services/google-services-integration";
 import { aiChatUpdateService } from "@/lib/services/ai-chat-update-service";
 import { ecosystemServices, UserProfile } from "@/lib/services/ecosystem-services";
 import { userContextService } from "@/lib/services/user-context-service";
+import { premiumSalesAssistant } from "@/lib/services/premium-sales-assistant";
 
 interface Message {
   id: string;
@@ -70,7 +71,11 @@ export const LiveChatWidget = () => {
     location: "South Africa"
   });
   const [aiService, setAiService] = useState<"gemini" | "local" | "fallback">("gemini");
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const chatWidgetRef = useRef<HTMLDivElement>(null);
 
   // Initialize AI services
   const googleServices = new GoogleServicesIntegration({
@@ -338,13 +343,67 @@ export const LiveChatWidget = () => {
       ]
     };
 
+    // Get premium sales assistant insights
+    let premiumInsights: any = {};
+    
+    try {
+      // Check for sales/marketplace intent
+      const salesKeywords = ['buy', 'sell', 'price', 'recommend', 'product', 'device', 'marketplace'];
+      const hasSalesIntent = salesKeywords.some(keyword => 
+        userInput.toLowerCase().includes(keyword)
+      );
+      
+      if (hasSalesIntent) {
+        const recommendations = await premiumSalesAssistant.getPersonalizedProductRecommendations(userInput);
+        const matching = await premiumSalesAssistant.facilitateBuyerSellerMatching(userInput);
+        
+        premiumInsights = {
+          salesRecommendations: recommendations.recommendations,
+          hotDeals: recommendations.hotDeals,
+          buyerSellerMatches: matching.matches,
+          salesAttribution: recommendations.attribution
+        };
+        
+        // Track interaction
+        await premiumSalesAssistant.trackSalesAttribution('recommendation', undefined, 0);
+      }
+      
+      // Check for service-related queries
+      const serviceKeywords = ['repair', 'fix', 'broken', 'insurance', 'lost', 'stolen'];
+      const hasServiceIntent = serviceKeywords.some(keyword => 
+        userInput.toLowerCase().includes(keyword)
+      );
+      
+      if (hasServiceIntent) {
+        if (userInput.toLowerCase().includes('repair')) {
+          premiumInsights.repairServices = await premiumSalesAssistant.findAndBookRepairServices(userInput);
+        }
+        if (userInput.toLowerCase().includes('insurance')) {
+          premiumInsights.insuranceQuotes = await premiumSalesAssistant.getInstantInsuranceQuotes(15000); // Default device value
+        }
+        if (userInput.toLowerCase().includes('donation')) {
+          premiumInsights.donationOpportunities = await premiumSalesAssistant.suggestDonationOpportunities();
+        }
+      }
+      
+    } catch (error) {
+      console.error('Premium sales assistant error:', error);
+    }
+
     let response: any;
 
     try {
       if (aiService === "gemini") {
+        // Enhance context with premium insights
+        const enhancedContext = {
+          ...context,
+          premiumInsights,
+          salesMode: Object.keys(premiumInsights).length > 0
+        };
+        
         response = await googleServices.provideIntelligentSupport(
           userInput,
-          context,
+          enhancedContext,
           chatContext.language || "en"
         );
       } else if (aiService === "local") {
@@ -507,7 +566,7 @@ export const LiveChatWidget = () => {
         ]
       },
       wallet: {
-        response: "S-Pay Wallet provides the most secure payment system for device transactions in South Africa.\n\nKey Features:\n• Military-grade escrow protection\n• Multi-currency support (ZAR, USD, EUR)\n• Real-time transaction monitoring\n• Instant payment notifications\n\nHow to Use:\n1. Add funds from your bank account\n2. Funds held in secure escrow during transaction\n3. Released automatically when both parties confirm\n4. Track all transaction history\n\nReady to make a secure purchase? I can help you find the perfect device with trusted sellers!",
+        response: "S-Pay Wallet provides the most secure payment system for device transactions in South Africa.\n\nKey Features:\n• Military-grade escrow protection\n• Multi-currency support (ZAR primary, USD, EUR)\n• Real-time transaction monitoring\n• Instant payment notifications\n\nHow to Use:\n1. Add funds from your bank account\n2. Funds held in secure escrow during transaction\n3. Released automatically when both parties confirm\n4. Track all transaction history\n\nReady to make a secure purchase? I can help you find the perfect device with trusted sellers!",
         confidence: 0.9,
         suggestedActions: ["Open Wallet", "Add Funds"],
         followUpQuestions: ["Need help adding funds?", "Having transaction issues?"],
@@ -621,47 +680,63 @@ export const LiveChatWidget = () => {
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    // Set the message and trigger send
+    // Auto-fill the input field instead of auto-sending
     setInputMessage(suggestion);
     
-    // Mark conversation as started
-    if (!conversationStarted) {
-      setConversationStarted(true);
-    }
+    // Focus the input field for user to review and send manually
+    setTimeout(() => {
+      const inputField = document.querySelector('input[placeholder="Type your message..."]') as HTMLInputElement;
+      if (inputField) {
+        inputField.focus();
+      }
+    }, 50);
+  };
 
-    // Create and send user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: suggestion,
-      sender: "user",
-      timestamp: new Date(),
-      type: "text"
+  // Drag functionality for movable widget
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (chatWidgetRef.current && !isDragging) {
+      const rect = chatWidgetRef.current.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+      setIsDragging(true);
+      e.preventDefault();
+    }
+  };
+
+  // Add global mouse event listeners for dragging
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        const newX = e.clientX - dragOffset.x;
+        const newY = e.clientY - dragOffset.y;
+        
+        // Keep widget within viewport bounds
+        const maxX = window.innerWidth - 384; // 384px is widget width
+        const maxY = window.innerHeight - 600; // 600px is widget height
+        
+        setPosition({
+          x: Math.max(0, Math.min(newX, maxX)),
+          y: Math.max(0, Math.min(newY, maxY))
+        });
+      }
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage("");
-    setIsTyping(true);
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
 
-    // Get AI response
-    setTimeout(async () => {
-      try {
-        const aiResponse = await getAIResponse(suggestion);
-        setMessages(prev => [...prev, aiResponse]);
-      } catch (error) {
-        console.error("AI response error:", error);
-        const errorMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: "I'm experiencing technical difficulties. Please try again or contact our support team directly.",
-          sender: "bot",
-          timestamp: new Date(),
-          type: "error"
-        };
-        setMessages(prev => [...prev, errorMessage]);
-      } finally {
-        setIsTyping(false);
-      }
-    }, 500);
-  };
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragOffset]);
 
   const handleActionClick = (action: string) => {
     // Handle action buttons
@@ -695,13 +770,27 @@ export const LiveChatWidget = () => {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 w-80 h-96">
+    <div 
+      ref={chatWidgetRef}
+      className="fixed z-50 w-80 h-96"
+      style={{
+        bottom: position.x === 0 && position.y === 0 ? '16px' : 'auto',
+        right: position.x === 0 && position.y === 0 ? '16px' : 'auto',
+        left: position.x === 0 && position.y === 0 ? 'auto' : `${position.x}px`,
+        top: position.x === 0 && position.y === 0 ? 'auto' : `${position.y}px`,
+        cursor: isDragging ? 'grabbing' : 'default'
+      }}
+    >
       <Card className="flex flex-col h-full shadow-xl border-2 border-primary/20">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-primary/5 to-primary/10">
+        <div 
+          className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-primary/5 to-primary/10 cursor-grab active:cursor-grabbing"
+          onMouseDown={handleMouseDown}
+        >
           <div className="flex items-center gap-2">
+            <Move className="w-4 h-4 text-gray-400 mr-1" />
             <div className="relative">
-            <MessageCircle className="w-5 h-5 text-primary" />
+              <MessageCircle className="w-5 h-5 text-primary" />
               {getAIStatusIcon()}
             </div>
             <div>
@@ -880,7 +969,7 @@ export const LiveChatWidget = () => {
                             }}
                             className="text-xs h-6 px-2 text-primary hover:bg-primary/10"
                           >
-                            → {typeof link === 'string' ? link.replace('/', '').replace('-', ' ').toUpperCase() : link.label}
+                            → {typeof link === 'string' ? (link as string).replace('/', '').replace('-', ' ').toUpperCase() : (link as any).label}
                           </Button>
                         ))}
                       </div>

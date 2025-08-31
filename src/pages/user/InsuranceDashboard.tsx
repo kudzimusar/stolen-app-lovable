@@ -36,7 +36,7 @@ import {
   Globe,
   Lock
 } from "lucide-react";
-import { cn } from "@/lib/utils/utils";
+import { cn } from "@/lib/utils";
 
 const InsuranceDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");

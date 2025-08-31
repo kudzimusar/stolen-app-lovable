@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils/utils";
+import { cn } from "@/lib/utils";
 import {
   ArrowLeft,
   Shield,

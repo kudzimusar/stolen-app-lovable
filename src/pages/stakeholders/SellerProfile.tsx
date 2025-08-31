@@ -10,7 +10,7 @@ const listings = Array.from({ length: 6 }, (_, i) => ({
   id: i + 1,
   title: `Sample Device ${i + 1}`,
   price: 4999 + i * 500,
-  image: `https://placehold.co/400x300?text=Device+${i + 1}`,
+  image: `https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop&auto=format&sig=${i + 1}`,
   location: "Johannesburg",
   province: "Gauteng",
 }));

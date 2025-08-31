@@ -42,7 +42,7 @@ export default function InsuranceQuote() {
   const product = useMemo(() => ({
     id: Number(id),
     title: `Listing #${id}`,
-    image: `https://placehold.co/640x480?text=Listing+%23${id}`,
+    image: `https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=640&h=480&fit=crop&auto=format&sig=${id}`,
     price: 18999,
     condition: "Like New",
     warrantyMonths: 8,

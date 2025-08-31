@@ -52,7 +52,7 @@ const ListMyDevice = () => {
       estimatedValue: 18999,
       registrationDate: "2024-01-15",
       condition: "Excellent",
-      photos: ["https://placehold.co/200x150?text=iPhone+Front", "https://placehold.co/200x150?text=iPhone+Back"],
+      photos: ["", ""],
       repairHistory: [],
       warrantyMonths: 8
     },
@@ -64,7 +64,7 @@ const ListMyDevice = () => {
       estimatedValue: 32999,
       registrationDate: "2023-11-20",
       condition: "Like New",
-      photos: ["https://placehold.co/200x150?text=MacBook+Open", "https://placehold.co/200x150?text=MacBook+Closed"],
+      photos: ["", ""],
       repairHistory: [],
       warrantyMonths: 10
     },
@@ -76,7 +76,7 @@ const ListMyDevice = () => {
       estimatedValue: 14999,
       registrationDate: "2024-02-10",
       condition: "Good",
-      photos: ["https://placehold.co/200x150?text=Galaxy+Front", "https://placehold.co/200x150?text=Galaxy+Back"],
+      photos: ["", ""],
       repairHistory: [{ date: "2024-06-15", description: "Screen protector replacement" }],
       warrantyMonths: 6
     },
@@ -88,7 +88,7 @@ const ListMyDevice = () => {
       estimatedValue: 16999,
       registrationDate: "2023-12-05",
       condition: "Excellent",
-      photos: ["https://placehold.co/200x150?text=iPad+Front", "https://placehold.co/200x150?text=iPad+Back"],
+      photos: ["", ""],
       repairHistory: [],
       warrantyMonths: 12
     }

@@ -66,15 +66,32 @@ export class AITransferSuggestionEngine {
   private aiModel: any;
 
   constructor() {
-    this.supabase = createClient(
-      import.meta.env.VITE_SUPABASE_URL!,
-      import.meta.env.VITE_SUPABASE_ANON_KEY!
-    );
+    try {
+      // Safe initialization with fallback
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      if (supabaseUrl && supabaseKey) {
+        this.supabase = createClient(supabaseUrl, supabaseKey);
+      } else {
+        console.warn('AITransferSuggestionEngine: Supabase credentials not available, running in fallback mode');
+        this.supabase = null;
+      }
+    } catch (error) {
+      console.warn('AITransferSuggestionEngine initialization failed:', error);
+      this.supabase = null;
+    }
   }
 
   // Main method to generate transfer suggestions for a user
   async generateSuggestions(userId: string): Promise<TransferSuggestion[]> {
     try {
+      // Safety check for Supabase availability
+      if (!this.supabase) {
+        console.warn('AITransferSuggestionEngine: Supabase not available, returning empty suggestions');
+        return [];
+      }
+      
       console.log(`🤖 Generating transfer suggestions for user: ${userId}`);
 
       const userDevices = await this.getUserDevices(userId);

@@ -1,11 +1,11 @@
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import cacheManager from '../lib/redis';
-import performanceMonitor from '../lib/performance-monitoring';
-import searchService from '../lib/search-optimization';
-import apiService from '../lib/api-optimization';
+import cacheManager from '../lib/performance/redis';
+import performanceMonitor from '../lib/performance/performance-monitoring';
+import searchService from '../lib/performance/search-optimization';
+import apiService from '../lib/performance/api-optimization';
 import backgroundJobs from '../lib/optimization/background-jobs-browser';
-import imageService from '../lib/image-optimization';
+import imageService from '../lib/performance/image-optimization';
 
 /**
  * Hook for optimized API calls with caching and performance monitoring
@@ -403,6 +403,23 @@ export const useThrottle = <T extends (...args: any[]) => any>(
   ) as T;
 };
 
+/**
+ * Debounced search hook for performance optimization
+ */
+export const useDebouncedSearch = (query: string, delay: number = 300) => {
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [query, delay]);
+
+  return debouncedQuery;
+};
+
 export default {
   useOptimizedApiCall,
   useOptimizedMutation,
@@ -414,4 +431,5 @@ export default {
   useLazyLoading,
   useDebounce,
   useThrottle,
+  useDebouncedSearch,
 };

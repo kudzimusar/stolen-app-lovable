@@ -5,11 +5,19 @@ import TransactionDetailsModal from "@/components/modals/TransactionDetailsModal
 import PaymentMethodManager from "@/components/payment/PaymentMethodManager";
 import WithdrawalRequestForm from "@/components/payment/WithdrawalRequestForm";
 import SABankingIntegration from "@/components/payment/SABankingIntegration";
-import SecurityEnhancement from "@/components/security/SecurityEnhancement";
+import SecurityEnhancement from "@/components/payment/SecurityEnhancement";
+import FICACompliance from "@/components/payment/FICACompliance";
+import QRCodeScanner from "@/components/payment/QRCodeScanner";
+import InvestmentFeatures from "@/components/payment/InvestmentFeatures";
+import MerchantServices from "@/components/payment/MerchantServices";
 import { Badge } from "@/components/ui/badge";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { BackButton } from "@/components/navigation/BackButton";
 import { Link } from "react-router-dom";
+import { LiveChatWidget } from "@/components/ui/LiveChatWidget";
+import { AIWalletInsights } from "@/components/payment/AIWalletInsights";
+import { RealTimeUpdates } from "@/components/payment/RealTimeUpdates";
+import { SupportContactWidget } from "@/components/support/SupportContactWidget";
 import {
   ArrowLeft,
   Wallet as WalletIcon,
@@ -24,10 +32,25 @@ import {
   Shield,
   Gift,
   CreditCard,
-  RefreshCw
+  RefreshCw,
+  Building2,
+  QrCode,
+  UserCheck,
+  TrendingUp,
+  Smartphone,
+  PiggyBank,
+  Store,
+  HeadphonesIcon,
+  Info
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { dynamicWalletService, WalletBalance as DynamicWalletBalance } from "@/lib/services/dynamic-wallet-service";
 
 const Wallet = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [showBalance, setShowBalance] = useState(true);
   const [activeTab, setActiveTab] = useState<"transactions" | "rewards" | "escrow">("transactions");
   const [loading, setLoading] = useState(true);
@@ -41,12 +64,95 @@ const Wallet = () => {
   const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
   const [showSABanking, setShowSABanking] = useState(false);
   const [showSecurityEnhancement, setShowSecurityEnhancement] = useState(false);
+  const [showFICACompliance, setShowFICACompliance] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [showInvestmentFeatures, setShowInvestmentFeatures] = useState(false);
+  const [showMerchantServices, setShowMerchantServices] = useState(false);
+  const [showAIInsights, setShowAIInsights] = useState(true);
+  const [userId] = useState('user_123'); // This should come from auth context
+  const [dynamicBalance, setDynamicBalance] = useState<DynamicWalletBalance | null>(null);
 
   // Fetch wallet data on component mount
   useEffect(() => {
+    initializeDynamicWallet();
     fetchWalletData();
     fetchTransactions();
   }, []);
+
+  // Initialize dynamic wallet system
+  const initializeDynamicWallet = async () => {
+    try {
+      const balance = await dynamicWalletService.initializeWallet(userId);
+      setDynamicBalance(balance);
+      
+      // Add sample transactions for testing
+      await dynamicWalletService.addSampleTransactions(userId);
+      
+      // Set up real-time updates
+      const unsubscribe = dynamicWalletService.onBalanceUpdate(userId, (newBalance) => {
+        setDynamicBalance(newBalance);
+        toast({
+          title: "Balance Updated",
+          description: `Your wallet balance has been updated: R${newBalance.available.toFixed(2)}`,
+        });
+      });
+
+      return unsubscribe;
+    } catch (error) {
+      console.error('Error initializing dynamic wallet:', error);
+    }
+  };
+
+  // Handle real-time updates
+  const handleBalanceUpdate = (newBalance: any) => {
+    setWalletData(prev => ({ ...prev, ...newBalance }));
+  };
+
+  const handleTransactionUpdate = (transaction: any) => {
+    setTransactions(prev => [transaction, ...prev]);
+  };
+
+  const handleSecurityAlert = (alert: any) => {
+    console.log('Security alert received:', alert);
+    // You can add security alert handling here
+  };
+
+  const handleAIInsightAction = (insight: any) => {
+    console.log('AI insight action:', insight);
+    // Handle AI insight actions here
+  };
+
+  const handleQRScanResult = (data: any) => {
+    console.log('QR scan result:', data);
+    
+    switch (data.type) {
+      case 'payment_request':
+        // Navigate to send money with pre-filled data
+        navigate(`/wallet/send?amount=${data.amount}&recipient=${data.recipientId}&description=${data.description}`);
+        break;
+      case 'wallet_id':
+        // Navigate to send money with recipient
+        navigate(`/wallet/send?recipient=${data.recipientId}`);
+        break;
+      case 'contact_info':
+        toast({
+          title: "Contact Scanned",
+          description: `Contact information for ${data.recipientName} has been scanned.`,
+        });
+        break;
+      case 'verification_code':
+        toast({
+          title: "Verification Code Scanned",
+          description: "Verification code has been processed.",
+        });
+        break;
+      default:
+        toast({
+          title: "QR Code Scanned",
+          description: "QR code has been scanned successfully.",
+        });
+    }
+  };
 
   const fetchWalletData = async () => {
     try {
@@ -134,11 +240,11 @@ const Wallet = () => {
     }
   };
 
-  // Calculate balances from wallet data (ZAR currency)
-  const balance = walletData?.available_balance || 1250.75;
-  const escrowAmount = walletData?.escrow_balance || 450.00;
-  const rewardsEarned = walletData?.total_rewards || 85.50;
-  const currency = walletData?.currency || 'ZAR';
+  // Calculate balances from dynamic wallet data (ZAR currency)
+  const balance = dynamicBalance?.available || walletData?.available_balance || 1250.75;
+  const escrowAmount = dynamicBalance?.escrow || walletData?.escrow_balance || 450.00;
+  const rewardsEarned = dynamicBalance?.rewards || walletData?.total_rewards || 85.50;
+  const currency = dynamicBalance?.currency || walletData?.currency || 'ZAR';
   const ficaStatus = walletData?.fica_status || 'pending';
   const isVerified = walletData?.is_verified || false;
 
@@ -181,8 +287,42 @@ const Wallet = () => {
   };
 
   // Mock rewards data (will be replaced with API call)
+  useEffect(() => {
+    // Initialize mock rewards data
+    setRewards([
+      {
+        id: 1,
+        title: "Device Recovery Reward",
+        description: "Successfully recovered stolen iPhone 15 Pro",
+        amount: 50.00,
+        sponsor: "STOLEN Foundation",
+        date: "2024-07-28",
+        status: "completed"
+      },
+      {
+        id: 2,
+        title: "Marketplace Purchase Cashback",
+        description: "3% cashback on Galaxy S24 purchase",
+        amount: 35.50,
+        sponsor: "STOLEN Rewards",
+        date: "2024-07-25",
+        status: "completed"
+      }
+    ]);
 
-  // Mock escrow transactions data (will be replaced with API call)
+    // Initialize mock escrow transactions data
+    setEscrowTransactions([
+      {
+        id: 1,
+        device: "iPhone 15 Pro Max 256GB",
+        seller: "TechDeals Pro",
+        amount: 299.99,
+        status: "awaiting_delivery",
+        estimatedRelease: "2024-08-05",
+        created: "2024-07-27"
+      }
+    ]);
+  }, []);
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
@@ -225,8 +365,8 @@ const Wallet = () => {
               <STOLENLogo />
             </div>
             <Button variant="outline" size="sm" asChild>
-              <Link to="/escrow-payment">
-                <CreditCard className="w-4 h-4" />
+              <Link to="/wallet/add-funds">
+                <Plus className="w-4 h-4" />
                 Add Funds
               </Link>
             </Button>
@@ -267,9 +407,32 @@ const Wallet = () => {
                     </Badge>
                   )}
                   {ficaStatus === 'pending' && (
-                    <Badge variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-300">
-                      FICA Pending
-                    </Badge>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-1">
+                            <Badge variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-300">
+                              FICA Pending
+                            </Badge>
+                            <Info className="w-3 h-3 text-yellow-300 cursor-help" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <div className="space-y-2">
+                            <p className="font-semibold">FICA Compliance</p>
+                            <p className="text-sm">
+                              FICA (Financial Intelligence Centre Act) verification is required by South African law for financial services. 
+                              Complete your verification to unlock higher transaction limits and full wallet features.
+                            </p>
+                            <div className="text-xs text-muted-foreground">
+                              • Upload ID document<br/>
+                              • Proof of address<br/>
+                              • Income verification
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </div>
               </div>
@@ -305,21 +468,69 @@ const Wallet = () => {
                 <div className="text-xs text-white/80">Rewards Earned</div>
               </div>
             </div>
+
+            {/* Dynamic Balance Testing (remove in production) */}
+            <div className="flex gap-2 pt-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-white border-white/20 hover:bg-white/10"
+                onClick={async () => {
+                  const result = await dynamicWalletService.simulateTransaction(userId, 'funding', 100);
+                  setDynamicBalance(result.balance);
+                  toast({
+                    title: "Test Funding",
+                    description: "Added R100 to your wallet",
+                  });
+                }}
+              >
+                +R100 Test
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-white border-white/20 hover:bg-white/10"
+                onClick={async () => {
+                  const result = await dynamicWalletService.simulateTransaction(userId, 'purchase', 50);
+                  setDynamicBalance(result.balance);
+                  toast({
+                    title: "Test Purchase",
+                    description: "Purchased item for R50",
+                  });
+                }}
+              >
+                -R50 Test
+              </Button>
+            </div>
           </div>
         </Card>
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Button variant="outline" className="h-16 flex-col gap-2" asChild>
-            <Link to="/escrow-payment">
+            <Link to="/wallet/send">
               <Send className="w-5 h-5" />
               <span>Send</span>
             </Link>
           </Button>
           <Button variant="outline" className="h-16 flex-col gap-2" asChild>
-            <Link to="/escrow-payment">
+            <Link to="/wallet/receive">
               <Download className="w-5 h-5" />
               <span>Receive</span>
+            </Link>
+          </Button>
+          <Button 
+            variant="outline" 
+            className="h-16 flex-col gap-2"
+            onClick={() => setShowQRScanner(true)}
+          >
+            <QrCode className="w-5 h-5" />
+            <span>QR Scanner</span>
+          </Button>
+          <Button variant="outline" className="h-16 flex-col gap-2" asChild>
+            <Link to="/wallet/transfer">
+              <TrendingUp className="w-5 h-5" />
+              <span>Transfer</span>
             </Link>
           </Button>
           <Button 
@@ -349,11 +560,38 @@ const Wallet = () => {
           <Button 
             variant="outline" 
             className="h-16 flex-col gap-2"
+            onClick={() => setShowFICACompliance(true)}
+          >
+            <UserCheck className="w-5 h-5" />
+            <span>FICA Verify</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            className="h-16 flex-col gap-2"
+            onClick={() => setShowInvestmentFeatures(true)}
+          >
+            <PiggyBank className="w-5 h-5" />
+            <span>Invest</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            className="h-16 flex-col gap-2"
+            onClick={() => setShowMerchantServices(true)}
+          >
+            <Store className="w-5 h-5" />
+            <span>Merchant</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            className="h-16 flex-col gap-2"
             onClick={() => setShowSecurityEnhancement(true)}
           >
             <Shield className="w-5 h-5" />
             <span>Security</span>
           </Button>
+          <div className="md:col-span-4">
+            <SupportContactWidget />
+          </div>
         </div>
 
         {/* Tabs */}
@@ -551,11 +789,62 @@ const Wallet = () => {
                   <SABankingIntegration
                     isOpen={showSABanking}
                     onClose={() => setShowSABanking(false)}
+                    userId={userId}
                   />
                   <SecurityEnhancement
                     isOpen={showSecurityEnhancement}
                     onClose={() => setShowSecurityEnhancement(false)}
+                    userId={userId}
                   />
+
+                  <FICACompliance
+                    isOpen={showFICACompliance}
+                    onClose={() => setShowFICACompliance(false)}
+                    userId={userId}
+                  />
+
+                  <QRCodeScanner
+                    isOpen={showQRScanner}
+                    onClose={() => setShowQRScanner(false)}
+                    onScanResult={handleQRScanResult}
+                    mode="payment"
+                    title="Scan Payment QR Code"
+                  />
+
+                  <InvestmentFeatures
+                    isOpen={showInvestmentFeatures}
+                    onClose={() => setShowInvestmentFeatures(false)}
+                    userId={userId}
+                    walletBalance={balance}
+                  />
+
+                  <MerchantServices
+                    isOpen={showMerchantServices}
+                    onClose={() => setShowMerchantServices(false)}
+                    userId={userId}
+                  />
+
+        {/* AI Insights Section */}
+        {showAIInsights && walletData && (
+          <div className="mt-6">
+            <AIWalletInsights
+              walletData={walletData}
+              transactions={transactions}
+              onInsightAction={handleAIInsightAction}
+            />
+          </div>
+        )}
+
+        {/* Real-Time Updates */}
+        <RealTimeUpdates
+          userId={userId}
+          onBalanceUpdate={handleBalanceUpdate}
+          onTransactionUpdate={handleTransactionUpdate}
+          onSecurityAlert={handleSecurityAlert}
+        />
+
+        {/* Live Chat Widget */}
+        <LiveChatWidget />
       </div>
     </div>
   );

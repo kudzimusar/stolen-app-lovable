@@ -27,7 +27,7 @@ import {
   AlertTriangle,
   CheckCircle
 } from "lucide-react";
-import { cn } from "@/lib/utils/utils";
+import { cn } from "@/lib/utils";
 
 const AdminProfile = () => {
   const [showPassword, setShowPassword] = useState(false);

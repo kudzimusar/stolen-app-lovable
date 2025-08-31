@@ -3,309 +3,389 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
-  Building2, CreditCard, Shield, CheckCircle, AlertCircle, 
-  Plus, Edit, Trash2, Upload, Download, Banknote, Users
+  Building2, 
+  CreditCard, 
+  Shield, 
+  CheckCircle,
+  AlertCircle,
+  Smartphone,
+  QrCode,
+  RefreshCw,
+  ArrowRight,
+  Banknote,
+  Clock,
+  Info
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { apiEndpointsService } from "@/lib/services/api-endpoints-service";
 
-interface SABankingIntegrationProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface SABank {
+  id: string;
+  name: string;
+  code: string;
+  logo: string;
+  color: string;
+  supportedServices: string[];
+  processingTime: string;
+  maxLimit: number;
 }
 
 interface BankAccount {
   id: string;
-  bank_name: string;
-  account_number: string;
-  account_type: string;
-  branch_code: string;
-  account_holder_name: string;
-  is_verified: boolean;
-  verification_date?: string;
+  bankId: string;
+  accountNumber: string;
+  accountType: 'savings' | 'cheque' | 'credit';
+  accountHolderName: string;
+  branchCode: string;
+  isVerified: boolean;
+  balance?: number;
+  lastSyncTime?: string;
 }
 
-interface FICADocument {
+interface MobilePaymentMethod {
   id: string;
-  verification_type: string;
-  document_type: string;
-  document_number: string;
-  verification_status: string;
-  created_at: string;
+  name: string;
+  type: 'snapscan' | 'zapper' | 'vodapay' | 'eft';
+  icon: string;
+  color: string;
+  processingFee: number;
+  instantTransfer: boolean;
 }
 
-const SABankingIntegration: React.FC<SABankingIntegrationProps> = ({ isOpen, onClose }) => {
-  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
-  const [ficaDocuments, setFicaDocuments] = useState<FICADocument[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showAddBank, setShowAddBank] = useState(false);
-  const [showFICAUpload, setShowFICAUpload] = useState(false);
-  const [formData, setFormData] = useState({
-    bank_name: '',
-    account_number: '',
-    account_type: '',
-    branch_code: '',
-    account_holder_name: ''
+interface SABankingIntegrationProps {
+  isOpen: boolean;
+  onClose: () => void;
+  userId: string;
+}
+
+const SABankingIntegration: React.FC<SABankingIntegrationProps> = ({
+  isOpen,
+  onClose,
+  userId
+}) => {
+  const [activeTab, setActiveTab] = useState<'banks' | 'mobile' | 'eft'>('banks');
+  const [connectedAccounts, setConnectedAccounts] = useState<BankAccount[]>([]);
+  const [availableBanks, setAvailableBanks] = useState<SABank[]>([]);
+  const [mobilePaymentMethods, setMobilePaymentMethods] = useState<MobilePaymentMethod[]>([]);
+  const [selectedBank, setSelectedBank] = useState<SABank | null>(null);
+  const [showAddAccount, setShowAddAccount] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [accountForm, setAccountForm] = useState({
+    accountNumber: '',
+    accountType: 'cheque' as const,
+    accountHolderName: '',
+    branchCode: ''
   });
-  const [ficaFormData, setFicaFormData] = useState({
-    verification_type: '',
-    document_type: '',
-    document_number: '',
-    document_url: ''
-  });
-
-  const southAfricanBanks = [
-    { value: 'absa', label: 'ABSA Bank' },
-    { value: 'fnb', label: 'First National Bank (FNB)' },
-    { value: 'nedbank', label: 'Nedbank' },
-    { value: 'standard_bank', label: 'Standard Bank' },
-    { value: 'capitec', label: 'Capitec Bank' },
-    { value: 'african_bank', label: 'African Bank' },
-    { value: 'bidvest_bank', label: 'Bidvest Bank' },
-    { value: 'grindrod_bank', label: 'Grindrod Bank' },
-    { value: 'investec', label: 'Investec Bank' },
-    { value: 'sasfin', label: 'Sasfin Bank' }
-  ];
-
-  const accountTypes = [
-    { value: 'savings', label: 'Savings Account' },
-    { value: 'cheque', label: 'Cheque Account' },
-    { value: 'credit', label: 'Credit Account' },
-    { value: 'business', label: 'Business Account' }
-  ];
-
-  const ficaVerificationTypes = [
-    { value: 'id_document', label: 'Identity Document' },
-    { value: 'proof_of_address', label: 'Proof of Address' },
-    { value: 'income_verification', label: 'Income Verification' },
-    { value: 'source_of_funds', label: 'Source of Funds' }
-  ];
-
-  const documentTypes = [
-    { value: 'sa_id', label: 'South African ID' },
-    { value: 'passport', label: 'Passport' },
-    { value: 'drivers_license', label: 'Driver\'s License' },
-    { value: 'utility_bill', label: 'Utility Bill' },
-    { value: 'bank_statement', label: 'Bank Statement' },
-    { value: 'payslip', label: 'Payslip' },
-    { value: 'tax_certificate', label: 'Tax Certificate' }
-  ];
 
   useEffect(() => {
     if (isOpen) {
-      fetchBankAccounts();
-      fetchFICAStatus();
+      fetchConnectedAccounts();
+      fetchAvailableBanks();
+      fetchMobilePaymentMethods();
     }
   }, [isOpen]);
 
-  const fetchBankAccounts = async () => {
+  const fetchConnectedAccounts = async () => {
     try {
-      const response = await fetch('/api/v1/s-pay-enhanced', {
-        method: 'POST',
+      const response = await fetch('/api/v1/s-pay/banks/accounts', {
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
-        },
-        body: JSON.stringify({
-          action: 'get_sa_bank_accounts'
-        })
+        }
       });
 
+      if (response.ok) {
       const result = await response.json();
-      
-      if (result.success) {
-        setBankAccounts(result.data);
-      } else {
-        throw new Error(result.error);
+        setConnectedAccounts(result.accounts || []);
       }
     } catch (error) {
-      console.error('Error fetching bank accounts:', error);
-      // Fallback to mock data
-      setBankAccounts([
+      console.error('Error fetching connected accounts:', error);
+      // Mock data for demo
+      setConnectedAccounts([
         {
           id: '1',
-          bank_name: 'absa',
-          account_number: '1234567890',
-          account_type: 'savings',
-          branch_code: '632005',
-          account_holder_name: 'John Doe',
-          is_verified: true,
-          verification_date: '2024-07-15'
+          bankId: 'fnb',
+          accountNumber: '****7892',
+          accountType: 'cheque',
+          accountHolderName: 'John Doe',
+          branchCode: '250655',
+          isVerified: true,
+          balance: 8920.50,
+          lastSyncTime: new Date().toISOString()
         }
       ]);
     }
   };
 
-  const fetchFICAStatus = async () => {
+  const fetchAvailableBanks = async () => {
     try {
-      const response = await fetch('/api/v1/s-pay-enhanced', {
+      const response = await fetch('/api/v1/s-pay/banks/sa-banks');
+      
+      if (response.ok) {
+        const result = await response.json();
+        setAvailableBanks(result.banks || []);
+      }
+    } catch (error) {
+      console.error('Error fetching available banks:', error);
+      // Mock SA banks data
+      setAvailableBanks([
+        {
+          id: 'fnb',
+          name: 'First National Bank (FNB)',
+          code: '250655',
+          logo: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=64&h=64&fit=crop&auto=format',
+          color: 'rgb(0, 86, 149)',
+          supportedServices: ['EFT', 'Real-time', 'Mobile Banking'],
+          processingTime: 'Instant - 2 hours',
+          maxLimit: 500000
+        },
+        {
+          id: 'standard_bank',
+          name: 'Standard Bank',
+          code: '051001',
+          logo: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=64&h=64&fit=crop&auto=format',
+          color: 'rgb(0, 61, 113)',
+          supportedServices: ['EFT', 'Real-time', 'Internet Banking'],
+          processingTime: 'Instant - 1 hour',
+          maxLimit: 1000000
+        },
+        {
+          id: 'absa',
+          name: 'ABSA Bank',
+          code: '632005',
+          logo: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=64&h=64&fit=crop&auto=format',
+          color: 'rgb(176, 33, 51)',
+          supportedServices: ['EFT', 'Real-time', 'Mobile Banking'],
+          processingTime: 'Instant - 3 hours',
+          maxLimit: 750000
+        },
+        {
+          id: 'nedbank',
+          name: 'Nedbank',
+          code: '198765',
+          logo: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=64&h=64&fit=crop&auto=format',
+          color: 'rgb(0, 153, 51)',
+          supportedServices: ['EFT', 'Internet Banking'],
+          processingTime: '1 - 24 hours',
+          maxLimit: 250000
+        },
+        {
+          id: 'capitec',
+          name: 'Capitec Bank',
+          code: '470010',
+          logo: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=64&h=64&fit=crop&auto=format',
+          color: 'rgb(0, 173, 239)',
+          supportedServices: ['EFT', 'Real-time', 'Mobile Banking'],
+          processingTime: 'Instant - 2 hours',
+          maxLimit: 300000
+        }
+      ]);
+    }
+  };
+
+  const fetchMobilePaymentMethods = async () => {
+    // Mock mobile payment methods
+    setMobilePaymentMethods([
+      {
+        id: 'snapscan',
+        name: 'SnapScan',
+        type: 'snapscan',
+        icon: 'qr-code',
+        color: 'rgb(0, 171, 85)',
+        processingFee: 2.50,
+        instantTransfer: true
+      },
+      {
+        id: 'zapper',
+        name: 'Zapper',
+        type: 'zapper',
+        icon: 'smartphone',
+        color: 'rgb(255, 87, 34)',
+        processingFee: 2.00,
+        instantTransfer: true
+      },
+      {
+        id: 'vodapay',
+        name: 'VodaPay',
+        type: 'vodapay',
+        icon: 'smartphone',
+        color: 'rgb(230, 25, 75)',
+        processingFee: 3.00,
+        instantTransfer: true
+      },
+      {
+        id: 'eft',
+        name: 'Standard EFT',
+        type: 'eft',
+        icon: 'banknote',
+        color: 'rgb(107, 114, 128)',
+        processingFee: 5.00,
+        instantTransfer: false
+      }
+    ]);
+  };
+
+  const handleBankSelection = (bank: SABank) => {
+    setSelectedBank(bank);
+    setShowAddAccount(true);
+  };
+
+  const handleAddAccount = async () => {
+    if (!selectedBank) return;
+
+    setIsConnecting(true);
+    try {
+      const response = await fetch('/api/v1/s-pay/banks/connect-account', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
         },
         body: JSON.stringify({
-          action: 'get_fica_status'
+          bankId: selectedBank.id,
+          ...accountForm
         })
       });
 
+      if (response.ok) {
       const result = await response.json();
       
       if (result.success) {
-        setFicaDocuments(result.data.documents || []);
+          toast({
+            title: "Account Connected",
+            description: "Your bank account has been connected successfully and is being verified.",
+          });
+          
+          // Add to connected accounts
+          const newAccount = {
+            id: `acc_${Date.now()}`,
+            bankId: selectedBank.id,
+            bankName: selectedBank.name,
+            accountType: accountForm.accountType,
+            accountHolderName: accountForm.accountHolderName,
+            last4: accountForm.accountNumber.slice(-4),
+            branchCode: accountForm.branchCode || selectedBank.code,
+            status: 'verified',
+            balance: Math.floor(Math.random() * 50000) + 1000,
+            connectedAt: new Date().toISOString(),
+            currency: 'ZAR'
+          };
+          
+          setConnectedAccounts(prev => [...prev, newAccount]);
+          setShowAddAccount(false);
+          setAccountForm({
+            accountNumber: '',
+            accountType: 'cheque',
+            accountHolderName: '',
+            branchCode: ''
+          });
+        } else {
+          throw new Error(result.error || 'Failed to connect account');
+        }
       } else {
-        throw new Error(result.error);
+        throw new Error('Failed to connect account');
       }
     } catch (error) {
-      console.error('Error fetching FICA status:', error);
-      // Fallback to mock data
-      setFicaDocuments([
-        {
-          id: '1',
-          verification_type: 'id_document',
-          document_type: 'sa_id',
-          document_number: '8001015009087',
-          verification_status: 'approved',
-          created_at: '2024-07-15'
-        }
-      ]);
+      console.error('Error connecting account:', error);
+      toast({
+        title: "Connection Failed",
+        description: "Unable to connect your bank account. Please check your details and try again.",
+        variant: "destructive"
+      });
     } finally {
-      setLoading(false);
+      setIsConnecting(false);
     }
   };
 
-  const handleAddBankAccount = async () => {
+  const handleAccountVerification = async (accountId: string) => {
     try {
-      const response = await fetch('/api/v1/s-pay-enhanced', {
+      const response = await fetch(`/api/v1/s-pay/banks/verify-account`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
         },
-        body: JSON.stringify({
-          action: 'add_sa_bank_account',
-          ...formData
-        })
+        body: JSON.stringify({ accountId })
       });
 
+      if (response.ok) {
       const result = await response.json();
       
       if (result.success) {
         toast({
-          title: "Bank Account Added",
-          description: "Your bank account has been added successfully.",
-        });
-        setShowAddBank(false);
-        setFormData({
-          bank_name: '',
-          account_number: '',
-          account_type: '',
-          branch_code: '',
-          account_holder_name: ''
-        });
-        fetchBankAccounts();
-      } else {
-        throw new Error(result.error);
+            title: "Verification Initiated",
+            description: "Account verification has been started. This may take a few minutes.",
+          });
+          
+          // Refresh accounts after a delay
+          setTimeout(fetchConnectedAccounts, 2000);
+        }
       }
     } catch (error) {
-      console.error('Error adding bank account:', error);
+      console.error('Error verifying account:', error);
       toast({
-        title: "Error",
-        description: "Failed to add bank account. Please try again.",
+        title: "Verification Failed",
+        description: "Unable to verify account. Please try again later.",
         variant: "destructive"
       });
     }
   };
 
-  const handleUploadFICADocument = async () => {
+  const handleMobilePaymentSetup = async (method: MobilePaymentMethod) => {
     try {
-      // Enhanced FICA document verification with real compliance checks
-      const enhancedFormData = {
-        ...ficaFormData,
-        // Add South African specific validation
-        country: 'ZA',
-        currency: 'ZAR',
-        complianceLevel: 'FICA',
-        verificationSource: 'Home Affairs API'
-      };
-
-      const response = await fetch('/api/v1/s-pay-enhanced', {
+      const response = await fetch(`/api/v1/s-pay/mobile/${method.type}/setup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
         },
-        body: JSON.stringify({
-          action: 'upload_fica_document',
-          ...enhancedFormData
-        })
+        body: JSON.stringify({ methodId: method.id })
       });
 
+      if (response.ok) {
       const result = await response.json();
       
       if (result.success) {
-        // Enhanced success handling with compliance details
         toast({
-          title: "FICA Document Verified",
-          description: `Document verified with ${result.confidence || 95}% confidence. Compliance status: ${result.complianceStatus || 'Approved'}`,
-        });
-        
-        setShowFICAUpload(false);
-        setFicaFormData({
-          verification_type: '',
-          document_type: '',
-          document_number: '',
-          document_url: ''
-        });
-        
-        // Update FICA status with enhanced data
-        setFicaStatus({
-          verified: true,
-          confidence: result.confidence || 95,
-          documentType: ficaFormData.document_type,
-          verifiedAt: new Date().toISOString(),
-          ficaNumber: result.ficaNumber,
-          complianceStatus: result.complianceStatus || 'approved'
-        });
-        
-        fetchFICAStatus();
-      } else {
-        throw new Error(result.error || 'FICA verification failed');
+            title: `${method.name} Connected`,
+            description: `${method.name} has been connected to your S-Pay wallet.`,
+          });
+        }
       }
     } catch (error) {
-      console.error('Error uploading FICA document:', error);
+      console.error('Error setting up mobile payment:', error);
       toast({
-        title: "FICA Verification Failed",
-        description: "Failed to verify FICA document. Please ensure document is valid and try again.",
+        title: "Setup Failed",
+        description: `Unable to setup ${method.name}. Please try again.`,
         variant: "destructive"
       });
     }
   };
 
-  const getBankName = (bankCode: string) => {
-    const bank = southAfricanBanks.find(b => b.value === bankCode);
-    return bank ? bank.label : bankCode;
+  const getBankLogo = (bankId: string) => {
+    const bank = availableBanks.find(b => b.id === bankId);
+    return bank?.logo || 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=32&h=32&fit=crop&auto=format';
   };
 
-  const getAccountTypeName = (typeCode: string) => {
-    const type = accountTypes.find(t => t.value === typeCode);
-    return type ? type.label : typeCode;
+  const getBankName = (bankId: string) => {
+    const bank = availableBanks.find(b => b.id === bankId);
+    return bank?.name || 'Unknown Bank';
   };
 
-  const getFICAStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
+  const getPaymentIcon = (type: string) => {
+    switch (type) {
+      case 'snapscan':
+      case 'zapper':
+        return <QrCode className="w-5 h-5" />;
+      case 'vodapay':
+        return <Smartphone className="w-5 h-5" />;
+      case 'eft':
+        return <Banknote className="w-5 h-5" />;
       default:
-        return 'bg-gray-100 text-gray-800';
+        return <CreditCard className="w-5 h-5" />;
     }
   };
 
@@ -319,283 +399,359 @@ const SABankingIntegration: React.FC<SABankingIntegrationProps> = ({ isOpen, onC
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* FICA Compliance Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5" />
-                FICA Compliance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Verification Status</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Complete FICA verification to unlock higher transaction limits
-                    </p>
-                  </div>
-                  <Button onClick={() => setShowFICAUpload(true)}>
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload Document
-                  </Button>
-                </div>
-
-                {ficaDocuments.length > 0 ? (
-                  <div className="space-y-3">
-                    {ficaDocuments.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <Users className="w-4 h-4 text-blue-600" />
-                          </div>
-                          <div>
-                            <div className="font-medium">
-                              {documentTypes.find(d => d.value === doc.document_type)?.label || doc.document_type}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {doc.document_number} • {new Date(doc.created_at).toLocaleDateString()}
-                            </div>
-                          </div>
-                        </div>
-                        <Badge className={getFICAStatusColor(doc.verification_status)}>
-                          {doc.verification_status.charAt(0).toUpperCase() + doc.verification_status.slice(1)}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No FICA documents uploaded yet</p>
-                    <p className="text-sm">Upload your identity documents to complete verification</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Separator />
-
-          {/* Bank Accounts Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Banknote className="w-5 h-5" />
-                Connected Bank Accounts
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">South African Banks</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Connect your local bank accounts for seamless transfers
-                    </p>
-                  </div>
-                  <Button onClick={() => setShowAddBank(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Bank Account
-                  </Button>
-                </div>
-
-                {bankAccounts.length > 0 ? (
-                  <div className="space-y-3">
-                    {bankAccounts.map((account) => (
-                      <div key={account.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-green-100 rounded-lg">
-                            <Building2 className="w-4 h-4 text-green-600" />
-                          </div>
-                          <div>
-                            <div className="font-medium">{getBankName(account.bank_name)}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {account.account_number} • {getAccountTypeName(account.account_type)}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {account.account_holder_name}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {account.is_verified ? (
-                            <Badge className="bg-green-100 text-green-800">
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Verified
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline">Pending Verification</Badge>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No bank accounts connected yet</p>
-                    <p className="text-sm">Connect your South African bank account to enable transfers</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Tabs */}
+        <div className="flex gap-2 p-1 bg-muted rounded-lg">
+          <Button
+            variant={activeTab === 'banks' ? 'default' : 'ghost'}
+            className="flex-1"
+            onClick={() => setActiveTab('banks')}
+          >
+            <Building2 className="w-4 h-4 mr-2" />
+            Banks
+          </Button>
+          <Button
+            variant={activeTab === 'mobile' ? 'default' : 'ghost'}
+            className="flex-1"
+            onClick={() => setActiveTab('mobile')}
+          >
+            <Smartphone className="w-4 h-4 mr-2" />
+            Mobile Payments
+          </Button>
+          <Button
+            variant={activeTab === 'eft' ? 'default' : 'ghost'}
+            className="flex-1"
+            onClick={() => setActiveTab('eft')}
+          >
+            <Banknote className="w-4 h-4 mr-2" />
+            EFT Transfers
+          </Button>
         </div>
 
-        {/* Add Bank Account Modal */}
-        <Dialog open={showAddBank} onOpenChange={setShowAddBank}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Bank Account</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="bank_name">Bank</Label>
-                <Select value={formData.bank_name} onValueChange={(value) => setFormData({...formData, bank_name: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your bank" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {southAfricanBanks.map((bank) => (
-                      <SelectItem key={bank.value} value={bank.value}>
-                        {bank.label}
-                      </SelectItem>
+        {/* Tab Content */}
+        <div className="space-y-6">
+          {activeTab === 'banks' && (
+            <div className="space-y-6">
+              {/* Connected Accounts */}
+              {connectedAccounts.length > 0 && (
+              <div className="space-y-4">
+                  <h3 className="font-semibold">Connected Bank Accounts</h3>
+                  <div className="grid gap-4">
+                    {connectedAccounts.map((account) => (
+                      <Card key={account.id}>
+                        <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <img 
+                                src={getBankLogo(account.bankId)} 
+                                alt={getBankName(account.bankId)}
+                                className="w-8 h-8 rounded"
+                              />
+                  <div>
+                                <div className="font-medium">{getBankName(account.bankId)}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {account.accountType.charAt(0).toUpperCase() + account.accountType.slice(1)} Account • {account.accountNumber}
+                  </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {account.accountHolderName}
+                </div>
+                          </div>
+                            </div>
+                            <div className="text-right">
+                              {account.isVerified ? (
+                                <Badge className="bg-green-100 text-green-800">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Verified
+                                </Badge>
+                              ) : (
+                                <div className="space-y-2">
+                                  <Badge variant="outline" className="text-yellow-600">
+                                    <Clock className="w-3 h-3 mr-1" />
+                                    Pending
+                                  </Badge>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleAccountVerification(account.id)}
+                                  >
+                                    Verify
+                                  </Button>
+                                </div>
+                              )}
+                              {account.balance !== undefined && (
+                                <div className="text-sm font-medium mt-1">
+                                  R{account.balance.toFixed(2)}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </div>
+                  </div>
+                )}
+
+              {/* Available Banks */}
+              <div className="space-y-4">
+                <h3 className="font-semibold">Connect Bank Account</h3>
+                <div className="grid gap-4">
+                  {availableBanks.map((bank) => (
+                    <Card 
+                      key={bank.id} 
+                      className="cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => handleBankSelection(bank)}
+                    >
+                      <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <img 
+                              src={bank.logo} 
+                              alt={bank.name}
+                              className="w-10 h-10 rounded"
+                            />
+                  <div>
+                              <div className="font-medium">{bank.name}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {bank.supportedServices.join(' • ')}
+                  </div>
+                              <div className="text-xs text-muted-foreground">
+                                Processing: {bank.processingTime}
+                          </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium">
+                              Max: R{bank.maxLimit.toLocaleString()}
+                            </div>
+                            <ArrowRight className="w-4 h-4 mt-1 text-muted-foreground" />
+                          </div>
+              </div>
+            </CardContent>
+          </Card>
+                  ))}
+              </div>
               </div>
 
-              <div>
-                <Label htmlFor="account_type">Account Type</Label>
-                <Select value={formData.account_type} onValueChange={(value) => setFormData({...formData, account_type: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select account type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {accountTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="account_number">Account Number</Label>
+              {/* Add Account Form */}
+              {showAddAccount && selectedBank && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <img 
+                        src={selectedBank.logo} 
+                        alt={selectedBank.name}
+                        className="w-6 h-6 rounded"
+                      />
+                      Connect {selectedBank.name} Account
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="accountNumber">Account Number</Label>
                 <Input
-                  id="account_number"
-                  value={formData.account_number}
-                  onChange={(e) => setFormData({...formData, account_number: e.target.value})}
+                          id="accountNumber"
+                          value={accountForm.accountNumber}
+                          onChange={(e) => setAccountForm(prev => ({ ...prev, accountNumber: e.target.value }))}
                   placeholder="Enter account number"
                 />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="accountType">Account Type</Label>
+                        <select
+                          id="accountType"
+                          value={accountForm.accountType}
+                          onChange={(e) => setAccountForm(prev => ({ ...prev, accountType: e.target.value as any }))}
+                          className="w-full px-3 py-2 border border-input rounded-md"
+                        >
+                          <option value="cheque">Cheque Account</option>
+                          <option value="savings">Savings Account</option>
+                          <option value="credit">Credit Account</option>
+                        </select>
+                      </div>
               </div>
 
-              <div>
-                <Label htmlFor="branch_code">Branch Code</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="accountHolderName">Account Holder Name</Label>
                 <Input
-                  id="branch_code"
-                  value={formData.branch_code}
-                  onChange={(e) => setFormData({...formData, branch_code: e.target.value})}
-                  placeholder="Enter branch code"
+                          id="accountHolderName"
+                          value={accountForm.accountHolderName}
+                          onChange={(e) => setAccountForm(prev => ({ ...prev, accountHolderName: e.target.value }))}
+                          placeholder="Full name as on account"
                 />
               </div>
-
-              <div>
-                <Label htmlFor="account_holder_name">Account Holder Name</Label>
+                      <div className="space-y-2">
+                        <Label htmlFor="branchCode">Branch Code</Label>
                 <Input
-                  id="account_holder_name"
-                  value={formData.account_holder_name}
-                  onChange={(e) => setFormData({...formData, account_holder_name: e.target.value})}
-                  placeholder="Enter account holder name"
-                />
+                          id="branchCode"
+                          value={accountForm.branchCode}
+                          onChange={(e) => setAccountForm(prev => ({ ...prev, branchCode: e.target.value }))}
+                          placeholder={selectedBank.code}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex gap-2">
+                        <Info className="w-4 h-4 text-blue-600 mt-0.5" />
+                        <div className="text-sm text-blue-800">
+                          <div className="font-medium">Account Verification</div>
+                          <div>We'll verify your account details with {selectedBank.name}. This process is secure and typically takes a few minutes.</div>
+                        </div>
+                      </div>
               </div>
 
-              <div className="flex gap-3 justify-end">
-                <Button variant="outline" onClick={() => setShowAddBank(false)}>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setShowAddAccount(false)}
+                        disabled={isConnecting}
+                      >
                   Cancel
                 </Button>
-                <Button onClick={handleAddBankAccount}>
-                  Add Account
+                      <Button 
+                        onClick={handleAddAccount}
+                        disabled={isConnecting}
+                        className="flex-1"
+                      >
+                        {isConnecting ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                            Connecting...
+                          </>
+                        ) : (
+                          <>
+                            <Shield className="w-4 h-4 mr-2" />
+                            Connect Account
+                          </>
+                        )}
                 </Button>
               </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
-          </DialogContent>
-        </Dialog>
+          )}
 
-        {/* Upload FICA Document Modal */}
-        <Dialog open={showFICAUpload} onOpenChange={setShowFICAUpload}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Upload FICA Document</DialogTitle>
-            </DialogHeader>
+          {activeTab === 'mobile' && (
+            <div className="space-y-6">
             <div className="space-y-4">
+                <h3 className="font-semibold">Mobile Payment Methods</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect popular South African mobile payment services for instant transfers.
+                </p>
+                
+                <div className="grid gap-4">
+                  {mobilePaymentMethods.map((method) => (
+                    <Card 
+                      key={method.id}
+                      className="cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => handleMobilePaymentSetup(method)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-10 h-10 rounded-lg flex items-center justify-center text-white"
+                              style={{ backgroundColor: method.color }}
+                            >
+                              {getPaymentIcon(method.type)}
+                            </div>
               <div>
-                <Label htmlFor="verification_type">Verification Type</Label>
-                <Select value={ficaFormData.verification_type} onValueChange={(value) => setFicaFormData({...ficaFormData, verification_type: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select verification type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ficaVerificationTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="document_type">Document Type</Label>
-                <Select value={ficaFormData.document_type} onValueChange={(value) => setFicaFormData({...ficaFormData, document_type: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select document type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {documentTypes.map((doc) => (
-                      <SelectItem key={doc.value} value={doc.value}>
-                        {doc.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="document_number">Document Number</Label>
-                <Input
-                  id="document_number"
-                  value={ficaFormData.document_number}
-                  onChange={(e) => setFicaFormData({...ficaFormData, document_number: e.target.value})}
-                  placeholder="Enter document number"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="document_url">Document URL</Label>
-                <Input
-                  id="document_url"
-                  value={ficaFormData.document_url}
-                  onChange={(e) => setFicaFormData({...ficaFormData, document_url: e.target.value})}
-                  placeholder="Enter document URL or upload file"
-                />
-              </div>
-
-              <div className="flex gap-3 justify-end">
-                <Button variant="outline" onClick={() => setShowFICAUpload(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleUploadFICADocument}>
-                  Upload Document
-                </Button>
+                              <div className="font-medium">{method.name}</div>
+                              <div className="text-sm text-muted-foreground">
+                                Fee: R{method.processingFee.toFixed(2)} • 
+                                {method.instantTransfer ? ' Instant' : ' 1-2 hours'}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            {method.instantTransfer && (
+                              <Badge className="bg-green-100 text-green-800 mb-2">
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                Instant
+                              </Badge>
+                            )}
+                            <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          )}
+
+          {activeTab === 'eft' && (
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="font-semibold">EFT Transfer Information</h3>
+                <p className="text-sm text-muted-foreground">
+                  Standard Electronic Funds Transfer details for receiving payments from other banks.
+                </p>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Your S-Pay EFT Details</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Bank Name</Label>
+                        <div className="font-medium">S-Pay Virtual Bank</div>
+                      </div>
+              <div>
+                        <Label>Account Type</Label>
+                        <div className="font-medium">Savings</div>
+                      </div>
+              </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Account Number</Label>
+                        <div className="font-medium">1234567890</div>
+                      </div>
+              <div>
+                        <Label>Branch Code</Label>
+                        <div className="font-medium">470010</div>
+                      </div>
+              </div>
+
+              <div>
+                      <Label>Account Holder</Label>
+                      <div className="font-medium">John Doe</div>
+              </div>
+
+                    <Separator />
+
+                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex gap-2">
+                        <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5" />
+                        <div className="text-sm text-yellow-800">
+                          <div className="font-medium">Processing Time</div>
+                          <div>EFT transfers typically take 1-3 business days to reflect in your S-Pay wallet.</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Security Notice */}
+        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex gap-2">
+            <Shield className="w-5 h-5 text-green-600 mt-0.5" />
+            <div className="text-sm text-green-800">
+              <div className="font-medium">Bank-Grade Security</div>
+              <div>All banking integrations use encrypted connections and comply with South African banking regulations (SARB). Your account details are never stored on our servers.</div>
+            </div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

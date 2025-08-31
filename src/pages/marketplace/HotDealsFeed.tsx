@@ -15,7 +15,8 @@ import {
   MapPin,
   ShieldCheck,
   Star,
-  AlertTriangle
+  AlertTriangle,
+  Package
 } from "lucide-react";
 
 const HotDealsFeed = () => {
@@ -41,7 +42,7 @@ const HotDealsFeed = () => {
       title: "iPhone 15 Pro Max 256GB",
       price: 16999,
       originalPrice: 18999,
-      image: "https://placehold.co/300x200?text=iPhone",
+      image: "",
       seller: "TechPro_ZA",
       rating: 4.8,
       location: "Sandton, Gauteng",
@@ -58,7 +59,7 @@ const HotDealsFeed = () => {
       title: "MacBook Pro M3 14-inch",
       price: 28999,
       originalPrice: 32999,
-      image: "https://placehold.co/300x200?text=MacBook",
+      image: "",
       seller: "AppleExpert",
       rating: 4.9,
       location: "Cape Town, Western Cape",
@@ -75,7 +76,7 @@ const HotDealsFeed = () => {
       title: "Samsung Galaxy S24 Ultra",
       price: 12999,
       originalPrice: 14999,
-      image: "https://placehold.co/300x200?text=Galaxy",
+      image: "",
       seller: "Mobile_Guru",
       rating: 4.6,
       location: "Durban, KwaZulu-Natal",
@@ -92,7 +93,7 @@ const HotDealsFeed = () => {
       title: "iPad Pro 12.9 M2",
       price: 15999,
       originalPrice: 18999,
-      image: "https://placehold.co/300x200?text=iPad",
+      image: "",
       seller: "CreativeStudio",
       rating: 4.7,
       location: "Pretoria, Gauteng",
@@ -109,7 +110,7 @@ const HotDealsFeed = () => {
       title: "PlayStation 5 Digital Edition",
       price: 7999,
       originalPrice: 9999,
-      image: "https://placehold.co/300x200?text=PS5",
+      image: "",
       seller: "GameCollector",
       rating: 4.5,
       location: "Port Elizabeth, Eastern Cape",
@@ -200,11 +201,9 @@ const HotDealsFeed = () => {
             {filteredDeals.map((deal) => (
               <Card key={deal.id} className="overflow-hidden hover:shadow-card transition-all">
                 <div className="relative">
-                  <img 
-                    src={deal.image} 
-                    alt={deal.title}
-                    className="w-full h-48 object-cover"
-                  />
+                  <div className="w-full h-48 bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center">
+                    <Package className="w-16 h-16 text-muted-foreground" />
+                  </div>
                   <div className="absolute top-3 left-3">
                     <Badge className={urgencyColors[deal.urgency as keyof typeof urgencyColors]}>
                       <Clock className="w-3 h-3 mr-1" />

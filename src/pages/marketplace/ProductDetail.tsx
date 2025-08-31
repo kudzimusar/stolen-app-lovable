@@ -10,14 +10,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import PriceHistoryChart from "@/components/marketplace/PriceHistoryChart";
 import CompareModal from "@/components/marketplace/CompareModal";
-import { MapPin, ShieldCheck, Clock, CheckCircle, AlertTriangle, Star, ArrowLeft, Info, Heart } from "lucide-react";
+import { TrustVisualization } from "@/components/marketplace/TrustVisualization";
+import { EnhancedVerificationScanner } from "@/components/marketplace/EnhancedVerificationScanner";
+import { MarketplaceAIAssistant } from "@/components/marketplace/MarketplaceAIAssistant";
+import { MapPin, ShieldCheck, Clock, CheckCircle, AlertTriangle, Star, ArrowLeft, Info, Heart, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const images = [
-  "https://placehold.co/800x600?text=Image+1",
-  "https://placehold.co/800x600?text=Image+2",
-  "https://placehold.co/800x600?text=Image+3",
-];
+const images: string[] = [];
 
 const ownershipHistory = [
   { id: 1, date: "2024-02-10", event: "Ownership transfer", from: "Alice", to: "Bob", verified: true },
@@ -50,8 +49,8 @@ export default function ProductDetail() {
   const price = 18999;
   const [compareOpen, setCompareOpen] = useState(false);
   const similar = [
-    { id: 2, title: "MacBook Pro M3 14-inch", price: 32999, image: "https://placehold.co/320x220?text=Laptop", condition: "Excellent", warrantyMonths: 10 },
-    { id: 3, title: "Samsung Galaxy S24 Ultra", price: 14999, image: "https://placehold.co/320x220?text=Phone", condition: "Good", warrantyMonths: 6 }
+    { id: 2, title: "MacBook Pro M3 14-inch", price: 32999, condition: "Excellent", warrantyMonths: 10 },
+    { id: 3, title: "Samsung Galaxy S24 Ultra", price: 14999, condition: "Good", warrantyMonths: 6 }
   ];
 
   return (
@@ -72,11 +71,11 @@ export default function ProductDetail() {
           <Card className="p-3 md:p-4">
             <Carousel opts={{ align: 'start' }}>
               <CarouselContent>
-                {images.map((src, i) => (
-                  <CarouselItem key={i} className="md:basis-2/3 lg:basis-1/2">
-                    <img src={src} alt={`Product image ${i+1}`} className="w-full rounded-md object-cover aspect-[4/3]" loading="lazy" />
-                  </CarouselItem>
-                ))}
+                <CarouselItem className="md:basis-2/3 lg:basis-1/2">
+                  <div className="w-full rounded-md aspect-[4/3] bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+                    <Package className="w-24 h-24 text-muted-foreground" />
+                  </div>
+                </CarouselItem>
               </CarouselContent>
               <CarouselPrevious />
               <CarouselNext />
@@ -100,7 +99,7 @@ export default function ProductDetail() {
                 try {
                   const raw = localStorage.getItem('cart') || '[]';
                   const cart = JSON.parse(raw);
-                  cart.push({ id: Number(id), title: 'iPhone 15 Pro Max 256GB', price, image: images[0] });
+                  cart.push({ id: Number(id), title: 'iPhone 15 Pro Max 256GB', price });
                   localStorage.setItem('cart', JSON.stringify(cart));
                   toast({ title: 'Added to cart', description: 'Item added. Go to cart to checkout.' });
                 } catch {}
@@ -154,7 +153,7 @@ export default function ProductDetail() {
                 try {
                   const raw = localStorage.getItem('wishlist') || '[]';
                   const list = JSON.parse(raw);
-                  list.push({ id: Number(id), title: 'iPhone 15 Pro Max 256GB', price, image: images[0], location: 'Johannesburg', province: 'gauteng', condition: 'Like New', stolenStatus: 'clean' });
+                  list.push({ id: Number(id), title: 'iPhone 15 Pro Max 256GB', price, location: 'Johannesburg', province: 'gauteng', condition: 'Like New', stolenStatus: 'clean' });
                   localStorage.setItem('wishlist', JSON.stringify(list));
                   toast({ title: 'Saved', description: 'Added to your wishlist.' });
                 } catch {}
@@ -182,11 +181,17 @@ export default function ProductDetail() {
           </Card>
         </section>
 
+        {/* Trust Visualization */}
+        <section>
+          <TrustVisualization deviceId={id || 'device-1'} showFullDetails={false} />
+        </section>
+
         {/* Details */}
         <section>
           <Tabs defaultValue="details">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="verification">Verification</TabsTrigger>
               <TabsTrigger value="history">Ownership</TabsTrigger>
               <TabsTrigger value="repairs">Repairs</TabsTrigger>
             </TabsList>
@@ -214,6 +219,23 @@ export default function ProductDetail() {
                 <h4 className="font-semibold mb-2">Location</h4>
                 <div className="rounded-md bg-muted aspect-[16/9] flex items-center justify-center text-muted-foreground">Map preview</div>
                 <div className="text-xs text-muted-foreground mt-2">Trust badges help you shop safely. <Link to="/trust-badges" className="underline">Learn more</Link></div>
+              </Card>
+            </TabsContent>
+            <TabsContent value="verification" className="space-y-3">
+              <Card className="p-4">
+                <h4 className="font-semibold mb-4">Device Verification</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Verify this device using multiple methods to ensure authenticity and check for theft reports.
+                </p>
+                <EnhancedVerificationScanner 
+                  mode="embedded"
+                  onVerificationComplete={(result) => {
+                    console.log('Verification result:', result);
+                  }}
+                />
+              </Card>
+              <Card className="p-4">
+                <TrustVisualization deviceId={id || 'device-1'} showFullDetails={true} />
               </Card>
             </TabsContent>
             <TabsContent value="history" className="space-y-3">
@@ -252,7 +274,9 @@ export default function ProductDetail() {
             {[1,2,3,4].map((n) => (
               <Card key={n} className="p-2">
                 <Link to={`/marketplace/product/${n}`} className="space-y-2 block">
-                  <img src={`https://placehold.co/400x300?text=Related+${n}`} alt={`Related device ${n}`} className="w-full rounded-md object-cover aspect-[4/3]" loading="lazy" />
+                  <div className="w-full rounded-md aspect-[4/3] bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+                    <Package className="w-12 h-12 text-muted-foreground" />
+                  </div>
                   <div className="text-sm">Sample Device {n}</div>
                 </Link>
               </Card>
@@ -260,6 +284,21 @@ export default function ProductDetail() {
           </div>
         </section>
       </main>
+
+      {/* AI Assistant */}
+      <MarketplaceAIAssistant 
+        currentPage="product"
+        currentDevice={{
+          id,
+          title: "iPhone 15 Pro Max 256GB",
+          price: 18999,
+          seller: "TechDeals Pro",
+          location: "Johannesburg, Gauteng"
+        }}
+        userContext={{
+          viewingProduct: true
+        }}
+      />
     </div>
   );
 }

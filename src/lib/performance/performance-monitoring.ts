@@ -24,9 +24,9 @@ export class PerformanceMonitor {
       dsn: import.meta.env.VITE_SENTRY_DSN || 'your-sentry-dsn',
       integrations: [
         new BrowserTracing({
-          routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-            // Add your router history here if needed
-          ),
+          // Auto-instrumentation for React Router
+          autoInstrumentPageLoad: true,
+          autoInstrumentNavigations: true,
         }),
       ],
       tracesSampleRate: 0.1, // Sample 10% of transactions

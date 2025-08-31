@@ -27,7 +27,7 @@ import {
   Download,
   Zap
 } from "lucide-react";
-import { cn } from "@/lib/utils/utils";
+import { cn } from "@/lib/utils";
 
 const PaymentProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -133,7 +133,7 @@ const PaymentProfile = () => {
       id: 3,
       action: "Processing Limit Increased",
       timestamp: "2024-01-18 09:30 PST",
-      details: "Daily limit increased to $1M",
+      details: "Daily limit increased to R18M",
       severity: "success"
     },
     {

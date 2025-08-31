@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,9 +15,29 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Camera, Upload, Scan, MapPin, Shield, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useFormPersistence } from "@/hooks/useFormPersistence";
 
 const DeviceRegister = () => {
   const [step, setStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  // Enhanced form persistence
+  const {
+    formData: persistedData,
+    updateFormData,
+    clearFormData,
+    submitAndClear,
+    isDirty
+  } = useFormPersistence({
+    formId: 'device-register',
+    autoSaveInterval: 3000, // Save every 3 seconds
+    warnOnDataLoss: true,
+    clearOnSubmit: true
+  });
+
+  // Initialize form data with defaults
   const [formData, setFormData] = useState({
     deviceName: "",
     serialNumber: "",
@@ -31,11 +51,16 @@ const DeviceRegister = () => {
     description: "",
     enableLocation: false,
     photos: [] as File[],
-    receipt: null as File | null
+    receipt: null as File | null,
+    ...persistedData // Override with persisted data
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-  const navigate = useNavigate();
+
+  // Update form data and persist changes
+  const updateField = (field: string, value: any) => {
+    const newData = { ...formData, [field]: value };
+    setFormData(newData);
+    updateFormData(newData);
+  };
 
   const progress = (step / 4) * 100;
 

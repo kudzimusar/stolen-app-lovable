@@ -1,4 +1,4 @@
-import algoliasearch from 'algoliasearch';
+import { liteClient as algoliasearch } from 'algoliasearch/lite';
 import cacheManager from './redis';
 
 // Initialize Algolia client
