@@ -1,0 +1,892 @@
+{
+  "timestamp": "2025-09-02T05:28:39.737Z",
+  "score": "50.00",
+  "threshold": 96,
+  "passed": false,
+  "duration": 72932,
+  "summary": {
+    "total": 12,
+    "passed": 6,
+    "failed": 6
+  },
+  "tests": {
+    "passed": [
+      {
+        "name": "TypeScript Compilation",
+        "category": "BUILD",
+        "status": "passed",
+        "message": "No TypeScript errors found",
+        "details": {
+          "stderr": ""
+        }
+      },
+      {
+        "name": "ESLint Analysis",
+        "category": "CODE_QUALITY",
+        "status": "passed",
+        "message": "Found 0 errors and 0 warnings",
+        "details": {
+          "errorCount": 0,
+          "warningCount": 0,
+          "files": 0
+        }
+      },
+      {
+        "name": "Infinite Loop Detection",
+        "category": "RUNTIME",
+        "status": "passed",
+        "message": "No infinite loops detected",
+        "details": {
+          "stdout": "No infinite loops detected\n"
+        }
+      },
+      {
+        "name": "Memory Leak Detection",
+        "category": "RUNTIME",
+        "status": "passed",
+        "message": "No memory leaks detected",
+        "details": {}
+      },
+      {
+        "name": "Security Vulnerability Scan",
+        "category": "SECURITY",
+        "status": "passed",
+        "message": "Found 0 critical and 0 high vulnerabilities",
+        "details": {
+          "info": 0,
+          "low": 3,
+          "moderate": 4,
+          "high": 0,
+          "critical": 0,
+          "total": 7
+        }
+      },
+      {
+        "name": "Accessibility Compliance",
+        "category": "ACCESSIBILITY",
+        "status": "passed",
+        "message": "Basic accessibility checks passed",
+        "details": {
+          "issues": 0
+        }
+      }
+    ],
+    "failed": [
+      {
+        "name": "Build Compilation",
+        "category": "BUILD",
+        "status": "failed",
+        "message": "Build failed: Command failed: npm run build\nBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme\n",
+        "details": {
+          "buildTime": 30211,
+          "stdout": "\n> vite_react_shadcn_ts@0.0.0 build\n> vite build\n\nvite v5.4.10 building for production...\ntransforming...\n",
+          "stderr": "Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme\n"
+        }
+      },
+      {
+        "name": "Bundle Size Analysis",
+        "category": "BUNDLE",
+        "status": "failed",
+        "message": "Bundle size: 2608KB (threshold: 500KB)",
+        "details": {
+          "sizeKB": 2608,
+          "threshold": 500
+        }
+      },
+      {
+        "name": "Application Load Time",
+        "category": "PERFORMANCE",
+        "status": "failed",
+        "message": "Load time: undefinedms (threshold: 3000ms)",
+        "details": {
+          "error": "Cannot find module '/Users/shadreckmusarurwa/stolen-app-lovable/src/App' imported from /Users/shadreckmusarurwa/stolen-app-lovable/[eval]"
+        }
+      },
+      {
+        "name": "Test Coverage",
+        "category": "TESTS",
+        "status": "failed",
+        "message": "Coverage: 0.00% (threshold: 80%)",
+        "details": {
+          "coverage": 0,
+          "threshold": 80
+        }
+      },
+      {
+        "name": "Code Complexity Analysis",
+        "category": "CODE_QUALITY",
+        "status": "failed",
+        "message": "Found 189 files exceeding complexity threshold",
+        "details": {
+          "complexFiles": [
+            {
+              "fileName": "src/App.tsx",
+              "lineCount": 403
+            },
+            {
+              "fileName": "src/utils/marketplace-links-validator.ts",
+              "lineCount": 360
+            },
+            {
+              "fileName": "src/setupTests.ts",
+              "lineCount": 376
+            },
+            {
+              "fileName": "src/integrations/supabase/types.ts",
+              "lineCount": 808
+            },
+            {
+              "fileName": "src/components/ui/AIPageSearch.tsx",
+              "lineCount": 510
+            },
+            {
+              "fileName": "src/components/ui/chart.tsx",
+              "lineCount": 363
+            },
+            {
+              "fileName": "src/components/ui/RoleBasedFeatureShowcase.tsx",
+              "lineCount": 507
+            },
+            {
+              "fileName": "src/components/ui/MicroAnimations.tsx",
+              "lineCount": 568
+            },
+            {
+              "fileName": "src/components/ui/FloatingScrollControls.tsx",
+              "lineCount": 310
+            },
+            {
+              "fileName": "src/components/ui/LiveChatWidget.tsx",
+              "lineCount": 1071
+            },
+            {
+              "fileName": "src/components/ui/sidebar.tsx",
+              "lineCount": 761
+            },
+            {
+              "fileName": "src/components/forms/DeviceRegistrationForm.tsx",
+              "lineCount": 372
+            },
+            {
+              "fileName": "src/components/forms/OptimizedDeviceRegistrationForm.tsx",
+              "lineCount": 449
+            },
+            {
+              "fileName": "src/components/forms/OptimizedUploadComponent.tsx",
+              "lineCount": 368
+            },
+            {
+              "fileName": "src/components/forms/UploadComponent.tsx",
+              "lineCount": 315
+            },
+            {
+              "fileName": "src/components/security/SecurityVerification.tsx",
+              "lineCount": 357
+            },
+            {
+              "fileName": "src/components/security/SecurityEnhancements.tsx",
+              "lineCount": 590
+            },
+            {
+              "fileName": "src/components/security/SecurityEnhancement.tsx",
+              "lineCount": 801
+            },
+            {
+              "fileName": "src/components/payment/WithdrawalRequestForm.tsx",
+              "lineCount": 425
+            },
+            {
+              "fileName": "src/components/payment/FICACompliance.tsx",
+              "lineCount": 641
+            },
+            {
+              "fileName": "src/components/payment/PaymentMethodManager.tsx",
+              "lineCount": 602
+            },
+            {
+              "fileName": "src/components/payment/InvestmentFeatures.tsx",
+              "lineCount": 631
+            },
+            {
+              "fileName": "src/components/payment/QRCodeScanner.tsx",
+              "lineCount": 573
+            },
+            {
+              "fileName": "src/components/payment/SABankingIntegration.tsx",
+              "lineCount": 759
+            },
+            {
+              "fileName": "src/components/payment/MerchantServices.tsx",
+              "lineCount": 773
+            },
+            {
+              "fileName": "src/components/payment/SPayEcosystemIntegration.tsx",
+              "lineCount": 363
+            },
+            {
+              "fileName": "src/components/payment/RealTimeUpdates.tsx",
+              "lineCount": 481
+            },
+            {
+              "fileName": "src/components/payment/SecurityEnhancement.tsx",
+              "lineCount": 859
+            },
+            {
+              "fileName": "src/components/payment/AIWalletInsights.tsx",
+              "lineCount": 427
+            },
+            {
+              "fileName": "src/components/providers/EnhancedUXProvider.tsx",
+              "lineCount": 355
+            },
+            {
+              "fileName": "src/components/marketplace/AISmartSearch.tsx",
+              "lineCount": 467
+            },
+            {
+              "fileName": "src/components/marketplace/AIRecommendations.tsx",
+              "lineCount": 397
+            },
+            {
+              "fileName": "src/components/marketplace/CompleteBuyerJourney.tsx",
+              "lineCount": 860
+            },
+            {
+              "fileName": "src/components/marketplace/EnhancedTaxonomyBrowser.tsx",
+              "lineCount": 477
+            },
+            {
+              "fileName": "src/components/marketplace/HotDealsCountdown.tsx",
+              "lineCount": 309
+            },
+            {
+              "fileName": "src/components/marketplace/EnhancedCheckout.tsx",
+              "lineCount": 578
+            },
+            {
+              "fileName": "src/components/marketplace/EnhancedVerificationScanner.tsx",
+              "lineCount": 575
+            },
+            {
+              "fileName": "src/components/marketplace/FlashSaleSystem.tsx",
+              "lineCount": 551
+            },
+            {
+              "fileName": "src/components/marketplace/SellerDashboard.tsx",
+              "lineCount": 411
+            },
+            {
+              "fileName": "src/components/marketplace/RealtimeBidding.tsx",
+              "lineCount": 490
+            },
+            {
+              "fileName": "src/components/marketplace/MarketplaceAIAssistant.tsx",
+              "lineCount": 509
+            },
+            {
+              "fileName": "src/components/marketplace/EnhancedCart.tsx",
+              "lineCount": 543
+            },
+            {
+              "fileName": "src/components/marketplace/TrustVisualization.tsx",
+              "lineCount": 557
+            },
+            {
+              "fileName": "src/components/marketplace/BuyerInsights.tsx",
+              "lineCount": 412
+            },
+            {
+              "fileName": "src/components/admin/PerformanceDashboard.tsx",
+              "lineCount": 359
+            },
+            {
+              "fileName": "src/components/admin/ResponsivePerformanceTest.tsx",
+              "lineCount": 461
+            },
+            {
+              "fileName": "src/components/admin/ChatUpdateManager.tsx",
+              "lineCount": 389
+            },
+            {
+              "fileName": "src/components/admin/PerformanceMonitoringDashboard.tsx",
+              "lineCount": 506
+            },
+            {
+              "fileName": "src/components/navigation/BottomNavigation.tsx",
+              "lineCount": 361
+            },
+            {
+              "fileName": "src/components/modals/TransactionDetailsModal.tsx",
+              "lineCount": 337
+            },
+            {
+              "fileName": "src/components/user/NotificationPreferences.tsx",
+              "lineCount": 319
+            },
+            {
+              "fileName": "src/components/user/CommunityEvents.tsx",
+              "lineCount": 337
+            },
+            {
+              "fileName": "src/components/ai/AIProductDescriptionGenerator.tsx",
+              "lineCount": 469
+            },
+            {
+              "fileName": "src/components/ai/TransferSuggestionCard.tsx",
+              "lineCount": 313
+            },
+            {
+              "fileName": "src/components/ai/AIAutoFillAssistant.tsx",
+              "lineCount": 412
+            },
+            {
+              "fileName": "src/components/ai/TransferSuggestionDashboard.tsx",
+              "lineCount": 471
+            },
+            {
+              "fileName": "src/components/examples/OptimizedImageUpload.tsx",
+              "lineCount": 341
+            },
+            {
+              "fileName": "src/hooks/usePerformanceOptimization.ts",
+              "lineCount": 435
+            },
+            {
+              "fileName": "src/hooks/useFormPersistence.ts",
+              "lineCount": 350
+            },
+            {
+              "fileName": "src/hooks/useCrossDeviceContinuity.ts",
+              "lineCount": 390
+            },
+            {
+              "fileName": "src/hooks/useEnhancedScrollMemory.ts",
+              "lineCount": 304
+            },
+            {
+              "fileName": "src/lib/security/security-system.ts",
+              "lineCount": 569
+            },
+            {
+              "fileName": "src/lib/security/auth.ts",
+              "lineCount": 325
+            },
+            {
+              "fileName": "src/lib/optimization/background-jobs.ts",
+              "lineCount": 485
+            },
+            {
+              "fileName": "src/lib/optimization/end-to-end-testing.ts",
+              "lineCount": 852
+            },
+            {
+              "fileName": "src/lib/transfer/advanced-transfer-engine.ts",
+              "lineCount": 930
+            },
+            {
+              "fileName": "src/lib/transfer/certificate-generator.ts",
+              "lineCount": 557
+            },
+            {
+              "fileName": "src/lib/blockchain/blockchain-integration.ts",
+              "lineCount": 609
+            },
+            {
+              "fileName": "src/lib/ai/transfer-timing-optimizer.ts",
+              "lineCount": 496
+            },
+            {
+              "fileName": "src/lib/ai/ai-ml-system.ts",
+              "lineCount": 1072
+            },
+            {
+              "fileName": "src/lib/ai/smart-transfer-prompt-engine.ts",
+              "lineCount": 417
+            },
+            {
+              "fileName": "src/lib/ai/local-ai-service.ts",
+              "lineCount": 312
+            },
+            {
+              "fileName": "src/lib/ai/ai-transfer-suggestion-engine.ts",
+              "lineCount": 492
+            },
+            {
+              "fileName": "src/lib/geolocation/geolocation.ts",
+              "lineCount": 383
+            },
+            {
+              "fileName": "src/lib/performance/performance-optimization.ts",
+              "lineCount": 481
+            },
+            {
+              "fileName": "src/lib/performance/search-optimization.ts",
+              "lineCount": 377
+            },
+            {
+              "fileName": "src/lib/performance/api-optimization.ts",
+              "lineCount": 304
+            },
+            {
+              "fileName": "src/lib/services/reverse-verification-api.ts",
+              "lineCount": 442
+            },
+            {
+              "fileName": "src/lib/services/taxonomy-import-service.ts",
+              "lineCount": 489
+            },
+            {
+              "fileName": "src/lib/services/enhanced-stripe-service.ts",
+              "lineCount": 426
+            },
+            {
+              "fileName": "src/lib/services/ai-chat-update-service.ts",
+              "lineCount": 357
+            },
+            {
+              "fileName": "src/lib/services/escrow-service.ts",
+              "lineCount": 431
+            },
+            {
+              "fileName": "src/lib/services/supabase-marketplace-service.ts",
+              "lineCount": 704
+            },
+            {
+              "fileName": "src/lib/services/premium-sales-assistant.ts",
+              "lineCount": 541
+            },
+            {
+              "fileName": "src/lib/services/ecosystem-services.ts",
+              "lineCount": 379
+            },
+            {
+              "fileName": "src/lib/services/payment-integration-service.ts",
+              "lineCount": 389
+            },
+            {
+              "fileName": "src/lib/services/ocr-system.ts",
+              "lineCount": 620
+            },
+            {
+              "fileName": "src/lib/services/dispute-handling-service.ts",
+              "lineCount": 407
+            },
+            {
+              "fileName": "src/lib/services/qr-code-scanner.ts",
+              "lineCount": 490
+            },
+            {
+              "fileName": "src/lib/services/enhanced-taxonomy-service.ts",
+              "lineCount": 553
+            },
+            {
+              "fileName": "src/lib/services/ai-marketplace-service.ts",
+              "lineCount": 551
+            },
+            {
+              "fileName": "src/lib/services/free-blockchain-service.ts",
+              "lineCount": 419
+            },
+            {
+              "fileName": "src/lib/services/user-context-service.ts",
+              "lineCount": 372
+            },
+            {
+              "fileName": "src/lib/services/google-services-integration.ts",
+              "lineCount": 581
+            },
+            {
+              "fileName": "src/lib/services/blockchain-wallet-service.ts",
+              "lineCount": 657
+            },
+            {
+              "fileName": "src/lib/services/hot-deals-ai-service.ts",
+              "lineCount": 963
+            },
+            {
+              "fileName": "src/lib/services/hot-deals-realtime-service.ts",
+              "lineCount": 551
+            },
+            {
+              "fileName": "src/lib/services/api-endpoints-service.ts",
+              "lineCount": 439
+            },
+            {
+              "fileName": "src/lib/services/google-maps-config.ts",
+              "lineCount": 324
+            },
+            {
+              "fileName": "src/pages/security/ReverseVerifyEnhanced.tsx",
+              "lineCount": 826
+            },
+            {
+              "fileName": "src/pages/security/FraudDatabase.tsx",
+              "lineCount": 355
+            },
+            {
+              "fileName": "src/pages/security/SecurityTesting.tsx",
+              "lineCount": 446
+            },
+            {
+              "fileName": "src/pages/security/ReverseVerify.tsx",
+              "lineCount": 982
+            },
+            {
+              "fileName": "src/pages/security/FraudAlerts.tsx",
+              "lineCount": 396
+            },
+            {
+              "fileName": "src/pages/security/StolenReports.tsx",
+              "lineCount": 317
+            },
+            {
+              "fileName": "src/pages/payment/AddFunds.tsx",
+              "lineCount": 515
+            },
+            {
+              "fileName": "src/pages/payment/Wallet.tsx",
+              "lineCount": 852
+            },
+            {
+              "fileName": "src/pages/payment/TransferMoney.tsx",
+              "lineCount": 669
+            },
+            {
+              "fileName": "src/pages/payment/SendMoney.tsx",
+              "lineCount": 640
+            },
+            {
+              "fileName": "src/pages/payment/EscrowPayment.tsx",
+              "lineCount": 323
+            },
+            {
+              "fileName": "src/pages/payment/PaymentTransactions.tsx",
+              "lineCount": 468
+            },
+            {
+              "fileName": "src/pages/payment/PaymentFailure.tsx",
+              "lineCount": 342
+            },
+            {
+              "fileName": "src/pages/payment/PaymentProfile.tsx",
+              "lineCount": 663
+            },
+            {
+              "fileName": "src/pages/payment/PaymentSuccess.tsx",
+              "lineCount": 302
+            },
+            {
+              "fileName": "src/pages/payment/ReceiveMoney.tsx",
+              "lineCount": 579
+            },
+            {
+              "fileName": "src/pages/payment/PaymentAnalytics.tsx",
+              "lineCount": 641
+            },
+            {
+              "fileName": "src/pages/payment/PaymentFraud.tsx",
+              "lineCount": 640
+            },
+            {
+              "fileName": "src/pages/DisputeMediationCenter.tsx",
+              "lineCount": 442
+            },
+            {
+              "fileName": "src/pages/marketplace/HotDealsFeed.tsx",
+              "lineCount": 323
+            },
+            {
+              "fileName": "src/pages/marketplace/BulkRegistration.tsx",
+              "lineCount": 438
+            },
+            {
+              "fileName": "src/pages/marketplace/HotDealsHub.tsx",
+              "lineCount": 338
+            },
+            {
+              "fileName": "src/pages/marketplace/HotDeals.tsx",
+              "lineCount": 350
+            },
+            {
+              "fileName": "src/pages/marketplace/Marketplace.tsx",
+              "lineCount": 1006
+            },
+            {
+              "fileName": "src/pages/marketplace/EnhancedHotDealsFeed.tsx",
+              "lineCount": 742
+            },
+            {
+              "fileName": "src/pages/marketplace/ProductDetail.tsx",
+              "lineCount": 304
+            },
+            {
+              "fileName": "src/pages/marketplace/ListMyDevice.tsx",
+              "lineCount": 380
+            },
+            {
+              "fileName": "src/pages/admin/AdminProfile.tsx",
+              "lineCount": 602
+            },
+            {
+              "fileName": "src/pages/admin/BackendServicesStatus.tsx",
+              "lineCount": 400
+            },
+            {
+              "fileName": "src/pages/admin/AdminSystem.tsx",
+              "lineCount": 484
+            },
+            {
+              "fileName": "src/pages/admin/AnalyticsInsights.tsx",
+              "lineCount": 368
+            },
+            {
+              "fileName": "src/pages/admin/ApiDocumentation.tsx",
+              "lineCount": 445
+            },
+            {
+              "fileName": "src/pages/admin/AdminReports.tsx",
+              "lineCount": 430
+            },
+            {
+              "fileName": "src/pages/admin/AdminUsers.tsx",
+              "lineCount": 366
+            },
+            {
+              "fileName": "src/pages/admin/WidgetGenerator.tsx",
+              "lineCount": 497
+            },
+            {
+              "fileName": "src/pages/admin/AdminDashboard.tsx",
+              "lineCount": 320
+            },
+            {
+              "fileName": "src/pages/user/DeviceWarrantyStatus.tsx",
+              "lineCount": 393
+            },
+            {
+              "fileName": "src/pages/user/Index.tsx",
+              "lineCount": 751
+            },
+            {
+              "fileName": "src/pages/user/PerformanceDashboard.tsx",
+              "lineCount": 580
+            },
+            {
+              "fileName": "src/pages/user/DeviceCheck.tsx",
+              "lineCount": 326
+            },
+            {
+              "fileName": "src/pages/user/LostFoundReport.tsx",
+              "lineCount": 359
+            },
+            {
+              "fileName": "src/pages/user/RetailerDashboard.tsx",
+              "lineCount": 580
+            },
+            {
+              "fileName": "src/pages/user/LawEnforcementDashboard.tsx",
+              "lineCount": 615
+            },
+            {
+              "fileName": "src/pages/user/Dashboard.tsx",
+              "lineCount": 1068
+            },
+            {
+              "fileName": "src/pages/user/Support.tsx",
+              "lineCount": 353
+            },
+            {
+              "fileName": "src/pages/user/DeviceRecoveryStatus.tsx",
+              "lineCount": 316
+            },
+            {
+              "fileName": "src/pages/user/DeviceLifecycleManager.tsx",
+              "lineCount": 411
+            },
+            {
+              "fileName": "src/pages/user/LostFoundBoard.tsx",
+              "lineCount": 320
+            },
+            {
+              "fileName": "src/pages/user/RepairShopDashboard.tsx",
+              "lineCount": 748
+            },
+            {
+              "fileName": "src/pages/user/TermsOfService.tsx",
+              "lineCount": 400
+            },
+            {
+              "fileName": "src/pages/user/PaymentDashboard.tsx",
+              "lineCount": 486
+            },
+            {
+              "fileName": "src/pages/user/ComplianceDashboard.tsx",
+              "lineCount": 638
+            },
+            {
+              "fileName": "src/pages/user/IndividualNotifications.tsx",
+              "lineCount": 308
+            },
+            {
+              "fileName": "src/pages/user/Learn.tsx",
+              "lineCount": 373
+            },
+            {
+              "fileName": "src/pages/user/CommunityRewards.tsx",
+              "lineCount": 362
+            },
+            {
+              "fileName": "src/pages/user/Profile.tsx",
+              "lineCount": 634
+            },
+            {
+              "fileName": "src/pages/user/NGODashboard.tsx",
+              "lineCount": 350
+            },
+            {
+              "fileName": "src/pages/user/MyDevices.tsx",
+              "lineCount": 366
+            },
+            {
+              "fileName": "src/pages/user/InsuranceDashboard.tsx",
+              "lineCount": 515
+            },
+            {
+              "fileName": "src/pages/user/WhyStolen.tsx",
+              "lineCount": 378
+            },
+            {
+              "fileName": "src/pages/user/CommunityBoard.tsx",
+              "lineCount": 357
+            },
+            {
+              "fileName": "src/pages/user/DeviceRegister.tsx",
+              "lineCount": 385
+            },
+            {
+              "fileName": "src/pages/user/TransferDonate.tsx",
+              "lineCount": 354
+            },
+            {
+              "fileName": "src/pages/FeedbackRating.tsx",
+              "lineCount": 347
+            },
+            {
+              "fileName": "src/pages/law-enforcement/NewLawReport.tsx",
+              "lineCount": 314
+            },
+            {
+              "fileName": "src/pages/law-enforcement/LawEnforcementProfile.tsx",
+              "lineCount": 405
+            },
+            {
+              "fileName": "src/pages/stakeholders/RetailerProfile.tsx",
+              "lineCount": 397
+            },
+            {
+              "fileName": "src/pages/stakeholders/CompanyProfile.tsx",
+              "lineCount": 425
+            },
+            {
+              "fileName": "src/pages/EscrowPayment.tsx",
+              "lineCount": 393
+            },
+            {
+              "fileName": "src/pages/HotBuyerRequest.tsx",
+              "lineCount": 352
+            },
+            {
+              "fileName": "src/pages/ai/AITransferSuggestions.tsx",
+              "lineCount": 384
+            },
+            {
+              "fileName": "src/pages/GeolocationTesting.tsx",
+              "lineCount": 406
+            },
+            {
+              "fileName": "src/pages/ngo/NGOProfile.tsx",
+              "lineCount": 436
+            },
+            {
+              "fileName": "src/pages/insurance/InsuranceProfile.tsx",
+              "lineCount": 407
+            },
+            {
+              "fileName": "src/pages/insurance/InsuranceDashboardEnhanced.tsx",
+              "lineCount": 516
+            },
+            {
+              "fileName": "src/pages/repair/RepairCertificates.tsx",
+              "lineCount": 344
+            },
+            {
+              "fileName": "src/pages/repair/RepairerProfile.tsx",
+              "lineCount": 475
+            },
+            {
+              "fileName": "src/pages/repair/RepairInventory.tsx",
+              "lineCount": 610
+            },
+            {
+              "fileName": "src/pages/repair/RepairOrderFlow.tsx",
+              "lineCount": 429
+            },
+            {
+              "fileName": "src/pages/repair/RepairSupport.tsx",
+              "lineCount": 319
+            },
+            {
+              "fileName": "src/pages/repair/RepairBooking.tsx",
+              "lineCount": 402
+            },
+            {
+              "fileName": "src/pages/repair/RepairFraudDetection.tsx",
+              "lineCount": 399
+            },
+            {
+              "fileName": "src/pages/repair/RepairAnalytics.tsx",
+              "lineCount": 310
+            },
+            {
+              "fileName": "src/pages/repair/RepairHistoryManagement.tsx",
+              "lineCount": 450
+            },
+            {
+              "fileName": "src/pages/repair/RepairNGOPrograms.tsx",
+              "lineCount": 472
+            },
+            {
+              "fileName": "src/pages/repair/RepairCustomers.tsx",
+              "lineCount": 432
+            },
+            {
+              "fileName": "src/pages/repair/LogNewRepair.tsx",
+              "lineCount": 542
+            },
+            {
+              "fileName": "src/pages/repair/RepairInsuranceIntegration.tsx",
+              "lineCount": 428
+            },
+            {
+              "fileName": "src/pages/repair/RepairMarketplace.tsx",
+              "lineCount": 578
+            },
+            {
+              "fileName": "src/pages/repair/RepairerNotifications.tsx",
+              "lineCount": 304
+            }
+          ]
+        }
+      },
+      {
+        "name": "Console Error Detection",
+        "category": "CODE_QUALITY",
+        "status": "failed",
+        "message": "Found 365 console.error/warn statements (max allowed: 0)",
+        "details": {
+          "errorCount": 365
+        }
+      }
+    ]
+  }
+}

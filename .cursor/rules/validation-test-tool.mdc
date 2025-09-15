@@ -1,0 +1,5 @@
+---
+description: use the  @app-validation-suite.tsx to test the progress. Apply it to this project as a rule such that when there are issues mentioned in the document, we cannot proceed if we dont hit 96% score
+globs:
+alwaysApply: true
+---

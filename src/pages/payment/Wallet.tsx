@@ -411,9 +411,9 @@ const Wallet = () => {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div className="flex items-center gap-1">
-                            <Badge variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-300">
-                              FICA Pending
-                            </Badge>
+                    <Badge variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-300">
+                      FICA Pending
+                    </Badge>
                             <Info className="w-3 h-3 text-yellow-300 cursor-help" />
                           </div>
                         </TooltipTrigger>

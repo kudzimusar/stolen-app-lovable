@@ -82,6 +82,7 @@ serve(async (req) => {
         } else if (path === "verify") {
           return await handleVerifyWallet(req, supabaseServiceClient, user);
         }
+        break;
       
       case "PUT":
         if (path === "limits") {
@@ -89,11 +90,13 @@ serve(async (req) => {
         } else if (path === "payment-method") {
           return await handleUpdatePaymentMethod(req, supabaseServiceClient, user);
         }
+        break;
       
       case "DELETE":
         if (path === "payment-method") {
           return await handleDeletePaymentMethod(req, supabaseServiceClient, user);
         }
+        break;
       
       default:
         throw new Error(`Method ${req.method} not allowed`);

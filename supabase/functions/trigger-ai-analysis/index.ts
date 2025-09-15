@@ -121,7 +121,7 @@ serve(async (req) => {
       }
     );
   }
-}
+});
 
 // Enhanced AI analysis with advanced ML models
 async function performAdvancedAIAnalysis(entityType: string, entityId: string, data: any) {
@@ -187,7 +187,7 @@ async function detectAnomalyPatterns(entityType: string, entityId: string, data:
 async function calculateRiskScore(mlAnalysis: any, patterns: any) {
   // Calculate comprehensive risk score
   let riskScore = 0.5;
-  let confidence = 0.95;
+  const confidence = 0.95;
   
   // Adjust based on ML analysis
   riskScore += mlAnalysis.indicators.length * 0.1;
@@ -199,4 +199,4 @@ async function calculateRiskScore(mlAnalysis: any, patterns: any) {
   riskScore = Math.max(0, Math.min(1, riskScore));
   
   return { riskScore, confidence };
-});
+}

@@ -261,7 +261,7 @@ const EnhancedHotDealsFeed = () => {
 
   // Filter and sort deals
   const filteredAndSortedDeals = useMemo(() => {
-    let filtered = hotDeals.filter(deal => {
+    const filtered = hotDeals.filter(deal => {
       const matchesFilter = filter === "all" || deal.urgency === filter;
       const matchesSearch = searchQuery === "" || 
         deal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -278,9 +278,10 @@ const EnhancedHotDealsFeed = () => {
     // Sort deals
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case "urgency":
+        case "urgency": {
           const urgencyOrder = { "flash": 4, "lightning": 3, "today-only": 2, "48-hours": 1, "1-week": 0, "negotiable": -1 };
           return (urgencyOrder[b.urgency] || 0) - (urgencyOrder[a.urgency] || 0);
+        }
         case "price_low":
           return a.price - b.price;
         case "price_high":

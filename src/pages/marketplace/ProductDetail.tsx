@@ -102,7 +102,9 @@ export default function ProductDetail() {
                   cart.push({ id: Number(id), title: 'iPhone 15 Pro Max 256GB', price });
                   localStorage.setItem('cart', JSON.stringify(cart));
                   toast({ title: 'Added to cart', description: 'Item added. Go to cart to checkout.' });
-                } catch {}
+                } catch (error) {
+                  console.error('Error adding to cart:', error);
+                }
               }}>Add to Cart</Button>
               <Button variant="premium" asChild>
                 <Link to="/hot-buyer-request">Quick Request</Link>
@@ -156,7 +158,9 @@ export default function ProductDetail() {
                   list.push({ id: Number(id), title: 'iPhone 15 Pro Max 256GB', price, location: 'Johannesburg', province: 'gauteng', condition: 'Like New', stolenStatus: 'clean' });
                   localStorage.setItem('wishlist', JSON.stringify(list));
                   toast({ title: 'Saved', description: 'Added to your wishlist.' });
-                } catch {}
+                } catch (error) {
+                  console.error('Error adding to wishlist:', error);
+                }
               }}>
                 <Heart className="w-4 h-4 mr-1"/>Save for later
               </Button>

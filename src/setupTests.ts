@@ -160,11 +160,9 @@ jest.mock('react-router-dom', () => ({
   useLocation: () => ({ pathname: '/', search: '', hash: '', state: null }),
   useParams: () => ({}),
   Link: ({ children, ...props }: any) => {
-    const React = require('react');
     return React.createElement('a', props, children);
   },
   Navigate: ({ to }: any) => {
-    const React = require('react');
     return React.createElement('div', { 'data-testid': 'navigate', 'data-to': to });
   },
 }));
@@ -206,7 +204,6 @@ jest.mock('date-fns', () => ({
 
 // Mock recharts
 jest.mock('recharts', () => {
-  const React = require('react');
   return {
     LineChart: ({ children }: any) => React.createElement('div', { 'data-testid': 'line-chart' }, children),
     Line: ({ children }: any) => React.createElement('div', { 'data-testid': 'line' }, children),
@@ -237,7 +234,6 @@ jest.mock('@fingerprintjs/fingerprintjs', () => ({
 
 // Mock react-google-recaptcha-v3
 jest.mock('react-google-recaptcha-v3', () => {
-  const React = require('react');
   return {
     GoogleReCaptchaProvider: ({ children }: any) => React.createElement('div', { 'data-testid': 'recaptcha-provider' }, children),
     useGoogleReCaptcha: () => ({
@@ -254,7 +250,6 @@ jest.mock('papaparse', () => ({
 
 // Mock input-otp
 jest.mock('input-otp', () => {
-  const React = require('react');
   return {
     InputOTP: ({ children }: any) => React.createElement('div', { 'data-testid': 'input-otp' }, children),
     InputOTPGroup: ({ children }: any) => React.createElement('div', { 'data-testid': 'input-otp-group' }, children),
@@ -278,7 +273,6 @@ jest.mock('embla-carousel-react', () => ({
 
 // Mock react-day-picker
 jest.mock('react-day-picker', () => {
-  const React = require('react');
   return {
     DayPicker: ({ children }: any) => React.createElement('div', { 'data-testid': 'day-picker' }, children),
     useNavigation: () => ({
@@ -292,7 +286,6 @@ jest.mock('react-day-picker', () => {
 
 // Mock react-resizable-panels
 jest.mock('react-resizable-panels', () => {
-  const React = require('react');
   return {
     Panel: ({ children }: any) => React.createElement('div', { 'data-testid': 'panel' }, children),
     PanelGroup: ({ children }: any) => React.createElement('div', { 'data-testid': 'panel-group' }, children),
@@ -302,7 +295,6 @@ jest.mock('react-resizable-panels', () => {
 
 // Mock vaul
 jest.mock('vaul', () => {
-  const React = require('react');
   return {
     Drawer: ({ children }: any) => React.createElement('div', { 'data-testid': 'drawer' }, children),
   };
@@ -310,7 +302,6 @@ jest.mock('vaul', () => {
 
 // Mock cmdk
 jest.mock('cmdk', () => {
-  const React = require('react');
   return {
     Command: ({ children }: any) => React.createElement('div', { 'data-testid': 'command' }, children),
     CommandInput: ({ children }: any) => React.createElement('div', { 'data-testid': 'command-input' }, children),
@@ -324,7 +315,6 @@ jest.mock('cmdk', () => {
 
 // Mock next-themes
 jest.mock('next-themes', () => {
-  const React = require('react');
   return {
     useTheme: () => ({
       theme: 'light',
@@ -352,7 +342,6 @@ jest.mock('tailwind-merge', () => ({
 
 // Mock lucide-react
 jest.mock('lucide-react', () => {
-  const React = require('react');
   return {
     Search: ({ children, ...props }: any) => React.createElement('div', { 'data-testid': 'search-icon', ...props }, children),
     Menu: ({ children, ...props }: any) => React.createElement('div', { 'data-testid': 'menu-icon', ...props }, children),

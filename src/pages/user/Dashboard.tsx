@@ -122,24 +122,24 @@ const Dashboard = () => {
             nextBestAction: null
           },
           devices: [
-            {
-              id: 1,
-              name: "iPhone 15 Pro",
-              serial: "ABC123DEF456",
-              status: "verified",
-              registeredDate: "2024-01-15",
-              location: "Cape Town, WC",
-              performance: {
-                loadingTime: 0.8,
-                verificationSpeed: 0.6,
-                trustScore: 94.2,
-                lastVerified: "2 hours ago"
-              },
-              reverseVerification: {
-                integrated: true,
-                lastCheck: "1 hour ago",
-                fraudScore: 8,
-                marketplaceAlerts: 0
+    {
+      id: 1,
+      name: "iPhone 15 Pro",
+      serial: "ABC123DEF456",
+      status: "verified",
+      registeredDate: "2024-01-15",
+      location: "Cape Town, WC",
+      performance: {
+        loadingTime: 0.8,
+        verificationSpeed: 0.6,
+        trustScore: 94.2,
+        lastVerified: "2 hours ago"
+      },
+      reverseVerification: {
+        integrated: true,
+        lastCheck: "1 hour ago",
+        fraudScore: 8,
+        marketplaceAlerts: 0
               }
             }
           ],
@@ -434,14 +434,14 @@ const Dashboard = () => {
         <div className="space-y-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
                 <h1 className="text-3xl font-bold">
                   {userProfile.userType === 'new' ? 'Welcome to STOLEN!' : 
                    userProfile.userType === 'power' ? 'Welcome back, Expert!' : 'Welcome back!'}
                 </h1>
-                <Shield className="w-6 h-6 text-primary" />
-              </div>
-              <p className="text-muted-foreground">
+            <Shield className="w-6 h-6 text-primary" />
+          </div>
+          <p className="text-muted-foreground">
                 {userProfile.userType === 'new' 
                   ? 'Let\'s secure your first device and join the community' 
                   : userProfile.securityScore >= 90 
@@ -562,7 +562,7 @@ const Dashboard = () => {
 
         {/* Contextual AI Insights */}
         {contextualInsights.length > 0 && (
-          <div className="space-y-4">
+        <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <Brain className="w-5 h-5 text-purple-500" />
@@ -663,12 +663,12 @@ const Dashboard = () => {
               })
               .slice(0, showAllActions ? quickActions.length : 6)
               .map((action, index) => (
-                <Button
-                  key={index}
-                  variant={action.variant}
+              <Button
+                key={index}
+                variant={action.variant}
                   className="h-16 md:h-20 flex-col gap-2 text-xs md:text-sm relative group"
                   onClick={() => handleNavigateWithMemory(action.href, `Opening ${action.label}...`)}
-                >
+              >
                   {action.icon}
                   <span className="text-xs">{action.label}</span>
                   {action.label === 'Hot Deals' && (
@@ -681,8 +681,8 @@ const Dashboard = () => {
                       •
                     </Badge>
                   )}
-                </Button>
-              ))}
+              </Button>
+            ))}
           </div>
           
           {/* View All Actions */}
@@ -744,8 +744,8 @@ const Dashboard = () => {
               size="sm"
               onClick={() => handleNavigateWithMemory('/device/register', 'Opening device registration...')}
             >
-              <Plus className="w-4 h-4" />
-              Add Device
+                <Plus className="w-4 h-4" />
+                Add Device
             </Button>
           </div>
 
@@ -852,11 +852,11 @@ const Dashboard = () => {
                   {/* Action Buttons */}
                   <div className="flex flex-row lg:flex-col gap-2">
                     <Button variant="outline" size="sm" asChild className="flex-1 lg:flex-none">
-                      <Link to={`/device/${device.id}`}>
+                    <Link to={`/device/${device.id}`}>
                         <Eye className="w-4 h-4 mr-1" />
-                        View Details
-                      </Link>
-                    </Button>
+                      View Details
+                    </Link>
+                  </Button>
                     {device.status === 'verified' && (
                       <Button variant="secondary" size="sm" asChild className="flex-1 lg:flex-none">
                         <Link to={`/device-transfer?device=${device.id}`}>
@@ -1015,9 +1015,9 @@ const Dashboard = () => {
               {blockchainStats && (
                 <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
                   <Database className="w-5 h-5 text-blue-500" />
-                  <div>
+                <div>
                     <div className="font-medium">Blockchain Network Healthy</div>
-                    <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-muted-foreground">
                       Network status: {blockchainStats.networkStatus} • {blockchainStats.verifiedDevices} devices verified
                     </div>
                   </div>
@@ -1026,9 +1026,9 @@ const Dashboard = () => {
               {aiSuggestions.length > 0 && (
                 <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
                   <Brain className="w-5 h-5 text-purple-500" />
-                  <div>
+                <div>
                     <div className="font-medium">AI Analysis Complete</div>
-                    <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-muted-foreground">
                       {aiSuggestions.length} new transfer suggestions generated based on market analysis
                     </div>
                   </div>
