@@ -628,7 +628,7 @@ export const CompleteBuyerJourney: React.FC<CompleteBuyerJourneyProps> = ({
           </Card>
         );
 
-      case 3: // Checkout
+      case 3: { // Checkout
         const fees = calculateCartTotal();
         return (
           <Card>
@@ -779,6 +779,7 @@ export const CompleteBuyerJourney: React.FC<CompleteBuyerJourneyProps> = ({
             </CardContent>
           </Card>
         );
+        }
 
       default:
         return (

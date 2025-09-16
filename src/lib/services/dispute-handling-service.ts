@@ -295,8 +295,9 @@ class DisputeHandlingService {
           throw new Error('Partial refund amount not specified');
         }
         // Implement partial refund logic
-        const refundAmount = resolution.amount;
-        const sellerAmount = dispute.amount - refundAmount;
+        {
+          const refundAmount = resolution.amount;
+          const sellerAmount = dispute.amount - refundAmount;
         
         // Refund partial amount to buyer
         await dynamicWalletService.updateBalance(dispute.buyerId, {
@@ -321,6 +322,7 @@ class DisputeHandlingService {
           reason: `Escrow funds distributed via dispute resolution`,
           category: 'escrow'
         });
+        }
         break;
       
       case 'mediated_agreement':

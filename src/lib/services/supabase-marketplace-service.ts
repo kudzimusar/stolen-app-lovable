@@ -49,7 +49,7 @@ export class SupabaseMarketplaceService {
     error: string | null;
   }> {
     try {
-      let query = supabase
+      const query = supabase
         .from('marketplace_listings')
         .select(`
           *,
@@ -145,7 +145,7 @@ export class SupabaseMarketplaceService {
     error: string | null;
   }> {
     try {
-      let query = supabase
+      const query = supabase
         .from('marketplace_listings')
         .select(`
           *,
@@ -280,7 +280,7 @@ export class SupabaseMarketplaceService {
     error: string | null;
   }> {
     try {
-      let query = supabase
+      const query = supabase
         .from('marketplace_categories')
         .select('*')
         .order('featured', { ascending: false })

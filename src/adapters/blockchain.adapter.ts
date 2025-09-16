@@ -1,8 +1,26 @@
 // Blockchain Adapter Pattern
+export interface DeviceRegistration {
+  deviceId: string;
+  owner: string;
+  timestamp: number;
+  transactionHash: string;
+  blockNumber: number;
+}
+
+export interface DeviceHistoryEntry {
+  deviceId: string;
+  action: 'register' | 'transfer' | 'verify';
+  fromOwner?: string;
+  toOwner?: string;
+  timestamp: number;
+  transactionHash: string;
+  blockNumber: number;
+}
+
 export interface BlockchainAdapter {
   verifyDevice(deviceId: string): Promise<boolean>;
-  registerDevice(deviceId: string, owner: string): Promise<any>;
-  getDeviceHistory(deviceId: string): Promise<any[]>;
+  registerDevice(deviceId: string, owner: string): Promise<DeviceRegistration>;
+  getDeviceHistory(deviceId: string): Promise<DeviceHistoryEntry[]>;
   transferOwnership(deviceId: string, fromOwner: string, toOwner: string): Promise<boolean>;
 }
 
@@ -14,24 +32,27 @@ export class BrowserBlockchainAdapter implements BlockchainAdapter {
     return Math.random() > 0.1; // 90% success rate
   }
 
-  async registerDevice(deviceId: string, owner: string): Promise<any> {
+  async registerDevice(deviceId: string, owner: string): Promise<DeviceRegistration> {
     console.log(`[Browser] Registering device: ${deviceId} for owner: ${owner}`);
     return {
       deviceId,
       owner,
       timestamp: Date.now(),
-      hash: `0x${deviceId}${Date.now().toString(16)}`
+      transactionHash: `0x${deviceId}${Date.now().toString(16)}`,
+      blockNumber: Math.floor(Math.random() * 1000000)
     };
   }
 
-  async getDeviceHistory(deviceId: string): Promise<any[]> {
+  async getDeviceHistory(deviceId: string): Promise<DeviceHistoryEntry[]> {
     console.log(`[Browser] Getting device history: ${deviceId}`);
     return [
       {
         deviceId,
-        owner: `0x${Math.random().toString(16).substr(2, 40)}`,
+        action: 'register',
+        toOwner: `0x${Math.random().toString(16).substr(2, 40)}`,
         timestamp: Date.now() - 86400000,
-        hash: `0x${deviceId}${Date.now().toString(16)}`
+        transactionHash: `0x${deviceId}${Date.now().toString(16)}`,
+        blockNumber: Math.floor(Math.random() * 1000000)
       }
     ];
   }
@@ -50,12 +71,18 @@ export class ServerBlockchainAdapter implements BlockchainAdapter {
     return true;
   }
 
-  async registerDevice(deviceId: string, owner: string): Promise<any> {
+  async registerDevice(deviceId: string, owner: string): Promise<DeviceRegistration> {
     console.log(`[Server] Registering device: ${deviceId} for owner: ${owner}`);
-    return { deviceId, owner, timestamp: Date.now() };
+    return { 
+      deviceId, 
+      owner, 
+      timestamp: Date.now(),
+      transactionHash: `0x${deviceId}${Date.now().toString(16)}`,
+      blockNumber: Math.floor(Math.random() * 1000000)
+    };
   }
 
-  async getDeviceHistory(deviceId: string): Promise<any[]> {
+  async getDeviceHistory(deviceId: string): Promise<DeviceHistoryEntry[]> {
     console.log(`[Server] Getting device history: ${deviceId}`);
     return [];
   }

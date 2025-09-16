@@ -160,7 +160,7 @@ const AIAutoFillAssistant: React.FC<AIAutoFillAssistantProps> = ({
         }
         break;
 
-      case 'tags':
+      case 'tags': {
         // Tag suggestions
         const commonTags = ['excellent-condition', 'fast-shipping', 'verified-seller', 'original-box', 'unlocked', 'warranty-included'];
         if (ctx.category) {
@@ -178,9 +178,10 @@ const AIAutoFillAssistant: React.FC<AIAutoFillAssistantProps> = ({
             });
           }
         });
+        }
         break;
 
-      case 'features':
+      case 'features': {
         // Feature suggestions based on product category
         const featureSuggestions: Record<string, string[]> = {
           smartphones: ['Fast Charging', 'High-Resolution Camera', 'Large Storage', 'Long Battery Life', 'Water Resistant'],
@@ -200,9 +201,10 @@ const AIAutoFillAssistant: React.FC<AIAutoFillAssistantProps> = ({
             });
           }
         });
+        }
         break;
 
-      case 'specifications':
+      case 'specifications': {
         // Specification suggestions
         if (ctx.category === 'smartphones') {
           const specs = ['Screen Size: 6.1 inches', 'Storage: 128GB', 'RAM: 8GB', 'Battery: 4000mAh', 'Camera: 48MP'];
@@ -215,6 +217,7 @@ const AIAutoFillAssistant: React.FC<AIAutoFillAssistantProps> = ({
               reasoning: 'Standard specification format'
             });
           });
+        }
         }
         break;
 

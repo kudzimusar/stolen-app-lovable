@@ -21,21 +21,77 @@ import cacheManager from '@/lib/redis';
 import backgroundJobs from '@/lib/optimization/background-jobs-browser';
 import apiService from '@/lib/api-optimization';
 
+interface ApiStats {
+  responseTime: number;
+  requestsPerSecond: number;
+  errorRate: number;
+  cacheHitRate: number;
+}
+
+interface CacheStats {
+  hitRate: number;
+  missRate: number;
+  size: number;
+  evictions: number;
+}
+
+interface SearchStats {
+  queryTime: number;
+  resultsCount: number;
+  indexSize: number;
+}
+
+interface BackgroundStats {
+  jobsProcessed: number;
+  queueSize: number;
+  processingTime: number;
+}
+
+interface MemoryStats {
+  used: number;
+  total: number;
+  heapUsed: number;
+  heapTotal: number;
+}
+
 interface PerformanceStats {
-  api: Record<string, any>;
-  cache: Record<string, any>;
-  search: Record<string, any>;
-  background: Record<string, any>;
-  memory: Record<string, any>;
+  api: ApiStats;
+  cache: CacheStats;
+  search: SearchStats;
+  background: BackgroundStats;
+  memory: MemoryStats;
 }
 
 export const PerformanceDashboard: React.FC = () => {
   const [stats, setStats] = useState<PerformanceStats>({
-    api: {},
-    cache: {},
-    search: {},
-    background: {},
-    memory: {},
+    api: {
+      responseTime: 0,
+      requestsPerSecond: 0,
+      errorRate: 0,
+      cacheHitRate: 0
+    },
+    cache: {
+      hitRate: 0,
+      missRate: 0,
+      size: 0,
+      evictions: 0
+    },
+    search: {
+      queryTime: 0,
+      resultsCount: 0,
+      indexSize: 0
+    },
+    background: {
+      jobsProcessed: 0,
+      queueSize: 0,
+      processingTime: 0
+    },
+    memory: {
+      used: 0,
+      total: 0,
+      heapUsed: 0,
+      heapTotal: 0
+    },
   });
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -187,9 +243,7 @@ export const PerformanceDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {Object.values(stats.background).reduce((sum: number, queue: any) => 
-                    sum + (queue?.active || 0), 0
-                  )}
+                  {stats.background.queueSize}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Running in background

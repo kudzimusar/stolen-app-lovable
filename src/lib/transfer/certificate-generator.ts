@@ -152,7 +152,7 @@ export class CertificateGenerator {
     const template = this.getCertificateTemplate(certificateType);
     
     // Replace placeholders with actual data
-    let processedContent = template
+    const processedContent = template
       .replace(/\{\{transferId\}\}/g, data.transferId)
       .replace(/\{\{deviceId\}\}/g, data.deviceId)
       .replace(/\{\{deviceName\}\}/g, data.deviceName)

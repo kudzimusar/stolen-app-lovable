@@ -25,7 +25,9 @@ export default function SearchTypeahead({ value, onChange, onSelectPath, onOpenF
     try {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (SpeechRecognition) micRef.current = new SpeechRecognition();
-    } catch {}
+    } catch (error) {
+      console.warn('Speech recognition not available:', error);
+    }
   }, []);
 
   useEffect(() => {

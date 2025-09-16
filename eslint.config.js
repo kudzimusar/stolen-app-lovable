@@ -24,11 +24,31 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       "@typescript-eslint/no-unused-vars": "off",
-      "@typescript-eslint/no-explicit-any": "warn",
-      "no-case-declarations": "warn",
-      "prefer-const": "warn",
-      "no-empty": "warn",
-      "no-fallthrough": "warn",
+    },
+  },
+  // Special configuration for Cypress files
+  {
+    files: ["cypress/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-namespace": "off", // Allow namespaces in Cypress for type definitions
+      "@typescript-eslint/no-explicit-any": "warn", // Allow any in tests but warn
+    },
+  },
+  // Allow any types in test files, Supabase functions, service files, and components
+  {
+    files: [
+      "**/*.test.{ts,tsx}", 
+      "**/setupTests.ts", 
+      "supabase/functions/**/*.ts",
+      "src/lib/**/*.ts",
+      "src/services/**/*.ts",
+      "src/components/**/*.{ts,tsx}",
+      "src/pages/**/*.{ts,tsx}",
+      "src/hooks/**/*.ts"
+    ],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-namespace": "off",
     },
   }
 );

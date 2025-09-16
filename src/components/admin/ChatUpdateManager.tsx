@@ -36,8 +36,14 @@ interface ChatUpdateForm {
   isActive: boolean;
 }
 
+interface ChatUpdate extends ChatUpdateForm {
+  createdAt: string;
+  updatedAt: string;
+  version: string;
+}
+
 export const ChatUpdateManager = () => {
-  const [updates, setUpdates] = useState<any[]>([]);
+  const [updates, setUpdates] = useState<ChatUpdate[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ChatUpdateForm>({
@@ -87,7 +93,7 @@ export const ChatUpdateManager = () => {
     loadUpdates();
   };
 
-  const handleEdit = (update: any) => {
+  const handleEdit = (update: ChatUpdate) => {
     setEditingId(update.id);
     setForm({
       id: update.id,
@@ -223,7 +229,7 @@ export const ChatUpdateManager = () => {
               </div>
               <div>
                 <label className="text-sm font-medium">Type</label>
-                <Select value={form.type} onValueChange={(value: any) => setForm({ ...form, type: value })}>
+                <Select value={form.type} onValueChange={(value: ChatUpdateForm['type']) => setForm({ ...form, type: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -289,7 +295,7 @@ export const ChatUpdateManager = () => {
               </div>
               <div>
                 <label className="text-sm font-medium">Priority</label>
-                <Select value={form.priority} onValueChange={(value: any) => setForm({ ...form, priority: value })}>
+                <Select value={form.priority} onValueChange={(value: ChatUpdateForm['priority']) => setForm({ ...form, priority: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

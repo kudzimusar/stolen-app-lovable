@@ -1,10 +1,30 @@
 import cacheManager from './redis';
 import performanceMonitor from './performance-monitoring';
 
+export interface Request {
+  headers: Record<string, string>;
+  ip?: string;
+  user?: { id: string };
+  url?: string;
+  method?: string;
+  body?: unknown;
+}
+
+export interface Response {
+  status: (code: number) => Response;
+  json: (data: unknown) => void;
+  send: (data: unknown) => void;
+  end: () => void;
+}
+
+export interface NextFunction {
+  (): void;
+}
+
 export interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds
   maxRequests: number; // Maximum requests per window
-  keyGenerator?: (req: any) => string; // Custom key generator
+  keyGenerator?: (req: Request) => string; // Custom key generator
   skipSuccessfulRequests?: boolean;
   skipFailedRequests?: boolean;
 }
@@ -30,7 +50,7 @@ export class ApiOptimizationService {
    * Rate limiting middleware
    */
   createRateLimiter(config: RateLimitConfig) {
-    return async (req: any, res: any, next: any) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       const key = config.keyGenerator ? config.keyGenerator(req) : this.generateKey(req);
       const now = Date.now();
 
@@ -81,7 +101,7 @@ export class ApiOptimizationService {
    * API response caching middleware
    */
   createCacheMiddleware(config: CacheConfig) {
-    return async (req: any, res: any, next: any) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       // Skip caching for non-GET requests
       if (req.method !== 'GET') {
         return next();
@@ -105,7 +125,7 @@ export class ApiOptimizationService {
 
         // Override res.json to cache the response
         const originalJson = res.json;
-        res.json = async (data: any) => {
+        res.json = async (data: unknown) => {
           // Cache the response
           await cacheManager.set(cacheKey, data, config.ttl);
           
@@ -210,21 +230,21 @@ export class ApiOptimizationService {
   /**
    * Generate rate limit key
    */
-  private generateKey(req: any): string {
-    const ip = req.ip || req.connection.remoteAddress;
-    const userAgent = req.get('User-Agent') || '';
+  private generateKey(req: Request): string {
+    const ip = req.ip || 'unknown';
+    const userAgent = req.headers['user-agent'] || '';
     return `ratelimit:${ip}:${userAgent}`;
   }
 
   /**
    * Generate cache key
    */
-  private generateCacheKey(req: any): string {
-    const url = req.url;
-    const query = JSON.stringify(req.query);
+  private generateCacheKey(req: Request): string {
+    const url = req.url || '';
+    const query = JSON.stringify({});
     const headers = JSON.stringify({
-      'accept-language': req.get('Accept-Language'),
-      'user-agent': req.get('User-Agent'),
+      'accept-language': req.headers['accept-language'],
+      'user-agent': req.headers['user-agent'],
     });
     return `api:${url}:${query}:${headers}`;
   }
