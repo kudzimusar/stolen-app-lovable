@@ -327,7 +327,7 @@ POST /api/v1/s-pay-enhanced
 
 ### **Phase 3 Features**
 - **Crypto Integration**: Cryptocurrency support
-- **International Transfers**: Cross-border payments
+- **Local Transfers**: South African domestic payments
 - **Advanced Security**: Biometric authentication
 - **AI Features**: AI-powered fraud detection
 

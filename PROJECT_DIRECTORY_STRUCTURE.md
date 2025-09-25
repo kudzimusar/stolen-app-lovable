@@ -37,7 +37,7 @@ stolen-app-lovable/
 ### **Analysis Documents (`docs/analysis/`)**
 - `STOLEN_APP_COMPREHENSIVE_ANALYSIS.md` - Complete project analysis
 - `STOLEN_APP_PRODUCT_DESCRIPTION.md` - Product description and features
-- `PAYPASS_PRODUCT_DESCRIPTION.md` - Legacy product description
+- `STOLEN_PRODUCT_DESCRIPTION.md` - STOLEN platform product description
 - `STAKEHOLDER_ANALYSIS.md` - Stakeholder analysis and requirements
 - `STAKEHOLDER_TECHNOLOGY_MATRIX.md` - Technology mapping for stakeholders
 - `UI_UX_CONSISTENCY_PLAN.md` - UI/UX consistency guidelines

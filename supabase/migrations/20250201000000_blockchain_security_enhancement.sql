@@ -374,7 +374,7 @@ INSERT INTO public.transaction_fees (transaction_type, fee_percentage, fixed_fee
 ('multisig_setup', 0.00, 10.00, 10.00, 10.00), -- One-time multi-sig setup
 ('fraud_review', 0.00, 5.00, 5.00, 5.00), -- Manual fraud review fee
 ('expedited_transfer', 0.01, 15.00, 15.00, 100.00), -- Fast-track transfers
-('international_transfer', 0.025, 25.00, 25.00, 500.00) -- Cross-border transfers
+-- International transfer functionality removed - not part of STOLEN platform scope
 ON CONFLICT (transaction_type) DO NOTHING;
 
 -- Grant necessary permissions
