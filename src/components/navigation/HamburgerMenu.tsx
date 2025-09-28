@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu, Home, User, Settings, LogOut } from "lucide-react";
 
 interface HamburgerMenuProps {
@@ -12,13 +12,14 @@ interface HamburgerMenuProps {
 
 export const HamburgerMenu = ({ dashboardLink, profileLink, userRole }: HamburgerMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     const isMobile = window.innerWidth < 768;
     if (isMobile) {
-      window.location.href = "/splash-welcome";
+      navigate("/splash-welcome");
     } else {
-      window.location.href = "/";
+      navigate("/");
     }
   };
 

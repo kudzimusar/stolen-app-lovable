@@ -28,7 +28,7 @@ export const BottomNavigation = () => {
   
   // Mock authentication state and user role - in real app would come from auth context
   const isLoggedIn = true; // This should come from auth context
-  const userRole = "member"; // Mock role - should come from auth context
+  const userRole: string = "member"; // Mock role - should come from auth context
   
   // Role-specific navigation items
   const getNavItems = () => {
@@ -328,31 +328,48 @@ export const BottomNavigation = () => {
     "/reset-password"
   ];
   
+  // Debug logs removed for production
+  
   if (hideOnPaths.includes(location.pathname)) return null;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-border">
-      <div className="flex items-center justify-around px-4 py-2 max-w-lg mx-auto">
+    <div 
+      style={{ 
+        position: 'fixed', 
+        bottom: 0, 
+        left: 0, 
+        right: 0, 
+        zIndex: 40,
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        borderTop: '1px solid #e5e7eb',
+        padding: '8px 16px',
+        height: '80px'
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', maxWidth: '600px', margin: '0 auto' }}>
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
             <Link
               key={item.href}
               to={item.href}
-              className={cn(
-                "flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200",
-                "min-w-[60px] min-h-[56px]", // Touch-friendly size (44px minimum)
-                item.active
-                  ? "text-primary bg-primary/10"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-                item.highlight && !item.active && "text-primary"
-              )}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '8px',
+                borderRadius: '8px',
+                minWidth: '60px',
+                minHeight: '56px',
+                textDecoration: 'none',
+                color: item.active ? '#3b82f6' : '#6b7280',
+                backgroundColor: item.active ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                transition: 'all 0.2s ease'
+              }}
             >
-              <Icon className={cn(
-                "w-5 h-5 mb-1",
-                item.highlight && "drop-shadow-lg"
-              )} />
-              <span className="text-xs font-medium">{item.label}</span>
+              <Icon style={{ width: '20px', height: '20px', marginBottom: '4px' }} />
+              <span style={{ fontSize: '12px', fontWeight: '500' }}>{item.label}</span>
             </Link>
           );
         })}

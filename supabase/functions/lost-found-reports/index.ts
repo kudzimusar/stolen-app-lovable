@@ -68,7 +68,9 @@ serve(async (req) => {
         return await handleCreateReport(req, supabaseServiceClient, user);
       
       case "GET":
-        if (path === "nearby") {
+        if (path === "stats") {
+          return await handleGetStats(req, supabaseServiceClient, user);
+        } else if (path === "nearby") {
           return await handleGetNearbyReports(req, supabaseServiceClient, user);
         } else if (path === "user") {
           return await handleGetUserReports(req, supabaseServiceClient, user);
@@ -166,11 +168,7 @@ async function handleGetReports(req: Request, supabase: any, user: any): Promise
 
   let query = supabase
     .from("lost_found_reports")
-    .select(`
-      *,
-      users!inner(display_name, avatar_url),
-      user_reputation!inner(reputation_score, trust_level)
-    `)
+    .select("*")
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -184,10 +182,35 @@ async function handleGetReports(req: Request, supabase: any, user: any): Promise
     throw error;
   }
 
+  // Enrich reports with user data
+  const enrichedReports = await Promise.all(
+    reports.map(async (report: any) => {
+      // Get user data
+      const { data: userData } = await supabase
+        .from("users")
+        .select("display_name, avatar_url")
+        .eq("id", report.user_id)
+        .single();
+
+      // Get user reputation
+      const { data: reputationData } = await supabase
+        .from("user_reputation")
+        .select("reputation_score, trust_level")
+        .eq("user_id", report.user_id)
+        .single();
+
+      return {
+        ...report,
+        users: userData || { display_name: "Anonymous", avatar_url: null },
+        user_reputation: reputationData || { reputation_score: 0, trust_level: "new" }
+      };
+    })
+  );
+
   return new Response(
     JSON.stringify({
       success: true,
-      data: reports,
+      data: enrichedReports,
       pagination: {
         limit,
         offset,
@@ -259,30 +282,45 @@ async function handleGetNearbyReports(req: Request, supabase: any, user: any): P
   const reportIds = nearbyReports.map((r: any) => r.id);
   const { data: fullReports, error: fullError } = await supabase
     .from("lost_found_reports")
-    .select(`
-      *,
-      users!inner(display_name, avatar_url),
-      user_reputation!inner(reputation_score, trust_level)
-    `)
+    .select("*")
     .in("id", reportIds);
 
   if (fullError) {
     throw fullError;
   }
 
-  // Merge distance data with full reports
-  const reportsWithDistance = fullReports.map((report: any) => {
-    const nearbyData = nearbyReports.find((r: any) => r.id === report.id);
-    return {
-      ...report,
-      distance_km: nearbyData?.distance_km
-    };
-  });
+  // Enrich reports with user data and distance
+  const enrichedReports = await Promise.all(
+    fullReports.map(async (report: any) => {
+      const nearbyData = nearbyReports.find((r: any) => r.id === report.id);
+      
+      // Get user data
+      const { data: userData } = await supabase
+        .from("users")
+        .select("display_name, avatar_url")
+        .eq("id", report.user_id)
+        .single();
+
+      // Get user reputation
+      const { data: reputationData } = await supabase
+        .from("user_reputation")
+        .select("reputation_score, trust_level")
+        .eq("user_id", report.user_id)
+        .single();
+
+      return {
+        ...report,
+        distance_km: nearbyData?.distance_km,
+        users: userData || { display_name: "Anonymous", avatar_url: null },
+        user_reputation: reputationData || { reputation_score: 0, trust_level: "new" }
+      };
+    })
+  );
 
   return new Response(
     JSON.stringify({
       success: true,
-      data: reportsWithDistance,
+      data: enrichedReports,
       search_params: { lat, lng, radius }
     }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -489,6 +527,44 @@ function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
             Math.sin(dLng/2) * Math.sin(dLng/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c;
+}
+
+async function handleGetStats(req: Request, supabase: any, user: any): Promise<Response> {
+  try {
+    // Get community statistics
+    const { data: lostCount } = await supabase
+      .from("lost_found_reports")
+      .select("id", { count: "exact" })
+      .eq("report_type", "lost")
+      .eq("verification_status", "active");
+
+    const { data: foundCount } = await supabase
+      .from("lost_found_reports")
+      .select("id", { count: "exact" })
+      .eq("report_type", "found")
+      .eq("verification_status", "active");
+
+    const { data: reunitedCount } = await supabase
+      .from("lost_found_reports")
+      .select("id", { count: "exact" })
+      .eq("verification_status", "resolved");
+
+    const stats = {
+      lost: lostCount?.length || 0,
+      found: foundCount?.length || 0,
+      reunited: reunitedCount?.length || 0
+    };
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        data: stats
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function sendNearbyNotifications(supabase: any, report: any): Promise<void> {

@@ -1,21 +1,34 @@
 import { liteClient as algoliasearch } from 'algoliasearch/lite';
 import cacheManager from './redis';
 
-// Initialize Algolia client
-const searchClient = algoliasearch(
-  import.meta.env.VITE_ALGOLIA_APP_ID || 'your-app-id',
-  import.meta.env.VITE_ALGOLIA_SEARCH_KEY || 'your-search-key'
-);
+// Initialize Algolia client with error handling
+let searchClient: any = null;
+let indices: any = {};
 
-// Search indices
-const indices = {
-  devices: searchClient.initIndex('devices'),
-  users: searchClient.initIndex('users'),
-  transactions: searchClient.initIndex('transactions'),
-  marketplace: searchClient.initIndex('marketplace'),
-  insurance: searchClient.initIndex('insurance'),
-  lawEnforcement: searchClient.initIndex('law-enforcement'),
-} as const;
+try {
+  const appId = import.meta.env.VITE_ALGOLIA_APP_ID;
+  const searchKey = import.meta.env.VITE_ALGOLIA_SEARCH_KEY;
+  
+  if (appId && searchKey && appId !== 'your-app-id' && searchKey !== 'your-search-key') {
+    searchClient = algoliasearch(appId, searchKey);
+    
+    // Search indices
+    indices = {
+      devices: searchClient.initIndex('devices'),
+      users: searchClient.initIndex('users'),
+      transactions: searchClient.initIndex('transactions'),
+      marketplace: searchClient.initIndex('marketplace'),
+      insurance: searchClient.initIndex('insurance'),
+      lawEnforcement: searchClient.initIndex('law-enforcement'),
+    };
+  } else {
+    console.warn('Algolia credentials not configured, search optimization disabled');
+  }
+} catch (error) {
+  console.warn('Failed to initialize Algolia client:', error);
+  searchClient = null;
+  indices = {};
+}
 
 export interface SearchFilters {
   category?: string;
@@ -59,6 +72,10 @@ export class SearchOptimizationService {
     filters: SearchFilters = {},
     options: SearchOptions = {}
   ) {
+    if (!searchClient || !indices.devices) {
+      console.warn('Search optimization not available, returning empty results');
+      return { hits: [], nbHits: 0, page: 0, nbPages: 0 };
+    }
     const cacheKey = `search:devices:${query}:${JSON.stringify(filters)}:${JSON.stringify(options)}`;
     
     // Try to get from cache first
@@ -107,6 +124,10 @@ export class SearchOptimizationService {
     filters: SearchFilters = {},
     options: SearchOptions = {}
   ) {
+    if (!searchClient || !indices.users) {
+      console.warn('Search optimization not available, returning empty results');
+      return { hits: [], nbHits: 0, page: 0, nbPages: 0 };
+    }
     const cacheKey = `search:users:${query}:${JSON.stringify(filters)}:${JSON.stringify(options)}`;
     
     const cached = await cacheManager.get(cacheKey);
@@ -148,6 +169,10 @@ export class SearchOptimizationService {
     filters: SearchFilters = {},
     options: SearchOptions = {}
   ) {
+    if (!searchClient || !indices.transactions) {
+      console.warn('Search optimization not available, returning empty results');
+      return { hits: [], nbHits: 0, page: 0, nbPages: 0 };
+    }
     const cacheKey = `search:transactions:${query}:${JSON.stringify(filters)}:${JSON.stringify(options)}`;
     
     const cached = await cacheManager.get(cacheKey);
@@ -189,6 +214,10 @@ export class SearchOptimizationService {
     filters: SearchFilters = {},
     options: SearchOptions = {}
   ) {
+    if (!searchClient || !indices.marketplace) {
+      console.warn('Search optimization not available, returning empty results');
+      return { hits: [], nbHits: 0, page: 0, nbPages: 0 };
+    }
     const cacheKey = `search:marketplace:${query}:${JSON.stringify(filters)}:${JSON.stringify(options)}`;
     
     const cached = await cacheManager.get(cacheKey);

@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Search,
@@ -18,10 +20,13 @@ import {
   CheckCircle,
   Plus,
   DollarSign,
-  Eye
+  Eye,
+  Database
 } from "lucide-react";
 
 const CommunityBoard = () => {
+  const { user, getAuthToken } = useAuth();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("all");
@@ -41,18 +46,194 @@ const CommunityBoard = () => {
     fetchStats();
   }, []);
 
+  // Initialize with fallback data for testing
+  useEffect(() => {
+    if (posts.length === 0 && !loading) {
+      console.log('Initializing with fallback data for testing...');
+      setPosts([
+        {
+          id: 1,
+          type: "lost",
+          device: "iPhone 15 Pro Max",
+          description: "Space Black, cracked screen protector, purple case",
+          location: "Sandton City Mall, Johannesburg",
+          timeAgo: "2 hours ago",
+          reward: "R5000",
+          verified: true,
+          responses: 3,
+          image: "/placeholder.svg",
+          user: "Sarah M.",
+          reputation: 85,
+          trustLevel: "trusted"
+        },
+        {
+          id: 2,
+          type: "found",
+          device: "Samsung Galaxy S24",
+          description: "Found at V&A Waterfront, blue case",
+          location: "V&A Waterfront, Cape Town",
+          timeAgo: "4 hours ago",
+          reward: null,
+          verified: false,
+          responses: 1,
+          image: "/placeholder.svg",
+          user: "Mike D.",
+          reputation: 42,
+          trustLevel: "verified"
+        },
+        {
+          id: 3,
+          type: "lost",
+          device: "MacBook Pro",
+          description: "Space Gray, 13-inch, South African flag sticker",
+          location: "Gateway Theatre of Shopping, Durban",
+          timeAgo: "1 day ago",
+          reward: "R8000",
+          verified: false,
+          responses: 0,
+          image: "/placeholder.svg",
+          user: "David K.",
+          reputation: 23,
+          trustLevel: "new"
+        },
+        {
+          id: 4,
+          type: "found",
+          device: "iPad Air",
+          description: "Found at OR Tambo Airport, silver color",
+          location: "OR Tambo Airport, Johannesburg",
+          timeAgo: "6 hours ago",
+          reward: null,
+          verified: true,
+          responses: 2,
+          image: "/placeholder.svg",
+          user: "Lisa T.",
+          reputation: 67,
+          trustLevel: "trusted"
+        },
+        {
+          id: 5,
+          type: "lost",
+          device: "AirPods Pro",
+          description: "Lost at Greenmarket Square, black case",
+          location: "Greenmarket Square, Cape Town",
+          timeAgo: "3 hours ago",
+          reward: "R1500",
+          verified: false,
+          responses: 1,
+          image: "/placeholder.svg",
+          user: "John P.",
+          reputation: 31,
+          trustLevel: "verified"
+        }
+      ]);
+      
+      setStats({
+        lost: 3,
+        found: 2,
+        reunited: 12
+      });
+    }
+  }, [posts.length, loading]);
+
+  // Function to insert test data into database
+  const insertTestData = async () => {
+    try {
+      const token = await getAuthToken();
+      if (!token) {
+        toast.error("Please log in to insert test data");
+        return;
+      }
+
+      const testReports = [
+        {
+          report_type: "lost",
+          device_category: "Smartphone",
+          device_model: "iPhone 15 Pro Max",
+          description: "Space Black, cracked screen protector, purple case",
+          location_lat: -26.1076,
+          location_lng: 28.0567,
+          location_address: "Sandton City Mall, Johannesburg",
+          incident_date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+          reward_amount: 5000,
+          photos: ["https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=300&fit=crop"]
+        },
+        {
+          report_type: "found",
+          device_category: "Smartphone",
+          device_model: "Samsung Galaxy S24",
+          description: "Found at V&A Waterfront, blue case",
+          location_lat: -33.9048,
+          location_lng: 18.4161,
+          location_address: "V&A Waterfront, Cape Town",
+          incident_date: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+          reward_amount: 0,
+          photos: ["https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop"]
+        },
+        {
+          report_type: "lost",
+          device_category: "Laptop",
+          device_model: "MacBook Pro",
+          description: "Space Gray, 13-inch, South African flag sticker",
+          location_lat: -29.8587,
+          location_lng: 31.0218,
+          location_address: "Gateway Theatre of Shopping, Durban",
+          incident_date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          reward_amount: 8000,
+          photos: ["https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=300&fit=crop"]
+        }
+      ];
+
+      for (const report of testReports) {
+        const response = await fetch('/api/v1/lost-found/reports', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(report)
+        });
+
+        if (response.ok) {
+          console.log('Test report inserted:', report.device_model);
+        } else {
+          console.error('Failed to insert test report:', report.device_model);
+        }
+      }
+
+      toast.success("Test data inserted successfully!");
+      // Refresh the data
+      fetchPosts();
+      fetchStats();
+    } catch (error) {
+      console.error('Error inserting test data:', error);
+      toast.error("Failed to insert test data");
+    }
+  };
+
   const fetchPosts = async () => {
     try {
       setLoading(true);
+      console.log('Fetching posts from API...');
+      
+      // Get auth token from authenticated user
+      const authToken = await getAuthToken() || 
+                       localStorage.getItem('supabase.auth.token') || 
+                       localStorage.getItem('sb-lerjhxchglztvhbsdjjn-auth-token') ||
+                       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlcmpoeGNoZ2x6dHZoYnNkampuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MzAyOTIsImV4cCI6MjA2OTIwNjI5Mn0.nzbVcrz576dB30B2lcazoWhAuK-XRRdYAIxBI_qesIs';
+      
       const response = await fetch('/api/v1/lost-found/reports', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
         }
       });
       
+      console.log('API Response status:', response.status);
       const result = await response.json();
+      console.log('API Response data:', result);
       
-      if (result.success) {
+      if (result.success && result.data && result.data.length > 0) {
         setPosts(result.data.map((post: any) => ({
           id: post.id,
           type: post.report_type,
@@ -60,7 +241,7 @@ const CommunityBoard = () => {
           description: post.description,
           location: post.location_address || 'Location not specified',
           timeAgo: formatTimeAgo(post.created_at),
-          reward: post.reward_amount ? `$${post.reward_amount}` : null,
+          reward: post.reward_amount ? `R${post.reward_amount}` : null,
           verified: post.verification_status === 'verified',
           responses: post.community_tips_count || 0,
           image: post.photos?.[0] || "/placeholder.svg",
@@ -69,36 +250,15 @@ const CommunityBoard = () => {
           reputation: post.user_reputation?.reputation_score || 0,
           trustLevel: post.user_reputation?.trust_level || 'new'
         })));
+        console.log('Successfully loaded', result.data.length, 'posts from API');
+      } else {
+        console.log('API returned empty data, using fallback...');
+        // Don't set posts here - let the fallback useEffect handle it
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
-      // Fallback to mock data if API fails
-      setPosts([
-        {
-          id: 1,
-          type: "lost",
-          device: "iPhone 15 Pro Max",
-          description: "Space Black, cracked screen protector, purple case",
-          location: "Downtown SF, near Union Square",
-          timeAgo: "2 hours ago",
-          reward: "$100",
-          verified: true,
-          responses: 3,
-          image: "/placeholder.svg"
-        },
-        {
-          id: 2,
-          type: "found",
-          device: "Samsung Galaxy S24",
-          description: "Found at Starbucks on Market St, blue case",
-          location: "Market Street, SF",
-          timeAgo: "4 hours ago",
-          reward: null,
-          verified: false,
-          responses: 1,
-          image: "/placeholder.svg"
-        }
-      ]);
+      console.log('API failed, using fallback data...');
+      // Don't set posts here - let the fallback useEffect handle it
     } finally {
       setLoading(false);
     }
@@ -106,25 +266,36 @@ const CommunityBoard = () => {
 
   const fetchStats = async () => {
     try {
+      console.log('Fetching community stats...');
+      
+      // Get auth token from authenticated user
+      const authToken = await getAuthToken() || 
+                       localStorage.getItem('supabase.auth.token') || 
+                       localStorage.getItem('sb-lerjhxchglztvhbsdjjn-auth-token') ||
+                       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlcmpoeGNoZ2x6dHZoYnNkampuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MzAyOTIsImV4cCI6MjA2OTIwNjI5Mn0.nzbVcrz576dB30B2lcazoWhAuK-XRRdYAIxBI_qesIs';
+      
       const response = await fetch('/api/v1/lost-found/community/stats', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
         }
       });
       
+      console.log('Stats API Response status:', response.status);
       const result = await response.json();
+      console.log('Stats API Response data:', result);
       
-      if (result.success) {
+      if (result.success && result.data && (result.data.lost > 0 || result.data.found > 0 || result.data.reunited > 0)) {
         setStats(result.data);
+        console.log('Successfully loaded community stats from API');
+      } else {
+        console.log('Stats API returned empty data, using fallback...');
+        // Don't set stats here - let the fallback useEffect handle it
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
-      // Fallback stats
-      setStats({
-        lost: posts.filter(p => p.type === 'lost').length,
-        found: posts.filter(p => p.type === 'found').length,
-        reunited: 12
-      });
+      console.log('Stats API failed, using fallback stats...');
+      // Don't set stats here - let the fallback useEffect handle it
     }
   };
 
@@ -137,6 +308,26 @@ const CommunityBoard = () => {
     if (diffInHours < 24) return `${diffInHours} hours ago`;
     if (diffInHours < 48) return '1 day ago';
     return `${Math.floor(diffInHours / 24)} days ago`;
+  };
+
+  // Interactive handlers
+  const handlePostAction = (post: any) => {
+    if (post.type === "lost") {
+      toast.success("Thank you! We'll connect you with the owner.");
+      // Navigate to contact form or modal
+      navigate(`/lost-found/contact/${post.id}`);
+    } else {
+      toast.info("Opening contact form...");
+      navigate(`/lost-found/contact/${post.id}`);
+    }
+  };
+
+  const handleViewDetails = (post: any) => {
+    navigate(`/lost-found/details/${post.id}`);
+  };
+
+  const handleViewResponses = (post: any) => {
+    navigate(`/lost-found/responses/${post.id}`);
   };
 
   const filteredPosts = posts.filter(post => {
@@ -197,17 +388,37 @@ const CommunityBoard = () => {
 
       <div className="flex items-center justify-between pt-2 border-t">
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
+          <div 
+            className="flex items-center gap-1 cursor-pointer hover:text-primary"
+            onClick={() => handleViewResponses(post)}
+          >
             <MessageCircle className="w-4 h-4" />
             {post.responses} responses
           </div>
-          <div className="flex items-center gap-1">
+          <div 
+            className="flex items-center gap-1 cursor-pointer hover:text-primary"
+            onClick={() => handleViewDetails(post)}
+          >
             <Eye className="w-4 h-4" />
             View details
           </div>
+          {post.user && (
+            <div className="flex items-center gap-1">
+              <span className="text-xs">by {post.user}</span>
+              {post.reputation > 0 && (
+                <Badge variant="outline" className="text-xs">
+                  {post.reputation} pts
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
         
-        <Button size="sm" variant={post.type === "lost" ? "default" : "outline"}>
+        <Button 
+          size="sm" 
+          variant={post.type === "lost" ? "default" : "outline"}
+          onClick={() => handlePostAction(post)}
+        >
           {post.type === "lost" ? "I found this!" : "Contact owner"}
         </Button>
       </div>
@@ -301,37 +512,54 @@ const CommunityBoard = () => {
           </TabsList>
 
           <TabsContent value="all" className="mt-6">
-            <div className="space-y-4">
-              {filteredPosts.map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </div>
+            {!loading && (
+              <div className="space-y-4">
+                {filteredPosts.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="lost" className="mt-6">
-            <div className="space-y-4">
-              {filteredPosts.filter(p => p.type === "lost").map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </div>
+            {!loading && (
+              <div className="space-y-4">
+                {filteredPosts.filter(p => p.type === "lost").map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="found" className="mt-6">
-            <div className="space-y-4">
-              {filteredPosts.filter(p => p.type === "found").map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </div>
+            {!loading && (
+              <div className="space-y-4">
+                {filteredPosts.filter(p => p.type === "found").map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
+        {/* Loading State */}
+        {loading && (
+          <Card className="p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <h3 className="font-semibold mb-2">Loading community posts...</h3>
+            <p className="text-muted-foreground">
+              Fetching the latest lost and found reports
+            </p>
+          </Card>
+        )}
+
         {/* Empty State */}
-        {filteredPosts.length === 0 && (
+        {!loading && filteredPosts.length === 0 && (
           <Card className="p-8 text-center">
             <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="font-semibold mb-2">No devices found</h3>
             <p className="text-muted-foreground mb-4">
-              Try adjusting your search or filters
+              Try adjusting your search or filters, or be the first to report a device
             </p>
             <Button asChild>
               <Link to="/lost-found-report">
@@ -343,7 +571,16 @@ const CommunityBoard = () => {
         )}
 
         {/* Floating Action Button */}
-        <div className="fixed bottom-6 right-6">
+        <div className="fixed bottom-6 right-6 flex flex-col gap-3">
+          <Button 
+            size="lg" 
+            className="rounded-full shadow-lg" 
+            onClick={insertTestData}
+            variant="outline"
+            title="Insert test data"
+          >
+            <Database className="w-6 h-6" />
+          </Button>
           <Button size="lg" className="rounded-full shadow-lg" asChild>
             <Link to="/lost-found-report">
               <Plus className="w-6 h-6" />

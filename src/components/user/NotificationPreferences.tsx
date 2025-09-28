@@ -1,38 +1,34 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 import {
   Bell,
   Mail,
   Smartphone,
   MapPin,
-  Shield,
+  Settings,
   Save,
-  RotateCcw
+  CheckCircle
 } from "lucide-react";
 
-interface NotificationPreferencesProps {
-  onClose?: () => void;
-}
-
-const NotificationPreferences = ({ onClose }: NotificationPreferencesProps) => {
+export const NotificationPreferences = () => {
+  const { getAuthToken } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [preferences, setPreferences] = useState({
     email: true,
     push: true,
     sms: false,
     radius_km: 10,
     high_value_only: false,
-    daily_digest: true,
-    immediate_alerts: true
+    frequency: "immediate"
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     loadPreferences();
@@ -40,280 +36,231 @@ const NotificationPreferences = ({ onClose }: NotificationPreferencesProps) => {
 
   const loadPreferences = async () => {
     try {
-      setIsLoading(true);
-      const response = await fetch('/api/v1/lost-found/notifications/preferences', {
+      const token = await getAuthToken();
+      if (!token) return;
+
+      const response = await fetch('/api/v1/notifications/preferences', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       
       const result = await response.json();
-      
-      if (result.success && result.data) {
-        setPreferences(result.data);
+      if (result.success && result.data?.preferences) {
+        setPreferences(result.data.preferences);
       }
     } catch (error) {
       console.error('Error loading preferences:', error);
-      // Use default preferences if loading fails
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleSave = async () => {
+  const savePreferences = async () => {
+    setSaving(true);
     try {
-      setIsSaving(true);
-      const response = await fetch('/api/v1/lost-found/notifications/preferences', {
+      const token = await getAuthToken();
+      if (!token) {
+        toast.error("Please log in to save preferences");
+        return;
+      }
+
+      const response = await fetch('/api/v1/notifications/preferences', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(preferences)
+        body: JSON.stringify({ preferences })
       });
 
       const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to save preferences');
+      if (result.success) {
+        toast.success("Preferences saved successfully!");
+      } else {
+        toast.error(result.error || "Failed to save preferences");
       }
-
-      toast({
-        title: "Preferences Saved",
-        description: "Your notification preferences have been updated successfully.",
-      });
-
-      onClose?.();
     } catch (error) {
       console.error('Error saving preferences:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to save preferences. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("Failed to save preferences");
     } finally {
-      setIsSaving(false);
+      setSaving(false);
     }
   };
 
-  const handleReset = () => {
-    setPreferences({
-      email: true,
-      push: true,
-      sms: false,
-      radius_km: 10,
-      high_value_only: false,
-      daily_digest: true,
-      immediate_alerts: true
-    });
+  const handlePreferenceChange = (key: string, value: any) => {
+    setPreferences(prev => ({
+      ...prev,
+      [key]: value
+    }));
   };
 
-  if (isLoading) {
-    return (
-      <Card className="p-6">
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </Card>
-    );
-  }
-
   return (
-    <Card className="p-6 space-y-6">
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Bell className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold">Notification Preferences</h3>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Customize how you receive notifications about lost and found devices
-        </p>
-      </div>
-
-      <div className="space-y-6">
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Settings className="w-5 h-5" />
+          Notification Preferences
+        </CardTitle>
+        <CardDescription>
+          Customize how you receive notifications about lost and found devices in your area.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-8">
         {/* Notification Channels */}
-        <div className="space-y-4">
-          <h4 className="font-medium">Notification Channels</h4>
+        <div className="space-y-6">
+          <h3 className="text-lg font-semibold">Notification Channels</h3>
           
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-muted-foreground" />
+                <Mail className="w-5 h-5 text-blue-600" />
                 <div>
-                  <Label htmlFor="email" className="text-sm font-medium">Email Notifications</Label>
-                  <p className="text-xs text-muted-foreground">Receive updates via email</p>
+                  <Label htmlFor="email">Email Notifications</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Receive updates via email
+                  </p>
                 </div>
               </div>
-              <Checkbox
+              <Switch
                 id="email"
                 checked={preferences.email}
-                onCheckedChange={(checked) => 
-                  setPreferences({...preferences, email: checked as boolean})
-                }
+                onCheckedChange={(checked) => handlePreferenceChange('email', checked)}
               />
             </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Bell className="w-4 h-4 text-muted-foreground" />
+                <Smartphone className="w-5 h-5 text-green-600" />
                 <div>
-                  <Label htmlFor="push" className="text-sm font-medium">Push Notifications</Label>
-                  <p className="text-xs text-muted-foreground">In-app and browser notifications</p>
+                  <Label htmlFor="push">Push Notifications</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Receive push notifications on your device
+                  </p>
                 </div>
               </div>
-              <Checkbox
+              <Switch
                 id="push"
                 checked={preferences.push}
-                onCheckedChange={(checked) => 
-                  setPreferences({...preferences, push: checked as boolean})
-                }
+                onCheckedChange={(checked) => handlePreferenceChange('push', checked)}
               />
             </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Smartphone className="w-4 h-4 text-muted-foreground" />
+                <Bell className="w-5 h-5 text-orange-600" />
                 <div>
-                  <Label htmlFor="sms" className="text-sm font-medium">SMS Notifications</Label>
-                  <p className="text-xs text-muted-foreground">Text messages for urgent alerts</p>
+                  <Label htmlFor="sms">SMS Notifications</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Receive text messages for urgent updates
+                  </p>
                 </div>
               </div>
-              <Checkbox
+              <Switch
                 id="sms"
                 checked={preferences.sms}
-                onCheckedChange={(checked) => 
-                  setPreferences({...preferences, sms: checked as boolean})
-                }
+                onCheckedChange={(checked) => handlePreferenceChange('sms', checked)}
               />
             </div>
           </div>
         </div>
 
         {/* Geographic Settings */}
-        <div className="space-y-4">
-          <h4 className="font-medium">Geographic Settings</h4>
+        <div className="space-y-6">
+          <h3 className="text-lg font-semibold">Geographic Settings</h3>
           
+          <div className="space-y-4">
           <div className="space-y-3">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">Notification Radius</Label>
-                <Badge variant="outline">{preferences.radius_km} km</Badge>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-red-600" />
+                <Label>Notification Radius</Label>
               </div>
+              <div className="px-3">
               <Slider
                 value={[preferences.radius_km]}
-                onValueChange={(value) => setPreferences({...preferences, radius_km: value[0]})}
+                  onValueChange={(value) => handlePreferenceChange('radius_km', value[0])}
                 max={50}
                 min={1}
                 step={1}
                 className="w-full"
               />
-              <p className="text-xs text-muted-foreground">
-                Only receive notifications for devices within this distance
+                <div className="flex justify-between text-sm text-muted-foreground mt-2">
+                  <span>1 km</span>
+                  <span className="font-medium">{preferences.radius_km} km</span>
+                  <span>50 km</span>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Only receive notifications for devices within this radius of your location
               </p>
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <MapPin className="w-4 h-4 text-muted-foreground" />
                 <div>
-                  <Label htmlFor="high_value" className="text-sm font-medium">High-Value Devices Only</Label>
-                  <p className="text-xs text-muted-foreground">Only notify about devices with rewards</p>
-                </div>
+                <Label htmlFor="high_value_only">High Value Devices Only</Label>
+                <p className="text-sm text-muted-foreground">
+                  Only notify about devices with rewards above R1000
+                </p>
               </div>
-              <Checkbox
-                id="high_value"
+              <Switch
+                id="high_value_only"
                 checked={preferences.high_value_only}
-                onCheckedChange={(checked) => 
-                  setPreferences({...preferences, high_value_only: checked as boolean})
-                }
+                onCheckedChange={(checked) => handlePreferenceChange('high_value_only', checked)}
               />
             </div>
           </div>
         </div>
 
         {/* Frequency Settings */}
-        <div className="space-y-4">
-          <h4 className="font-medium">Frequency Settings</h4>
+        <div className="space-y-6">
+          <h3 className="text-lg font-semibold">Frequency Settings</h3>
           
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Bell className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <Label htmlFor="immediate" className="text-sm font-medium">Immediate Alerts</Label>
-                  <p className="text-xs text-muted-foreground">Get notified as soon as new reports are posted</p>
-                </div>
-              </div>
-              <Checkbox
-                id="immediate"
-                checked={preferences.immediate_alerts}
-                onCheckedChange={(checked) => 
-                  setPreferences({...preferences, immediate_alerts: checked as boolean})
-                }
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <Label htmlFor="digest" className="text-sm font-medium">Daily Digest</Label>
-                  <p className="text-xs text-muted-foreground">Receive a summary of all new reports once per day</p>
-                </div>
-              </div>
-              <Checkbox
-                id="digest"
-                checked={preferences.daily_digest}
-                onCheckedChange={(checked) => 
-                  setPreferences({...preferences, daily_digest: checked as boolean})
-                }
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="frequency">Notification Frequency</Label>
+            <Select
+              value={preferences.frequency}
+              onValueChange={(value) => handlePreferenceChange('frequency', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select frequency" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="immediate">Immediate - Get notified right away</SelectItem>
+                <SelectItem value="hourly">Hourly - Get a summary every hour</SelectItem>
+                <SelectItem value="daily">Daily - Get a daily digest</SelectItem>
+                <SelectItem value="weekly">Weekly - Get a weekly summary</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-muted-foreground">
+              How often you want to receive notifications
+            </p>
           </div>
         </div>
 
         {/* Privacy Notice */}
-        <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-          <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium">Privacy & Data Usage</span>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Your location data is only used to send relevant notifications and is never shared with third parties. 
-            You can disable location-based notifications at any time.
-          </p>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start gap-2">
+            <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+            <div className="text-sm text-blue-800">
+              <p className="font-medium mb-1">Privacy & Data Usage</p>
+              <p>
+                Your location data is only used to determine relevant notifications and is not shared with third parties. 
+                You can update these preferences at any time.
+              </p>
+            </div>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3">
+        {/* Save Button */}
+        <div className="pt-4">
         <Button 
-          onClick={handleSave} 
-          className="flex-1" 
-          disabled={isSaving}
-        >
-          {isSaving ? "Saving..." : "Save Preferences"}
-        </Button>
-        <Button 
-          variant="outline" 
-          onClick={handleReset}
-          disabled={isSaving}
-        >
-          <RotateCcw className="w-4 h-4 mr-2" />
-          Reset
-        </Button>
-        {onClose && (
-          <Button 
-            variant="ghost" 
-            onClick={onClose}
-            disabled={isSaving}
+            onClick={savePreferences}
+            disabled={saving}
+            className="w-full"
           >
-            Cancel
+            <Save className="w-4 h-4 mr-2" />
+            {saving ? "Saving..." : "Save Preferences"}
           </Button>
-        )}
       </div>
+      </CardContent>
     </Card>
   );
 };
-
-export default NotificationPreferences;

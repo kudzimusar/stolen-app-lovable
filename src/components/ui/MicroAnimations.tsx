@@ -199,7 +199,7 @@ export const FadeIn: React.FC<FadeInProps> = ({
       }}
     >
       {children}
-      <style jsx>{`
+      <style jsx="true">{`
         .fade-in-element.fade-in-visible {
           opacity: 1;
           transform: translateY(0) translateX(0) scale(1);
@@ -271,7 +271,7 @@ export const SlideIn: React.FC<SlideInProps> = ({
       }}
     >
       {children}
-      <style jsx>{`
+      <style jsx="true">{`
         .slide-in-element.slide-in-visible {
           opacity: 1;
           transform: translateX(0) translateY(0);
@@ -348,7 +348,7 @@ export const PageTransition: React.FC<PageTransitionProps> = ({
       className={cn('page-transition', className)}
     >
       {children}
-      <style jsx global>{`
+      <style jsx="true" global="true">{`
         .page-transition {
           transition: opacity 300ms ease-out, transform 300ms ease-out;
         }

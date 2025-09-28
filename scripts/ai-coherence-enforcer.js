@@ -133,30 +133,52 @@ class AICoherenceEnforcer {
       let aiResponse = null;
       
       if (AI_SERVICES.nvidia.apiKey) {
+        console.log(`  🔑 NVIDIA API Key found: ${AI_SERVICES.nvidia.apiKey.substring(0, 10)}...`);
         try {
           aiResponse = await this.callNVIDIAAPI(content, context);
           console.log(`  ✅ NVIDIA AI analysis completed`);
         } catch (error) {
           console.log(`  ⚠️  NVIDIA AI failed: ${error.message}`);
+          console.log(`  🔍 Error details: ${error.stack}`);
         }
+      } else {
+        console.log(`  ❌ NVIDIA API Key not found`);
       }
       
       if (!aiResponse && AI_SERVICES.anthropic.apiKey) {
+        console.log(`  🔑 Anthropic API Key found: ${AI_SERVICES.anthropic.apiKey.substring(0, 10)}...`);
         try {
           aiResponse = await this.callAnthropicAPI(content, context);
           console.log(`  ✅ Anthropic AI analysis completed`);
         } catch (error) {
           console.log(`  ⚠️  Anthropic AI failed: ${error.message}`);
         }
+      } else if (!aiResponse) {
+        console.log(`  ❌ Anthropic API Key not found`);
       }
       
       if (!aiResponse && AI_SERVICES.groq.apiKey) {
+        console.log(`  🔑 Groq API Key found: ${AI_SERVICES.groq.apiKey.substring(0, 10)}...`);
         try {
           aiResponse = await this.callGroqAPI(content, context);
           console.log(`  ✅ Groq AI analysis completed`);
         } catch (error) {
           console.log(`  ⚠️  Groq AI failed: ${error.message}`);
         }
+      } else if (!aiResponse) {
+        console.log(`  ❌ Groq API Key not found`);
+      }
+      
+      if (!aiResponse && AI_SERVICES.google.apiKey) {
+        console.log(`  🔑 Google API Key found: ${AI_SERVICES.google.apiKey.substring(0, 10)}...`);
+        try {
+          aiResponse = await this.callGoogleAPI(content, context);
+          console.log(`  ✅ Google AI analysis completed`);
+        } catch (error) {
+          console.log(`  ⚠️  Google AI failed: ${error.message}`);
+        }
+      } else if (!aiResponse) {
+        console.log(`  ❌ Google API Key not found`);
       }
       
       if (!aiResponse) {
@@ -205,21 +227,158 @@ class AICoherenceEnforcer {
     const aiResponse = data.choices[0]?.message?.content || '';
     
     try {
-      return JSON.parse(aiResponse);
+      // Extract JSON from markdown code blocks if present
+      let jsonContent = aiResponse;
+      const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
+      if (jsonMatch) {
+        jsonContent = jsonMatch[1].trim();
+      }
+      
+      return JSON.parse(jsonContent);
     } catch (error) {
+      console.log(`  ⚠️  JSON parsing failed: ${error.message}`);
       // If JSON parsing fails, return structured response
       return this.parseTextResponse(aiResponse);
     }
   }
 
   async callAnthropicAPI(content, context) {
-    // Anthropic API implementation would go here
-    throw new Error('Anthropic API not yet implemented');
+    const prompt = this.buildAnalysisPrompt(content, context);
+    
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${AI_SERVICES.anthropic.apiKey}`,
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 4096,
+        messages: [
+          {
+            role: 'user',
+            content: `You are an expert software architect analyzing code for the STOLEN platform, a device recovery and marketplace ecosystem with 8 stakeholder types. Provide accurate, actionable analysis in JSON format.\n\n${prompt}`
+          }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Anthropic API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const aiResponse = data.content[0]?.text || '';
+    
+    try {
+      // Extract JSON from markdown code blocks if present
+      let jsonContent = aiResponse;
+      const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
+      if (jsonMatch) {
+        jsonContent = jsonMatch[1].trim();
+      }
+      
+      return JSON.parse(jsonContent);
+    } catch (error) {
+      console.log(`  ⚠️  JSON parsing failed: ${error.message}`);
+      return this.parseTextResponse(aiResponse);
+    }
   }
 
   async callGroqAPI(content, context) {
-    // Groq API implementation would go here
-    throw new Error('Groq API not yet implemented');
+    const prompt = this.buildAnalysisPrompt(content, context);
+    
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${AI_SERVICES.groq.apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-70b-versatile',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert software architect analyzing code for the STOLEN platform, a device recovery and marketplace ecosystem with 8 stakeholder types. Provide accurate, actionable analysis in JSON format.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 4096
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Groq API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const aiResponse = data.choices[0]?.message?.content || '';
+    
+    try {
+      // Extract JSON from markdown code blocks if present
+      let jsonContent = aiResponse;
+      const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
+      if (jsonMatch) {
+        jsonContent = jsonMatch[1].trim();
+      }
+      
+      return JSON.parse(jsonContent);
+    } catch (error) {
+      console.log(`  ⚠️  JSON parsing failed: ${error.message}`);
+      return this.parseTextResponse(aiResponse);
+    }
+  }
+
+  async callGoogleAPI(content, context) {
+    const prompt = this.buildAnalysisPrompt(content, context);
+    
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${AI_SERVICES.google.apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: `You are an expert software architect analyzing code for the STOLEN platform, a device recovery and marketplace ecosystem with 8 stakeholder types. Provide accurate, actionable analysis in JSON format.\n\n${prompt}`
+              }
+            ]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.3,
+          maxOutputTokens: 4096
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Google API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const aiResponse = data.candidates[0]?.content?.parts[0]?.text || '';
+    
+    try {
+      // Extract JSON from markdown code blocks if present
+      let jsonContent = aiResponse;
+      const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
+      if (jsonMatch) {
+        jsonContent = jsonMatch[1].trim();
+      }
+      
+      return JSON.parse(jsonContent);
+    } catch (error) {
+      console.log(`  ⚠️  JSON parsing failed: ${error.message}`);
+      return this.parseTextResponse(aiResponse);
+    }
   }
 
   buildAnalysisPrompt(content, context) {
@@ -658,7 +817,16 @@ STOLEN Platform Context:
     console.log(`  NVIDIA: ${AI_SERVICES.nvidia.apiKey ? '✅' : '❌'}`);
     console.log(`  Anthropic: ${AI_SERVICES.anthropic.apiKey ? '✅' : '❌'}`);
     console.log(`  Groq: ${AI_SERVICES.groq.apiKey ? '✅' : '❌'}`);
-    console.log(`  Google: ${AI_SERVICES.google.apiKey ? '✅' : '❌'}\n`);
+    console.log(`  Google: ${AI_SERVICES.google.apiKey ? '✅' : '❌'}`);
+    
+    const availableServices = [
+      AI_SERVICES.nvidia.apiKey && 'NVIDIA',
+      AI_SERVICES.anthropic.apiKey && 'Anthropic',
+      AI_SERVICES.groq.apiKey && 'Groq',
+      AI_SERVICES.google.apiKey && 'Google'
+    ].filter(Boolean);
+    
+    console.log(`  🎯 Active Services: ${availableServices.length > 0 ? availableServices.join(', ') : 'None (using fallback)'}\n`);
     
     // Analyze first 5 files as a sample
     const sampleFiles = files.slice(0, 5);

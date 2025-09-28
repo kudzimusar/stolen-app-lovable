@@ -48,8 +48,8 @@
     "coherence:comprehensive-all": "node scripts/comprehensive-coherence-enforcer.js analyze-all",
     "coherence:comprehensive-file": "node scripts/comprehensive-coherence-enforcer.js analyze",
     "coherence:ai": "node scripts/ai-coherence-enforcer.js",
-    "coherence:ai-all": "node scripts/ai-coherence-enforcer.js analyze-all",
-    "coherence:ai-file": "node scripts/ai-coherence-enforcer.js analyze",
+    "coherence:ai-all": "node scripts/load-env-and-run.js analyze-all",
+    "coherence:ai-file": "node scripts/load-env-and-run.js analyze",
     "coherence:monitor": "node scripts/production-monitor.js",
     "coherence:monitor-start": "node scripts/production-monitor.js",
     "coherence:production": "npm run coherence:ai-all && npm run coherence:monitor"

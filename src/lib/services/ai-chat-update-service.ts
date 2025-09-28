@@ -224,7 +224,7 @@ export class AIChatUpdateService {
       // 3. Update the AI models with new knowledge
       // 4. Notify other services about updates
       
-      console.log('Chat updates synced with backend at:', this.lastSync);
+      // console.log('Chat updates synced with backend at:', this.lastSync);
     } catch (error) {
       console.error('Failed to sync chat updates:', error);
     }
@@ -275,7 +275,7 @@ export class AIChatUpdateService {
       const hasUpdates = Math.random() > 0.8; // 20% chance of updates
       
       if (hasUpdates) {
-        console.log('External updates found, syncing...');
+        // console.log('External updates found, syncing...');
         await this.syncWithBackend();
       }
     } catch (error) {

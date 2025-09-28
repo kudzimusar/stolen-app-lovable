@@ -1,190 +1,125 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 import {
   MapPin,
-  Camera,
-  Eye,
   MessageCircle,
-  Shield,
-  Send
+  Eye,
+  EyeOff,
+  Send,
+  AlertCircle
 } from "lucide-react";
 
 interface CommunityTipFormProps {
   reportId: string;
-  reportType: "lost" | "found";
-  deviceName: string;
-  onTipSubmitted?: () => void;
-  onClose?: () => void;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-const CommunityTipForm = ({ 
-  reportId, 
-  reportType, 
-  deviceName, 
-  onTipSubmitted, 
-  onClose 
-}: CommunityTipFormProps) => {
+export const CommunityTipForm = ({ reportId, onSuccess, onCancel }: CommunityTipFormProps) => {
+  const { getAuthToken } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    tipType: "sighting" as "sighting" | "information" | "contact",
-    tipDescription: "",
-    tipLocation: "",
-    contactMethod: "",
-    anonymous: false
+    tip_type: "sighting",
+    tip_description: "",
+    tip_location_address: "",
+    contact_method: "",
+    anonymous: false,
+    reward_amount: 0
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setLoading(true);
 
     try {
-      // Get user's current location if available
-      let userLocation = null;
-      if (navigator.geolocation && !formData.anonymous) {
-        try {
-          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 60000
-            });
-          });
-          userLocation = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-        } catch (error) {
-          console.log("Could not get user location:", error);
-        }
+      const token = await getAuthToken();
+      if (!token) {
+        toast.error("Please log in to submit a tip");
+        return;
       }
-
-      const tipData = {
-        report_id: reportId,
-        tip_type: formData.tipType,
-        tip_description: formData.tipDescription,
-        tip_location_lat: userLocation?.lat || null,
-        tip_location_lng: userLocation?.lng || null,
-        tip_location_address: formData.tipLocation,
-        contact_method: formData.contactMethod,
-        anonymous: formData.anonymous
-      };
 
       const response = await fetch('/api/v1/community-tips', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(tipData)
+        body: JSON.stringify({
+          report_id: reportId,
+          ...formData
+        })
       });
 
       const result = await response.json();
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to submit tip');
+      if (result.success) {
+        toast.success("Tip submitted successfully!");
+        onSuccess?.();
+      } else {
+        toast.error(result.error || "Failed to submit tip");
       }
-
-      toast({
-        title: "Tip Submitted",
-        description: "Your tip has been submitted successfully. Thank you for helping!",
-      });
-
-      onTipSubmitted?.();
-      onClose?.();
     } catch (error) {
       console.error('Error submitting tip:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to submit tip. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("Failed to submit tip");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const getTipTypeDescription = (type: string) => {
-    switch (type) {
-      case "sighting":
-        return "I saw this device recently";
-      case "information":
-        return "I have information about this device";
-      case "contact":
-        return "I want to contact the owner/finder";
-      default:
-        return "";
-    }
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return (
-    <Card className="p-6 space-y-6">
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <MessageCircle className="w-5 h-5" />
+          Submit a Community Tip
+        </CardTitle>
+        <CardDescription>
+          Help the community by sharing information about this device. Your tip could lead to a successful recovery!
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Tip Type */}
       <div className="space-y-2">
-        <h3 className="text-lg font-semibold">Submit a Tip</h3>
-        <p className="text-sm text-muted-foreground">
-          Help reunite this {reportType} {deviceName} with its owner
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Tip Type Selection */}
-        <div className="space-y-2">
-          <Label>Tip Type</Label>
+            <Label htmlFor="tip_type">Tip Type</Label>
           <Select 
-            value={formData.tipType} 
-            onValueChange={(value) => setFormData({...formData, tipType: value as any})}
+              value={formData.tip_type}
+              onValueChange={(value) => handleInputChange('tip_type', value)}
           >
             <SelectTrigger>
-              <SelectValue />
+                <SelectValue placeholder="Select tip type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="sighting">
-                <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4" />
-                  Sighting
-                </div>
-              </SelectItem>
-              <SelectItem value="information">
-                <div className="flex items-center gap-2">
-                  <MessageCircle className="w-4 h-4" />
-                  Information
-                </div>
-              </SelectItem>
-              <SelectItem value="contact">
-                <div className="flex items-center gap-2">
-                  <Send className="w-4 h-4" />
-                  Contact
-                </div>
-              </SelectItem>
+                <SelectItem value="sighting">Sighting - I saw this device</SelectItem>
+                <SelectItem value="information">Information - I have relevant info</SelectItem>
+                <SelectItem value="contact">Contact - I can help connect people</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">
-            {getTipTypeDescription(formData.tipType)}
-          </p>
         </div>
 
-        {/* Tip Description */}
+          {/* Description */}
         <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
+            <Label htmlFor="tip_description">Description *</Label>
           <Textarea
-            id="description"
-            placeholder={
-              formData.tipType === "sighting" 
-                ? "Where and when did you see this device? Any details that could help identify it..."
-                : formData.tipType === "information"
-                ? "What information do you have about this device? Any relevant details..."
-                : "How would you like to be contacted? What's your message?"
-            }
-            value={formData.tipDescription}
-            onChange={(e) => setFormData({...formData, tipDescription: e.target.value})}
+              id="tip_description"
+              placeholder="Describe what you saw, know, or how you can help..."
+              value={formData.tip_description}
+              onChange={(e) => handleInputChange('tip_description', e.target.value)}
             required
             rows={4}
           />
@@ -192,79 +127,96 @@ const CommunityTipForm = ({
 
         {/* Location */}
         <div className="space-y-2">
-          <Label htmlFor="location">Location (Optional)</Label>
-          <div className="flex gap-2">
-            <Input
-              id="location"
-              placeholder="Where did you see/find this device?"
-              value={formData.tipLocation}
-              onChange={(e) => setFormData({...formData, tipLocation: e.target.value})}
-            />
-            <Button type="button" variant="outline" size="icon">
+            <Label htmlFor="tip_location_address" className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
-            </Button>
-          </div>
+              Location (optional)
+            </Label>
+            <Input
+              id="tip_location_address"
+              placeholder="Where did you see this or where is it now?"
+              value={formData.tip_location_address}
+              onChange={(e) => handleInputChange('tip_location_address', e.target.value)}
+            />
         </div>
 
         {/* Contact Method */}
-        {formData.tipType === "contact" && (
           <div className="space-y-2">
-            <Label htmlFor="contact">Contact Method</Label>
+            <Label htmlFor="contact_method">Contact Method (optional)</Label>
             <Input
-              id="contact"
-              placeholder="Email, phone, or preferred contact method"
-              value={formData.contactMethod}
-              onChange={(e) => setFormData({...formData, contactMethod: e.target.value})}
+              id="contact_method"
+              placeholder="How can you be reached? (phone, email, etc.)"
+              value={formData.contact_method}
+              onChange={(e) => handleInputChange('contact_method', e.target.value)}
             />
           </div>
-        )}
 
         {/* Anonymous Option */}
         <div className="flex items-center space-x-2">
           <Checkbox
             id="anonymous"
             checked={formData.anonymous}
-            onCheckedChange={(checked) => 
-              setFormData({...formData, anonymous: checked as boolean})
-            }
+              onCheckedChange={(checked) => handleInputChange('anonymous', checked)}
           />
-          <Label htmlFor="anonymous" className="text-sm">
+            <Label htmlFor="anonymous" className="flex items-center gap-2">
+              {formData.anonymous ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             Submit anonymously
           </Label>
         </div>
 
-        {/* Privacy Notice */}
-        <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-          <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium">Privacy Protected</span>
+          {/* Reward Amount */}
+          <div className="space-y-2">
+            <Label htmlFor="reward_amount">Reward Amount (optional)</Label>
+            <Input
+              id="reward_amount"
+              type="number"
+              placeholder="0"
+              value={formData.reward_amount}
+              onChange={(e) => handleInputChange('reward_amount', parseFloat(e.target.value) || 0)}
+              min="0"
+              step="0.01"
+            />
+            <p className="text-sm text-muted-foreground">
+              If you're offering a reward for information leading to recovery
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {formData.anonymous 
-              ? "Your identity will be completely hidden. Only the tip information will be shared."
-              : "Your contact information will only be shared with the device owner when necessary."
-            }
-          </p>
+
+          {/* Privacy Notice */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+              <div className="text-sm text-blue-800">
+                <p className="font-medium mb-1">Privacy Notice</p>
+                <p>
+                  Your tip will be shared with the device owner and community moderators. 
+                  If you choose to remain anonymous, your identity will not be revealed.
+                </p>
+              </div>
+            </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-3">
+          {/* Actions */}
+          <div className="flex gap-3 pt-4">
           <Button 
             type="submit" 
+              disabled={loading || !formData.tip_description.trim()}
             className="flex-1" 
-            disabled={isLoading || !formData.tipDescription}
-          >
-            {isLoading ? "Submitting..." : "Submit Tip"}
-          </Button>
-          {onClose && (
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+            >
+              <Send className="w-4 h-4 mr-2" />
+              {loading ? "Submitting..." : "Submit Tip"}
+            </Button>
+            {onCancel && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={loading}
+              >
+                Cancel
             </Button>
           )}
         </div>
       </form>
+      </CardContent>
     </Card>
   );
 };
-
-export default CommunityTipForm;

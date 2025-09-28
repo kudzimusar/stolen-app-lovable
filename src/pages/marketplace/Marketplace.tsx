@@ -46,7 +46,8 @@ import {
   SlidersHorizontal,
   Eye,
   ArrowUpDown,
-  Flame as Fire
+  Flame as Fire,
+  Package
 } from "lucide-react";
 
 const Marketplace = () => {

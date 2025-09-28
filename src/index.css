@@ -283,9 +283,9 @@
 
 /* Global mobile bottom padding for content clearance */
 @media (max-width: 768px) {
-  body {
+  /* body {
     padding-bottom: 80px;
-  }
+  } */
   
   /* Additional clearance for pages with bottom content */
   .mobile-safe-bottom {

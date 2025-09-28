@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { HamburgerMenu } from "@/components/navigation/HamburgerMenu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Menu, Bell, Settings, User, LogOut } from "lucide-react";
 import { BackButton } from "@/components/navigation/BackButton";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +25,7 @@ export const AppHeader = ({
   rightActions 
 }: AppHeaderProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isLandingPage = location.pathname === "/";
   
   // Authentication state
@@ -51,7 +52,8 @@ export const AppHeader = ({
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    window.location.href = "/";
+    // Use React Router navigation instead of window.location for better performance
+    navigate("/");
   };
 
   // Dynamic hamburger menu items based on auth state

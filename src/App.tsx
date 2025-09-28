@@ -51,12 +51,16 @@ const TrustBadges = lazy(() => import("./pages/user/TrustBadges"));
 const DeviceTransfer = lazy(() => import("./pages/user/DeviceTransfer"));
 const LostFoundBoard = lazy(() => import("./pages/user/LostFoundBoard"));
 const LostFoundReport = lazy(() => import("./pages/user/LostFoundReport"));
+const LostFoundDetails = lazy(() => import("./pages/user/LostFoundDetails"));
+const LostFoundResponses = lazy(() => import("./pages/user/LostFoundResponses"));
+const LostFoundContact = lazy(() => import("./pages/user/LostFoundContact"));
 import Wallet from "./pages/payment/Wallet";
 import DeviceCheck from "./pages/user/DeviceCheck";
 import DeviceRegister from "./pages/user/DeviceRegister";
 import MyDevices from "./pages/user/MyDevices";
 import CommunityBoard from "./pages/user/CommunityBoard";
 import Profile from "./pages/user/Profile";
+import DeviceWarrantyStatus from "./pages/user/DeviceWarrantyStatus";
 import Support from "./pages/user/Support";
 import PaymentHistory from "./pages/payment/PaymentHistory";
 import StolenReports from "./pages/security/StolenReports";
@@ -64,26 +68,37 @@ import UserRepairHistory from "./pages/repair/UserRepairHistory";
 import InsuranceDashboard from "./pages/insurance/InsuranceDashboard";
 // RetailerDashboard imported as lazy above
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      retry: 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
         <EnhancedUXProvider
-          enableScrollMemory={true}
-          enableCrossDeviceSync={true}
-          enableFloatingControls={true}
-          enablePageSearch={true}
-          enableMicroAnimations={true}
+          enableScrollMemory={false}
+          enableCrossDeviceSync={false}
+          enableFloatingControls={false}
+          enablePageSearch={false}
+          enableMicroAnimations={false}
           scrollControlsPosition="right"
         >
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/debug" element={<div style={{padding: '20px', minHeight: '100vh', background: 'lightblue'}}><h1>Debug Page</h1><p>This is a test page to verify routing works.</p></div>} />
           <Route 
             path="/dashboard" 
             element={
@@ -111,6 +126,7 @@ const App = () => (
           <Route path="/my-devices" element={<ProtectedRoute><MyDevices /></ProtectedRoute>} />
           <Route path="/community-board" element={<ProtectedRoute><CommunityBoard /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/device-warranty-status" element={<ProtectedRoute><DeviceWarrantyStatus /></ProtectedRoute>} />
           <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
           <Route path="/payment/history" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
           <Route path="/stolen-reports" element={<ProtectedRoute><StolenReports /></ProtectedRoute>} />
@@ -388,6 +404,30 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+          <Route 
+            path="/lost-found/details/:id" 
+            element={
+              <Suspense fallback={<div style={{ padding: '20px' }}>Loading Details...</div>}>
+                <LostFoundDetails />
+              </Suspense>
+            }
+          />
+          <Route 
+            path="/lost-found/responses/:id" 
+            element={
+              <Suspense fallback={<div style={{ padding: '20px' }}>Loading Responses...</div>}>
+                <LostFoundResponses />
+              </Suspense>
+            }
+          />
+          <Route 
+            path="/lost-found/contact/:id" 
+            element={
+              <Suspense fallback={<div style={{ padding: '20px' }}>Loading Contact...</div>}>
+                <LostFoundContact />
+              </Suspense>
+            }
+          />
 
           <Route path="*" element={<div style={{padding: '20px'}}>
             <h2>Page Not Found</h2>
@@ -396,9 +436,10 @@ const App = () => (
         </Routes>
         <BottomNavigation />
         </EnhancedUXProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

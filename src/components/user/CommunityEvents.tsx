@@ -1,49 +1,56 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 import {
   Calendar,
   MapPin,
   Users,
   Clock,
   Plus,
-  ExternalLink,
-  CheckCircle,
-  AlertCircle,
   Search,
-  Megaphone,
-  GraduationCap
+  Filter,
+  Star,
+  UserPlus,
+  UserMinus
 } from "lucide-react";
 
 interface CommunityEvent {
   id: string;
-  event_type: "recovery_drive" | "awareness_campaign" | "training_session";
   title: string;
   description: string;
+  event_type: string;
   location_address: string;
   start_date: string;
   end_date: string;
   max_participants: number;
   current_participants: number;
-  status: "upcoming" | "active" | "completed" | "cancelled";
-  organizer: {
+  status: string;
+  users: {
     display_name: string;
-    avatar_url?: string;
+    avatar_url: string;
   };
+  event_participants: Array<{
+    user_id: string;
+    role: string;
+    users: {
+      display_name: string;
+      avatar_url: string;
+    };
+  }>;
 }
 
-interface CommunityEventsProps {
-  onJoinEvent?: (eventId: string) => void;
-  onCreateEvent?: () => void;
-}
-
-const CommunityEvents = ({ onJoinEvent, onCreateEvent }: CommunityEventsProps) => {
+export const CommunityEvents = () => {
+  const { getAuthToken, user } = useAuth();
   const [events, setEvents] = useState<CommunityEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"all" | "upcoming" | "active">("all");
-  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
 
   useEffect(() => {
     fetchEvents();
@@ -51,55 +58,22 @@ const CommunityEvents = ({ onJoinEvent, onCreateEvent }: CommunityEventsProps) =
 
   const fetchEvents = async () => {
     try {
-      setLoading(true);
-      const response = await fetch('/api/v1/lost-found/community/events', {
+      const token = await getAuthToken();
+      if (!token) return;
+
+      const response = await fetch('/api/v1/community-events', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       
       const result = await response.json();
-      
       if (result.success) {
         setEvents(result.data);
       }
     } catch (error) {
       console.error('Error fetching events:', error);
-      // Fallback to mock data
-      setEvents([
-        {
-          id: "1",
-          event_type: "recovery_drive",
-          title: "Downtown Device Recovery Drive",
-          description: "Join us for a community-wide effort to help recover lost devices in the downtown area.",
-          location_address: "Union Square, San Francisco",
-          start_date: "2024-02-15T10:00:00Z",
-          end_date: "2024-02-15T16:00:00Z",
-          max_participants: 50,
-          current_participants: 23,
-          status: "upcoming",
-          organizer: {
-            display_name: "SF Community Group",
-            avatar_url: "/placeholder.svg"
-          }
-        },
-        {
-          id: "2",
-          event_type: "awareness_campaign",
-          title: "Device Security Workshop",
-          description: "Learn about device security, registration, and how to protect your devices from theft.",
-          location_address: "Public Library, Mission District",
-          start_date: "2024-02-20T14:00:00Z",
-          end_date: "2024-02-20T16:00:00Z",
-          max_participants: 30,
-          current_participants: 18,
-          status: "upcoming",
-          organizer: {
-            display_name: "Tech Safety Initiative",
-            avatar_url: "/placeholder.svg"
-          }
-        }
-      ]);
+      toast.error("Failed to load events");
     } finally {
       setLoading(false);
     }
@@ -107,100 +81,108 @@ const CommunityEvents = ({ onJoinEvent, onCreateEvent }: CommunityEventsProps) =
 
   const handleJoinEvent = async (eventId: string) => {
     try {
-      const response = await fetch(`/api/v1/lost-found/community/events/${eventId}/join`, {
+      const token = await getAuthToken();
+      if (!token) {
+        toast.error("Please log in to join events");
+        return;
+      }
+
+      const response = await fetch(`/api/v1/community-events/${eventId}/join`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 
       const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to join event');
+      if (result.success) {
+        toast.success("Successfully joined the event!");
+        fetchEvents(); // Refresh events
+      } else {
+        toast.error(result.error || "Failed to join event");
       }
-
-      toast({
-        title: "Event Joined",
-        description: "You have successfully joined the event!",
-      });
-
-      // Refresh events to update participant count
-      fetchEvents();
-      onJoinEvent?.(eventId);
     } catch (error) {
       console.error('Error joining event:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to join event. Please try again.",
-        variant: "destructive"
+      toast.error("Failed to join event");
+    }
+  };
+
+  const handleLeaveEvent = async (eventId: string) => {
+    try {
+      const token = await getAuthToken();
+      if (!token) return;
+
+      const response = await fetch(`/api/v1/community-events/${eventId}/leave`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
+
+      const result = await response.json();
+      if (result.success) {
+        toast.success("Left the event successfully");
+        fetchEvents(); // Refresh events
+      } else {
+        toast.error(result.error || "Failed to leave event");
+      }
+    } catch (error) {
+      console.error('Error leaving event:', error);
+      toast.error("Failed to leave event");
     }
   };
 
-  const getEventTypeIcon = (type: string) => {
-    switch (type) {
-      case "recovery_drive":
-        return <Search className="w-4 h-4" />;
-      case "awareness_campaign":
-        return <Megaphone className="w-4 h-4" />;
-      case "training_session":
-        return <GraduationCap className="w-4 h-4" />;
-      default:
-        return <Calendar className="w-4 h-4" />;
-    }
-  };
-
-  const getEventTypeLabel = (type: string) => {
-    switch (type) {
-      case "recovery_drive":
-        return "Recovery Drive";
-      case "awareness_campaign":
-        return "Awareness Campaign";
-      case "training_session":
-        return "Training Session";
-      default:
-        return type;
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "upcoming":
-        return <Badge variant="outline" className="text-blue-600">Upcoming</Badge>;
-      case "active":
-        return <Badge variant="default" className="bg-green-600">Active</Badge>;
-      case "completed":
-        return <Badge variant="secondary">Completed</Badge>;
-      case "cancelled":
-        return <Badge variant="destructive">Cancelled</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
+  const isUserParticipating = (event: CommunityEvent) => {
+    return event.event_participants.some(participant => participant.user_id === user?.id);
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-ZA', {
       weekday: 'short',
+      year: 'numeric',
       month: 'short',
       day: 'numeric',
-      hour: 'numeric',
+      hour: '2-digit',
       minute: '2-digit'
     });
   };
 
+  const getEventTypeColor = (type: string) => {
+    switch (type) {
+      case 'recovery_drive': return 'bg-blue-100 text-blue-800';
+      case 'awareness_campaign': return 'bg-green-100 text-green-800';
+      case 'training_session': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'upcoming': return 'bg-yellow-100 text-yellow-800';
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'completed': return 'bg-gray-100 text-gray-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   const filteredEvents = events.filter(event => {
-    if (filter === "all") return true;
-    return event.status === filter;
+    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         event.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || event.status === statusFilter;
+    const matchesType = typeFilter === "all" || event.event_type === typeFilter;
+    
+    return matchesSearch && matchesStatus && matchesType;
   });
 
   if (loading) {
     return (
-      <Card className="p-6">
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
+      <Card className="p-8 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <h3 className="font-semibold mb-2">Loading community events...</h3>
+        <p className="text-muted-foreground">
+          Fetching the latest community events and campaigns
+        </p>
       </Card>
     );
   }
@@ -210,128 +192,157 @@ const CommunityEvents = ({ onJoinEvent, onCreateEvent }: CommunityEventsProps) =
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Community Events</h3>
-          <p className="text-sm text-muted-foreground">
-            Join local events to help recover devices and build community awareness
+          <h1 className="text-2xl font-bold">Community Events</h1>
+          <p className="text-muted-foreground">
+            Join recovery drives, awareness campaigns, and training sessions
           </p>
         </div>
-        <Button onClick={onCreateEvent} size="sm">
+        <Button>
           <Plus className="w-4 h-4 mr-2" />
           Create Event
         </Button>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex gap-2">
-        <Button
-          variant={filter === "all" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setFilter("all")}
-        >
-          All Events
-        </Button>
-        <Button
-          variant={filter === "upcoming" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setFilter("upcoming")}
-        >
-          Upcoming
-        </Button>
-        <Button
-          variant={filter === "active" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setFilter("active")}
-        >
-          Active
-        </Button>
+      {/* Filters */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Search events..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="upcoming">Upcoming</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="Filter by type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="recovery_drive">Recovery Drive</SelectItem>
+                <SelectItem value="awareness_campaign">Awareness Campaign</SelectItem>
+                <SelectItem value="training_session">Training Session</SelectItem>
+              </SelectContent>
+            </Select>
       </div>
-
-      {/* Events List */}
-      <div className="space-y-4">
-        {filteredEvents.length === 0 ? (
-          <Card className="p-8 text-center">
-            <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h4 className="font-semibold mb-2">No events found</h4>
-            <p className="text-muted-foreground mb-4">
-              {filter === "all" 
-                ? "There are no community events scheduled at the moment."
-                : `No ${filter} events found.`
-              }
-            </p>
-            <Button onClick={onCreateEvent}>
-              <Plus className="w-4 h-4 mr-2" />
-              Create First Event
-            </Button>
+        </CardContent>
           </Card>
-        ) : (
-          filteredEvents.map((event) => (
-            <Card key={event.id} className="p-4 space-y-4">
+
+      {/* Events Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {filteredEvents.map((event) => (
+          <Card key={event.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader>
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  {getEventTypeIcon(event.event_type)}
-                  <Badge variant="outline">
-                    {getEventTypeLabel(event.event_type)}
+                <div className="space-y-2">
+                  <CardTitle className="text-lg">{event.title}</CardTitle>
+                  <div className="flex gap-2">
+                    <Badge className={getEventTypeColor(event.event_type)}>
+                      {event.event_type.replace('_', ' ')}
+                    </Badge>
+                    <Badge className={getStatusColor(event.status)}>
+                      {event.status}
                   </Badge>
-                  {getStatusBadge(event.status)}
-                </div>
-                <div className="text-right text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
-                    {event.current_participants}/{event.max_participants}
                   </div>
                 </div>
+                {event.status === 'upcoming' && (
+                  <Star className="w-5 h-5 text-yellow-500" />
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground line-clamp-3">
+                {event.description}
+              </p>
+              
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  <span>{formatDate(event.start_date)}</span>
+              </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                  <span className="truncate">{event.location_address}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-muted-foreground" />
+                  <span>
+                    {event.current_participants} / {event.max_participants || '∞'} participants
+                  </span>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <h4 className="font-semibold">{event.title}</h4>
-                <p className="text-sm text-muted-foreground">{event.description}</p>
-              </div>
-
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  {event.location_address}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  {formatDate(event.start_date)}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-muted-foreground">Organized by:</span>
-                  <span className="font-medium">{event.organizer.display_name}</span>
+              <div className="flex items-center justify-between pt-4">
+                <div className="flex items-center gap-2">
+                  <img
+                    src={event.users.avatar_url || '/placeholder.svg'}
+                    alt={event.users.display_name}
+                    className="w-6 h-6 rounded-full"
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    by {event.users.display_name}
+                  </span>
                 </div>
 
-                <div className="flex gap-2">
-                  {event.status === "upcoming" && event.current_participants < event.max_participants && (
+                {event.status === 'upcoming' && (
                     <Button 
                       size="sm" 
-                      onClick={() => handleJoinEvent(event.id)}
-                    >
-                      Join Event
+                    variant={isUserParticipating(event) ? "outline" : "default"}
+                    onClick={() => 
+                      isUserParticipating(event) 
+                        ? handleLeaveEvent(event.id)
+                        : handleJoinEvent(event.id)
+                    }
+                  >
+                    {isUserParticipating(event) ? (
+                      <>
+                        <UserMinus className="w-4 h-4 mr-1" />
+                        Leave
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="w-4 h-4 mr-1" />
+                        Join
+                      </>
+                    )}
                     </Button>
                   )}
-                  {event.status === "upcoming" && event.current_participants >= event.max_participants && (
-                    <Button size="sm" variant="outline" disabled>
-                      Event Full
-                    </Button>
-                  )}
-                  {event.status === "active" && (
-                    <Button size="sm" variant="outline">
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      View Details
-                    </Button>
-                  )}
-                </div>
               </div>
+            </CardContent>
             </Card>
-          ))
-        )}
+        ))}
       </div>
+
+      {/* Empty State */}
+      {filteredEvents.length === 0 && (
+        <Card className="p-8 text-center">
+          <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="font-semibold mb-2">No events found</h3>
+          <p className="text-muted-foreground mb-4">
+            Try adjusting your search or filters, or be the first to create an event
+          </p>
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            Create Event
+          </Button>
+        </Card>
+      )}
     </div>
   );
 };
-
-export default CommunityEvents;

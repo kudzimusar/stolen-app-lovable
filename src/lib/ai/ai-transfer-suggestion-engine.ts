@@ -67,16 +67,13 @@ export class AITransferSuggestionEngine {
 
   constructor() {
     try {
-      // Safe initialization with fallback
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      
-      if (supabaseUrl && supabaseKey) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
-      } else {
-        console.warn('AITransferSuggestionEngine: Supabase credentials not available, running in fallback mode');
+      // Use the existing configured Supabase client instead of creating a new one
+      import('@/integrations/supabase/client').then(({ supabase }) => {
+        this.supabase = supabase;
+      }).catch(() => {
+        console.warn('AITransferSuggestionEngine: Could not import Supabase client, running in fallback mode');
         this.supabase = null;
-      }
+      });
     } catch (error) {
       console.warn('AITransferSuggestionEngine initialization failed:', error);
       this.supabase = null;
@@ -92,7 +89,7 @@ export class AITransferSuggestionEngine {
         return [];
       }
       
-      console.log(`🤖 Generating transfer suggestions for user: ${userId}`);
+      // console.log(`🤖 Generating transfer suggestions for user: ${userId}`);
 
       const userDevices = await this.getUserDevices(userId);
       const userBehavior = await this.analyzeUserBehavior(userId);
@@ -115,11 +112,11 @@ export class AITransferSuggestionEngine {
         return bScore - aScore;
       });
 
-      console.log(`✅ Generated ${suggestions.length} transfer suggestions`);
+      // console.log(`✅ Generated ${suggestions.length} transfer suggestions`);
       return suggestions;
 
     } catch (error) {
-      console.error('❌ Error generating transfer suggestions:', error);
+      // console.error('❌ Error generating transfer suggestions:', error);
       throw new Error(`Failed to generate transfer suggestions: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -132,7 +129,7 @@ export class AITransferSuggestionEngine {
         *,
         transfer_history:device_transfers(*)
       `)
-      .eq('owner_id', userId);
+      .eq('current_owner_id', userId);
 
     if (error) throw error;
 

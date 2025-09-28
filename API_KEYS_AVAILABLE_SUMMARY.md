@@ -63,10 +63,11 @@
 - **Service Role**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU`
 - **Status**: ⏳ **Requires Docker Desktop**
 
-#### **Production Supabase**
+#### **Production Supabase (WORKING KEYS)**
 - **URL**: `https://lerjhxchglztvhbsdjjn.supabase.co`
-- **Anon Key**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlcmpoeGNoZ2x6dHZoYnNkampuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MzAyOTIsImV4cCI6MjA2OTIwNjI5Mn0.nzbVcrz`
-- **Status**: ✅ **READY FOR PRODUCTION**
+- **Anon Key**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlcmpoeGNoZ2x6dHZoYnNkampuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MzAyOTIsImV4cCI6MjA2OTIwNjI5Mn0.nzbVcrz576dB30B2lcazoWhAuK-XRRdYAIxBI_qesIs`
+- **JWT Secret**: `0kKhU3+PGqhqz6kMm0U32v8f61u86Z81yDefXkpm1dCn5Np1v5aJXqUEu7lMtdV0AMEFdX4beVMYSxUZMf93Gg==`
+- **Status**: ✅ **ACTIVE AND WORKING**
 
 ---
 

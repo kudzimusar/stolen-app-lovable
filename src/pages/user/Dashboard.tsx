@@ -8,6 +8,7 @@ import { TrustBadge } from "@/components/ui/TrustBadge";
 import { Link, useNavigate } from "react-router-dom";
 import { useScrollMemory } from "@/hooks/useScrollMemory";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { useRobustData } from "@/hooks/useRobustData";
 // aiTransferEngine import fixed with proper error handling
 import TransferSuggestionDashboard from "@/components/ai/TransferSuggestionDashboard";
@@ -87,6 +88,7 @@ const Dashboard = () => {
   const [devices, setDevices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dataLoadAttempted, setDataLoadAttempted] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   
   // Emergency fallback to prevent blank UI
   useEffect(() => {
@@ -101,13 +103,31 @@ const Dashboard = () => {
   }, [loading]);
   const [showAllActions, setShowAllActions] = useState(false);
 
+  // Load current user first
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user) {
+          navigate('/login');
+          return;
+        }
+        setCurrentUser(user);
+      } catch (error) {
+        console.error('Error loading user:', error);
+        navigate('/login');
+      }
+    };
+    loadCurrentUser();
+  }, [navigate]);
+
   // Load all dashboard data with robust fallbacks
   useEffect(() => {
-    if (dataLoadAttempted) return; // Prevent multiple loads
+    if (dataLoadAttempted || !currentUser) return; // Prevent multiple loads and wait for user
     
     const loadDashboardData = async () => {
       try {
-        console.log('🔄 Dashboard: Starting data load...');
+        // console.log('🔄 Dashboard: Starting data load...');
         setLoading(true);
         setDataLoadAttempted(true);
         
@@ -173,7 +193,7 @@ const Dashboard = () => {
         };
         
         // Set data directly without validation to prevent loops
-        console.log('✅ Dashboard: Setting user profile data...');
+        // console.log('✅ Dashboard: Setting user profile data...');
         setUserProfile(robustData.userProfile);
         setDevices(robustData.devices);
         setContextualInsights(robustData.insights.map(insight => ({
@@ -187,11 +207,11 @@ const Dashboard = () => {
                 activity.type === 'info' ? TrendingUp : Users
         })));
         setBlockchainStats(robustData.blockchainStats);
-        console.log('✅ Dashboard: All data set successfully');
+        // console.log('✅ Dashboard: All data set successfully');
 
         // Load AI suggestions separately (can fail gracefully)
         try {
-          const suggestions = await aiTransferEngine.generateSuggestions("user-123");
+          const suggestions = await aiTransferEngine.generateSuggestions(currentUser.id);
           setAiSuggestions(suggestions || []);
         } catch (aiError) {
           console.warn('AI suggestions unavailable:', aiError);
@@ -200,7 +220,7 @@ const Dashboard = () => {
 
         // Small delay to ensure smooth loading
         setTimeout(() => {
-          console.log('🎉 Dashboard: Loading complete - showing UI');
+          // console.log('🎉 Dashboard: Loading complete - showing UI');
           setLoading(false);
         }, 500);
         
@@ -226,7 +246,7 @@ const Dashboard = () => {
     };
 
     loadDashboardData();
-  }, []); // Remove dependencies that cause infinite re-renders
+  }, [currentUser]); // Depend on currentUser being loaded
 
   // Handler functions for interactive elements
   const handleAlertClick = (deviceId: number, alertCount: number) => {

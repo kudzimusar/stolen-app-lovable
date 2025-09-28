@@ -7,6 +7,65 @@ export default defineConfig({
   server: {
     port: 8080,
     host: true,
+    proxy: {
+      '/api/v1/lost-found/reports': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/lost-found-reports',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/lost-found\/reports/, ''),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Sending Request to the Target:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+          });
+        },
+      },
+      '/api/v1/lost-found/community/stats': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/lost-found-reports',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/lost-found\/community\/stats/, '/stats'),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Sending Request to the Target:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+          });
+        },
+      },
+      '/api/v1/community-tips': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/community-tips',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/community-tips/, '')
+      },
+      '/api/v1/device-matches': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/device-matches',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/device-matches/, '')
+      },
+      '/api/v1/notifications': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/notifications',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/notifications/, '')
+      },
+      '/api/v1/community-events': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/community-events',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/community-events/, '')
+      },
+      '/api/v1/success-stories': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/success-stories',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/success-stories/, '')
+      }
+    }
   },
   resolve: {
     alias: {
