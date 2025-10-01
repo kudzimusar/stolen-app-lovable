@@ -8,6 +8,7 @@ import { BackButton } from "@/components/navigation/BackButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { User as SupabaseUser } from "@supabase/supabase-js";
+import { LostFoundNotificationCenter } from "@/components/user/LostFoundNotificationCenter";
 
 interface AppHeaderProps {
   title?: string;
@@ -115,6 +116,11 @@ export const AppHeader = ({
             {/* Custom right actions */}
             {rightActions}
             
+            {/* Lost & Found Notification Center (shows on all authenticated pages) */}
+            {isLoggedIn && (
+              <LostFoundNotificationCenter />
+            )}
+            
             {/* Dashboard specific actions for all dashboard pages and profile pages */}
             {(location.pathname === "/dashboard" || 
               location.pathname === "/retailer-dashboard" ||
@@ -129,11 +135,7 @@ export const AppHeader = ({
               location.pathname === "/law-enforcement-profile" ||
               location.pathname === "/ngo-profile") && (
               <>
-                <Button variant="ghost" size="icon" asChild>
-                  <Link to="/fraud-alerts">
-                    <Bell className="w-5 h-5" />
-                  </Link>
-                </Button>
+                {/* Removed duplicate bell icon - using LostFoundNotificationCenter instead */}
             <Button variant="ghost" size="icon" asChild>
               <Link to={
                 location.pathname === "/retailer-dashboard" || location.pathname === "/retailer-profile" ? "/retailer-profile" :

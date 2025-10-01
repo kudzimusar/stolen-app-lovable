@@ -89,6 +89,16 @@ const LostFoundContact = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Security check: Prevent users from contacting their own posts
+    if (user && post && post.user === user.display_name) {
+      toast.error("❌ You cannot contact your own post!");
+      console.log('🚫 Self-contact prevented:', {
+        currentUser: user.display_name,
+        postOwner: post.user
+      });
+      return;
+    }
+    
     if (!formData.name || !formData.message) {
       toast.error("Please fill in all required fields");
       return;
@@ -222,21 +232,22 @@ const LostFoundContact = () => {
           </CardContent>
         </Card>
 
-        {/* Contact Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {post.type === "lost" ? "I Found This Device!" : "Contact the Owner"}
-            </CardTitle>
-            <p className="text-muted-foreground">
-              {post.type === "lost" 
-                ? "Great! Please provide your contact information so the owner can reach you."
-                : "Get in touch with the person who found this device."
-              }
-            </p>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Contact Form - Hide for own posts */}
+        {user && post.user !== user.display_name ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {post.type === "lost" ? "I Found This Device!" : "Contact the Owner"}
+              </CardTitle>
+              <p className="text-muted-foreground">
+                {post.type === "lost" 
+                  ? "Great! Please provide your contact information so the owner can reach you."
+                  : "Get in touch with the person who found this device."
+                }
+              </p>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <Label htmlFor="name">Your Name *</Label>
                 <Input
@@ -332,6 +343,34 @@ const LostFoundContact = () => {
             </form>
           </CardContent>
         </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-center">Your Own Post</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center py-8">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
+                  <User className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">This is your own post</h3>
+                  <p className="text-muted-foreground">
+                    You cannot contact yourself. If you found your device, 
+                    you can mark it as reunited from the details page.
+                  </p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate(`/lost-found/details/${id}`)}
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Details
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Safety Tips */}
         <Card>

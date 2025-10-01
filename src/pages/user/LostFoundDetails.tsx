@@ -3,16 +3,29 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
-import { ArrowLeft, MapPin, Clock, MessageCircle, AlertTriangle, CheckCircle, DollarSign, User, Shield, FileText } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, MessageCircle, AlertTriangle, CheckCircle, DollarSign, User, Shield, FileText, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
-import { getAuthToken } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 
 const LostFoundDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, getAuthToken } = useAuth();
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showReunitedDialog, setShowReunitedDialog] = useState(false);
+  const [marking, setMarking] = useState(false);
 
   // REMOVED: Mock data - now using real API data only
 
@@ -87,6 +100,44 @@ const LostFoundDetails = () => {
     fetchPostDetails();
   }, [id]);
 
+  const handleMarkAsReunited = async () => {
+    try {
+      setMarking(true);
+      console.log('🎉 Marking device as reunited:', id);
+      
+      const token = await getAuthToken();
+      const response = await fetch(`/api/v1/lost-found/reports/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: 'reunited',
+          verification_status: 'verified'
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        toast.success("🎉 Congratulations! Device marked as reunited!");
+        toast.info("Reward payment will be processed automatically.");
+        
+        // Refresh post details
+        window.location.reload();
+      } else {
+        toast.error("Failed to update status");
+      }
+    } catch (error) {
+      console.error('Error marking as reunited:', error);
+      toast.error("Error updating device status");
+    } finally {
+      setMarking(false);
+      setShowReunitedDialog(false);
+    }
+  };
+
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -100,6 +151,16 @@ const LostFoundDetails = () => {
   };
 
   const handleContact = () => {
+    // Security check: Prevent users from contacting their own posts
+    if (user && post && post.user === user.display_name) {
+      toast.error("❌ You cannot contact your own post!");
+      console.log('🚫 Self-contact prevented:', {
+        currentUser: user.display_name,
+        postOwner: post.user
+      });
+      return;
+    }
+    
     toast.success("Contact form opened!");
     navigate(`/lost-found/contact/${id}`);
   };
@@ -232,17 +293,27 @@ const LostFoundDetails = () => {
                 </div>
               </div>
               
-              <div className="flex gap-2">
-                {post.type === "lost" ? (
-                  <Button onClick={handleContact}>
-                    I found this!
-                  </Button>
-                ) : (
-                  <Button onClick={handleContact}>
-                    Contact Owner
-                  </Button>
-                )}
-              </div>
+              {/* Hide contact button for own posts */}
+              {user && post.user !== user.display_name && (
+                <div className="flex gap-2">
+                  {post.type === "lost" ? (
+                    <Button onClick={handleContact}>
+                      I found this!
+                    </Button>
+                  ) : (
+                    <Button onClick={handleContact}>
+                      Contact Owner
+                    </Button>
+                  )}
+                </div>
+              )}
+              {user && post.user === user.display_name && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs">
+                    Your Post
+                  </Badge>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -332,7 +403,85 @@ const LostFoundDetails = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Owner Actions - Mark as Reunited Button */}
+        {user && post.user === user.display_name && 
+         (post.status === 'contacted' || post.status === 'pending_verification') && (
+          <Card className="border-green-200 bg-green-50/50">
+            <CardHeader>
+              <CardTitle className="text-green-800 flex items-center gap-2">
+                <PartyPopper className="w-5 h-5" />
+                Device Recovery
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Have you successfully recovered your device? Mark it as reunited to complete the process.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button 
+                  onClick={() => setShowReunitedDialog(true)}
+                  className="bg-green-600 hover:bg-green-700"
+                  size="lg"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Mark as Reunited
+                </Button>
+                {post.reward && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border">
+                    <DollarSign className="w-4 h-4 text-green-600" />
+                    <span className="text-sm">
+                      <strong>{post.reward}</strong> reward will be released to finder
+                    </span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
+
+      {/* Reunited Confirmation Dialog */}
+      <AlertDialog open={showReunitedDialog} onOpenChange={setShowReunitedDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <PartyPopper className="w-5 h-5 text-green-600" />
+              Confirm Device Recovery
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3 pt-2">
+              <p>Please confirm that you have successfully recovered your <strong>{post?.device}</strong>.</p>
+              {post?.reward && (
+                <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                  <p className="text-sm text-green-800">
+                    <DollarSign className="w-4 h-4 inline mr-1" />
+                    The <strong>{post.reward}</strong> reward will be automatically released to the finder's S-Pay wallet.
+                  </p>
+                </div>
+              )}
+              <p className="text-sm text-muted-foreground">
+                This action will:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Mark the device as "Reunited"</li>
+                <li>Process reward payment (if applicable)</li>
+                <li>Notify the finder of successful recovery</li>
+                <li>Create a success story for the community</li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={marking}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleMarkAsReunited}
+              disabled={marking}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {marking ? "Processing..." : "Yes, Mark as Reunited"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

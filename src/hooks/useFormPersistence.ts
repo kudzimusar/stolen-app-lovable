@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { generateUUID } from '../lib/utils';
 
 interface FormData {
   [key: string]: any;
@@ -25,7 +26,7 @@ interface FormPersistenceOptions {
 
 // Global store for form drafts
 const formDrafts = new Map<string, FormDraft>();
-const sessionId = crypto.randomUUID();
+const sessionId = generateUUID();
 
 export const useFormPersistence = (options: FormPersistenceOptions) => {
   const {

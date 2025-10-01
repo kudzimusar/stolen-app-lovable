@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { generateUUID } from '../lib/utils';
 
 interface UserSession {
   deviceId: string;
@@ -45,7 +46,7 @@ const generateDeviceFingerprint = (): string => {
 };
 
 const deviceId = localStorage.getItem('device-id') || generateDeviceFingerprint();
-const sessionId = crypto.randomUUID();
+const sessionId = generateUUID();
 
 // Store device ID
 if (!localStorage.getItem('device-id')) {

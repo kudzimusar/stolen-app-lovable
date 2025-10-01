@@ -39,7 +39,7 @@ src/components/shared/
 ### **Method 1: Import Individual Components**
 ```tsx
 // Import specific components
-import { PhotoUpload, InteractiveMap, QRScanner } from '@/components/shared';
+import { PhotoUpload, InteractiveMap, OpenStreetMap, QRScanner, AIWalletInsights, EnhancedSelect, RealTimeUpdates } from '@/components/shared';
 
 // Use in your component
 <PhotoUpload
@@ -53,12 +53,14 @@ import { PhotoUpload, InteractiveMap, QRScanner } from '@/components/shared';
 ### **Method 2: Import by Category**
 ```tsx
 // Import component categories
-import { UploadComponents, MapComponents, PaymentComponents } from '@/components/shared';
+import { UploadComponents, MapComponents, AIComponents, FormComponents, CommunicationComponents } from '@/components/shared';
 
 // Use components
 <UploadComponents.PhotoUpload onUpload={handleUpload} />
-<MapComponents.InteractiveMap center={[-26.2041, 28.0473]} />
-<PaymentComponents.WalletBalance userId="user123" />
+<MapComponents.OpenStreetMap center={[-26.2041, 28.0473]} />
+<AIComponents.AIWalletInsights walletData={walletData} transactions={transactions} />
+<FormComponents.EnhancedSelect options={DEVICE_BRANDS} />
+<CommunicationComponents.RealTimeUpdates userId="user123" />
 ```
 
 ### **Method 3: Import All Components**
@@ -68,7 +70,10 @@ import { SharedComponents } from '@/components/shared';
 
 // Use any component
 <SharedComponents.PhotoUpload onUpload={handleUpload} />
-<SharedComponents.FraudDetection deviceData={deviceInfo} />
+<SharedComponents.OpenStreetMap center={[-26.2041, 28.0473]} />
+<SharedComponents.AIWalletInsights walletData={walletData} />
+<SharedComponents.EnhancedSelect options={DEVICE_BRANDS} />
+<SharedComponents.RealTimeUpdates userId="user123" />
 ```
 
 ## 📋 **Complete Component List**
@@ -83,6 +88,7 @@ import { SharedComponents } from '@/components/shared';
 | Component | File | Purpose | Key Features |
 |-----------|------|---------|--------------|
 | `InteractiveMap` | `maps/InteractiveMap.tsx` | Interactive maps with location services | Google Maps integration, GPS tracking, custom markers, search |
+| `OpenStreetMap` | `maps/OpenStreetMap.tsx` | Free OpenStreetMap integration | Leaflet integration, Nominatim geocoding, South African localization, clustering |
 
 ### **📱 Scanning & Recognition Components**
 | Component | File | Purpose | Key Features |
@@ -93,6 +99,7 @@ import { SharedComponents } from '@/components/shared';
 | Component | File | Purpose | Key Features |
 |-----------|------|---------|--------------|
 | `FraudDetection` | `ai/FraudDetection.tsx` | AI-powered fraud detection | Multi-factor analysis, risk scoring, confidence levels |
+| `AIWalletInsights` | `ai/AIWalletInsights.tsx` | AI-powered wallet analysis | Spending patterns, security insights, optimization suggestions, predictions |
 
 ### **🔗 Blockchain & Security Components**
 | Component | File | Purpose | Key Features |
@@ -113,6 +120,16 @@ import { SharedComponents } from '@/components/shared';
 | Component | File | Purpose | Key Features |
 |-----------|------|---------|--------------|
 | `MultiFactorAuth` | `security/MultiFactorAuth.tsx` | Multi-factor authentication | SMS, email, TOTP, backup codes, biometric support |
+
+### **📝 Form Components**
+| Component | File | Purpose | Key Features |
+|-----------|------|---------|--------------|
+| `EnhancedSelect` | `forms/EnhancedSelect.tsx` | Enhanced dropdown select | South African data, searchable, multiple options, device/geo data |
+
+### **💬 Communication Components**
+| Component | File | Purpose | Key Features |
+|-----------|------|---------|--------------|
+| `RealTimeUpdates` | `communication/RealTimeUpdates.tsx` | Real-time notification system | WebSocket integration, priority management, mobile optimization |
 
 ## 🎯 **Usage Examples by Use Case**
 

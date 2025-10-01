@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
+import { LostFoundNotificationCenter } from "@/components/user/LostFoundNotificationCenter";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
@@ -373,7 +374,9 @@ const CommunityBoard = () => {
   };
 
   const PostCard = ({ post }: { post: typeof posts[0] }) => (
-    <Card className="p-4 space-y-3">
+    <Card className={`p-4 space-y-3 ${
+      post.type === "found" ? "bg-gradient-to-br from-green-50 to-emerald-50 border-l-4 border-l-green-500" : ""
+    }`}>
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
           {/* Status Badge - Dynamic based on device status */}
@@ -430,9 +433,31 @@ const CommunityBoard = () => {
         </div>
 
         {post.reward && (
-          <div className="flex items-center gap-2 text-sm font-medium text-success">
-            <DollarSign className="w-4 h-4" />
-            {post.reward} reward
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 text-sm font-medium text-success">
+              <DollarSign className="w-4 h-4" />
+              {post.reward}
+            </div>
+            {post.status === 'contacted' && (
+              <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-800 border-yellow-300">
+                Reward Pending
+              </Badge>
+            )}
+            {post.status === 'pending_verification' && (
+              <Badge variant="outline" className="text-xs bg-orange-50 text-orange-800 border-orange-300">
+                Reward Processing
+              </Badge>
+            )}
+            {post.status === 'reunited' && (
+              <Badge variant="outline" className="text-xs bg-green-50 text-green-800 border-green-300">
+                Reward Paid
+              </Badge>
+            )}
+            {!post.status || post.status === 'active' && (
+              <Badge variant="outline" className="text-xs text-muted-foreground">
+                Reward Offered
+              </Badge>
+            )}
           </div>
         )}
       </div>
@@ -440,11 +465,19 @@ const CommunityBoard = () => {
       <div className="flex items-center justify-between pt-2 border-t">
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div 
-            className="flex items-center gap-1 cursor-pointer hover:text-primary"
+            className="flex items-center gap-1 cursor-pointer hover:text-primary group"
             onClick={() => handleViewResponses(post)}
+            title="View all community engagement"
           >
             <MessageCircle className="w-4 h-4" />
-            {post.responses} responses
+            <span className="text-sm">
+              {post.responses} {post.responses === 1 ? 'response' : 'responses'}
+            </span>
+            {post.responses > 0 && (
+              <Badge variant="secondary" className="text-xs ml-1 group-hover:bg-primary group-hover:text-primary-foreground">
+                {post.status === 'contacted' ? 'Contact received' : 'Tips & comments'}
+              </Badge>
+            )}
           </div>
           <div 
             className="flex items-center gap-1 cursor-pointer hover:text-primary"
@@ -499,11 +532,15 @@ const CommunityBoard = () => {
               </Link>
             </Button>
             <STOLENLogo />
-            <Button variant="ghost" size="icon" asChild>
-              <Link to="/lost-found-report">
-                <Plus className="w-5 h-5" />
-              </Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              {/* Lost & Found Notification Center */}
+              <LostFoundNotificationCenter />
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/lost-found-report">
+                  <Plus className="w-5 h-5" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </header>

@@ -104,9 +104,9 @@ start_servers() {
     print_status "Servers started successfully!"
     print_info "Access URLs:"
     echo "  • Dashboard: http://localhost:3000"
-    echo "  • Development: http://localhost:8080"
+    echo "  • Development: http://localhost:8081"
     echo "  • Preview: http://localhost:4173"
-    echo "  • Network Access: http://$LOCAL_IP:3000"
+    echo "  • Network Access: http://$LOCAL_IP:8081"
 }
 
 stop_servers() {
@@ -148,7 +148,7 @@ show_status() {
     
     echo ""
     print_info "Port Status:"
-    for port in 3000 8080 4173; do
+    for port in 3000 8081 4173; do
         if check_port $port; then
             print_status "Port $port: In use"
         else

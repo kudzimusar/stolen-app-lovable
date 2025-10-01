@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "dev:network": "vite --host 0.0.0.0 --port 8080",
+    "dev": "vite --host 0.0.0.0 --port 8081",
+    "dev:network": "vite --host 0.0.0.0 --port 8081",
     "dev:local": "vite --host localhost --port 8080",
     "dev:info": "node scripts/dev-info.js && npm run dev:network",
     "build": "vite build",

@@ -5,8 +5,11 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 8080,
     host: true,
+    port: 8081,
+    fs: {
+      strict: false
+    },
     proxy: {
       '/api/v1/lost-found/reports': {
         target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/lost-found-reports',

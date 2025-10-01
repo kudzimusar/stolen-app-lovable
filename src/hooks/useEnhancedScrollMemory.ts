@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
+import { generateUUID } from '../lib/utils';
 
 interface ScrollPosition {
   x: number;
@@ -19,8 +20,8 @@ interface ScrollMemoryOptions {
 
 // Enhanced global store for scroll positions
 const scrollPositions = new Map<string, ScrollPosition>();
-const sessionId = crypto.randomUUID();
-const deviceId = localStorage.getItem('device-id') || crypto.randomUUID();
+const sessionId = generateUUID();
+const deviceId = localStorage.getItem('device-id') || generateUUID();
 
 // Store device ID for session continuity
 if (!localStorage.getItem('device-id')) {
