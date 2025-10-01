@@ -64,6 +64,11 @@ export default defineConfig({
         target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/success-stories',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/v1\/success-stories/, '')
+      },
+      '/api/v1/send-contact-notification': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/send-contact-notification',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/send-contact-notification/, '')
       }
     }
   },

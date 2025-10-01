@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { ArrowLeft, MessageCircle, User, Clock, MapPin, Send, Phone, Mail } from "lucide-react";
 import { toast } from "sonner";
+import { getAuthToken } from "@/lib/auth";
 
 const LostFoundContact = () => {
   const { id } = useParams();
@@ -23,46 +24,69 @@ const LostFoundContact = () => {
     contactMethod: "email"
   });
 
-  // Mock data for testing
-  const mockPosts = [
-    {
-      id: 1,
-      type: "lost",
-      device: "iPhone 15 Pro Max",
-      description: "Space Black, cracked screen protector, purple case",
-      location: "Sandton City Mall, Johannesburg",
-      timeAgo: "2 hours ago",
-      reward: "R5000",
-      verified: true,
-      responses: 3,
-      user: "Sarah M.",
-      contactInfo: "sarah@email.com"
-    },
-    {
-      id: 2,
-      type: "found",
-      device: "Samsung Galaxy S24",
-      description: "Found at V&A Waterfront, blue case",
-      location: "V&A Waterfront, Cape Town",
-      timeAgo: "4 hours ago",
-      reward: null,
-      verified: false,
-      responses: 1,
-      user: "Mike D.",
-      contactInfo: "mike@email.com"
-    }
-  ];
+  // REMOVED: Mock data - now using real API data only
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const foundPost = mockPosts.find(p => p.id === parseInt(id || '1'));
-      setPost(foundPost || mockPosts[0]);
-      setLoading(false);
-    }, 500);
+    const fetchPostDetails = async () => {
+      try {
+        setLoading(true);
+        console.log('🔍 Fetching post details for contact form, ID:', id);
+        
+        const token = await getAuthToken();
+        const response = await fetch(`/api/v1/lost-found/reports/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const result = await response.json();
+        console.log('✅ Post details for contact:', result);
+
+        if (result.success && result.data) {
+          setPost({
+            id: result.data.id,
+            type: result.data.report_type,
+            device: result.data.device_model || result.data.device_category,
+            description: result.data.description,
+            location: result.data.location_address || 'Location not specified',
+            timeAgo: formatTimeAgo(result.data.created_at),
+            reward: result.data.reward_amount ? `R${result.data.reward_amount}` : null,
+            verified: result.data.verification_status === 'verified',
+            responses: 0,
+            user: result.data.users?.display_name || 'Anonymous',
+            contactInfo: result.data.contact_preferences?.method || 'Not specified'
+          });
+        } else {
+          console.error('❌ Failed to load post for contact');
+          toast.error("Failed to load post details");
+          navigate("/community-board");
+        }
+      } catch (error) {
+        console.error('Error fetching post for contact:', error);
+        toast.error("Error loading post details");
+        navigate("/community-board");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPostDetails();
   }, [id]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+    return `${Math.floor(seconds / 604800)} weeks ago`;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.name || !formData.message) {
@@ -80,9 +104,42 @@ const LostFoundContact = () => {
       return;
     }
 
-    // Simulate form submission
-    toast.success("Message sent successfully! The owner will contact you soon.");
-    navigate(`/lost-found/details/${id}`);
+    try {
+      console.log('📧 Sending contact notification...');
+      
+      const token = await getAuthToken();
+      const notificationData = {
+        report_id: id,
+        finder_name: formData.name,
+        finder_email: formData.email,
+        finder_phone: formData.phone,
+        message: formData.message,
+        contact_method: formData.contactMethod
+      };
+
+      const response = await fetch('/api/v1/send-contact-notification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(notificationData)
+      });
+
+      const result = await response.json();
+      console.log('✅ Notification response:', result);
+
+      if (result.success) {
+        toast.success("✅ Message sent! The owner has been notified and will contact you soon.");
+        toast.info("📧 Confirmation email sent to both parties");
+        navigate(`/lost-found/details/${id}`);
+      } else {
+        throw new Error(result.error || 'Failed to send notification');
+      }
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      toast.error("Failed to send message. Please try again.");
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -116,7 +173,7 @@ const LostFoundContact = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className="bg-white border-b">
         <div className="container mx-auto px-4 py-4">

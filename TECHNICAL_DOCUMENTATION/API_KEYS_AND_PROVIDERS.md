@@ -240,15 +240,23 @@ TWILIO_WHATSAPP_NUMBER=+1234567890
 
 ### **11. SendGrid**
 
-**Status**: ✅ **ACTIVE**  
+**Status**: ✅ **ACTIVE AND CONFIGURED**  
 **Expiry**: No Expiry  
-**Cost**: Free tier available
+**Cost**: Free tier (100 emails/day)
 
 #### **Configuration**
 ```bash
-SENDGRID_API_KEY=SG.your_sendgrid_api_key_here
-SENDGRID_FROM_EMAIL=noreply@stolen.com
+SENDGRID_API_KEY=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
+SENDGRID_FALLSAFE_CODE=99HK7EFNGGCXEA1HKU453GTA
+SENDGRID_FROM_EMAIL=kudzimusar@gmail.com
+SENDGRID_FROM_NAME=STOLEN App
 ```
+
+#### **Features**
+- **Lost & Found Notifications**: Email device owners when someone finds their device
+- **Contact Confirmations**: Email finders when message is sent
+- **Community Alerts**: Notify users of nearby lost devices
+- **Recovery Updates**: Send updates during device recovery process
 
 ### **12. South African SMS Gateways**
 

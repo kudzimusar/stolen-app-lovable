@@ -61,14 +61,22 @@ serve(async (req) => {
     }
 
     const url = new URL(req.url);
-    const path = url.pathname.split("/").pop();
+    const pathSegments = url.pathname.split("/").filter(Boolean);
+    const path = pathSegments[pathSegments.length - 1];
+    
+    // Check if path is a UUID (for single report request)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const isUUID = uuidRegex.test(path);
 
     switch (req.method) {
       case "POST":
         return await handleCreateReport(req, supabaseServiceClient, user);
       
       case "GET":
-        if (path === "stats") {
+        if (isUUID) {
+          // Single report request
+          return await handleGetSingleReport(req, supabaseServiceClient, user, path);
+        } else if (path === "stats") {
           return await handleGetStats(req, supabaseServiceClient, user);
         } else if (path === "nearby") {
           return await handleGetNearbyReports(req, supabaseServiceClient, user);
@@ -158,6 +166,87 @@ async function handleCreateReport(req: Request, supabase: any, user: any): Promi
     }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
+}
+
+async function handleGetSingleReport(req: Request, supabase: any, user: any, reportId: string): Promise<Response> {
+  try {
+    console.log('Fetching single report, ID:', reportId);
+    
+    // Fetch the report with user data
+    const { data: report, error } = await supabase
+      .from("lost_found_reports")
+      .select("*")
+      .eq("id", reportId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching report:', error);
+      throw error;
+    }
+
+    if (!report) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Report not found"
+        }),
+        { 
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    // Get user data
+    const { data: userData } = await supabase
+      .from("users")
+      .select("display_name, avatar_url")
+      .eq("id", report.user_id)
+      .single();
+
+    // Get user reputation
+    const { data: reputationData } = await supabase
+      .from("user_reputation")
+      .select("reputation_score, trust_level")
+      .eq("user_id", report.user_id)
+      .single();
+
+    // Get community tips count
+    const { data: tipsData } = await supabase
+      .from("community_tips")
+      .select("id")
+      .eq("report_id", reportId);
+
+    // Enrich report with related data
+    const enrichedReport = {
+      ...report,
+      users: userData || { display_name: "Anonymous", avatar_url: null },
+      user_reputation: reputationData || { reputation_score: 0, trust_level: "new" },
+      community_tips_count: tipsData?.length || 0
+    };
+
+    console.log('Successfully fetched single report:', enrichedReport);
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        data: enrichedReport
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error('Error in handleGetSingleReport:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || "Failed to fetch report"
+      }),
+      { 
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
+    );
+  }
 }
 
 async function handleGetReports(req: Request, supabase: any, user: any): Promise<Response> {

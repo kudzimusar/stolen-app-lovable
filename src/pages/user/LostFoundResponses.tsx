@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { ArrowLeft, MessageCircle, User, Clock, MapPin, Send } from "lucide-react";
 import { toast } from "sonner";
+import { getAuthToken } from "@/lib/auth";
 
 const LostFoundResponses = () => {
   const { id } = useParams();
@@ -16,62 +17,91 @@ const LostFoundResponses = () => {
   const [newResponse, setNewResponse] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Mock data for testing
-  const mockPosts = [
-    {
-      id: 1,
-      type: "lost",
-      device: "iPhone 15 Pro Max",
-      description: "Space Black, cracked screen protector, purple case",
-      location: "Sandton City Mall, Johannesburg",
-      timeAgo: "2 hours ago",
-      reward: "R5000",
-      verified: true,
-      responses: 3,
-      user: "Sarah M."
-    }
-  ];
-
-  const mockResponses = [
-    {
-      id: 1,
-      postId: 1,
-      user: "John D.",
-      message: "I think I saw a phone like this at the food court around 3 PM. It was on a table near the pizza place.",
-      timeAgo: "1 hour ago",
-      location: "Food Court, Sandton City",
-      verified: false
-    },
-    {
-      id: 2,
-      postId: 1,
-      user: "Lisa K.",
-      message: "Check with the mall security office. They usually collect lost items and keep them for a few days.",
-      timeAgo: "45 minutes ago",
-      location: null,
-      verified: true
-    },
-    {
-      id: 3,
-      postId: 1,
-      user: "Mike R.",
-      message: "I found a similar phone but it was a different case. Good luck with your search!",
-      timeAgo: "30 minutes ago",
-      location: "Parking Garage, Sandton City",
-      verified: false
-    }
-  ];
+  // REMOVED: Mock data - now using real API data only
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const foundPost = mockPosts.find(p => p.id === parseInt(id || '1'));
-      const postResponses = mockResponses.filter(r => r.postId === parseInt(id || '1'));
-      setPost(foundPost || mockPosts[0]);
-      setResponses(postResponses);
-      setLoading(false);
-    }, 500);
+    const fetchPostAndResponses = async () => {
+      try {
+        setLoading(true);
+        console.log('🔍 Fetching post and responses, ID:', id);
+        
+        const token = await getAuthToken();
+        
+        // Fetch post details
+        const postResponse = await fetch(`/api/v1/lost-found/reports/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        const postResult = await postResponse.json();
+
+        // Fetch community tips/responses
+        const tipsResponse = await fetch(`/api/v1/community-tips?report_id=${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        const tipsResult = await tipsResponse.json();
+
+        console.log('✅ Post loaded:', postResult);
+        console.log('✅ Tips loaded:', tipsResult);
+
+        if (postResult.success && postResult.data) {
+          setPost({
+            id: postResult.data.id,
+            type: postResult.data.report_type,
+            device: postResult.data.device_model || postResult.data.device_category,
+            description: postResult.data.description,
+            location: postResult.data.location_address || 'Location not specified',
+            timeAgo: formatTimeAgo(postResult.data.created_at),
+            reward: postResult.data.reward_amount ? `R${postResult.data.reward_amount}` : null,
+            verified: postResult.data.verification_status === 'verified',
+            responses: tipsResult.data?.length || 0,
+            user: postResult.data.users?.display_name || 'Anonymous'
+          });
+
+          // Format responses
+          if (tipsResult.success && tipsResult.data) {
+            setResponses(tipsResult.data.map((tip: any) => ({
+              id: tip.id,
+              postId: tip.report_id,
+              user: tip.users?.display_name || 'Anonymous',
+              message: tip.tip_description,
+              timeAgo: formatTimeAgo(tip.created_at),
+              location: tip.tip_location_address,
+              verified: tip.verified
+            })));
+          }
+        } else {
+          console.error('❌ Failed to load post/responses');
+          toast.error("Failed to load post details");
+          navigate("/community-board");
+        }
+      } catch (error) {
+        console.error('Error fetching post/responses:', error);
+        toast.error("Error loading data");
+        navigate("/community-board");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPostAndResponses();
   }, [id]);
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+    return `${Math.floor(seconds / 604800)} weeks ago`;
+  };
 
   const handleSubmitResponse = () => {
     if (!newResponse.trim()) {
@@ -118,7 +148,7 @@ const LostFoundResponses = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className="bg-white border-b">
         <div className="container mx-auto px-4 py-4">

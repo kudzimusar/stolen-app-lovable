@@ -166,6 +166,11 @@ export class AuthService {
   }
 }
 
+// Standalone function for getting auth token
+export async function getAuthToken(): Promise<string | null> {
+  return AuthService.getAuthToken();
+}
+
 // Hook for React components
 
 export function useAuth() {

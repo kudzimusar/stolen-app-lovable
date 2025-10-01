@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
-import { ArrowLeft, MapPin, Clock, MessageCircle, AlertTriangle, CheckCircle, DollarSign, User, Shield } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, MessageCircle, AlertTriangle, CheckCircle, DollarSign, User, Shield, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { getAuthToken } from "@/lib/auth";
 
 const LostFoundDetails = () => {
   const { id } = useParams();
@@ -13,53 +14,90 @@ const LostFoundDetails = () => {
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // Mock data for testing
-  const mockPosts = [
-    {
-      id: 1,
-      type: "lost",
-      device: "iPhone 15 Pro Max",
-      description: "Space Black, cracked screen protector, purple case. Lost at Sandton City Mall while shopping. The phone has a distinctive purple case with a photo of my dog on the lock screen. It was last seen near the food court area.",
-      location: "Sandton City Mall, Johannesburg",
-      timeAgo: "2 hours ago",
-      reward: "R5000",
-      verified: true,
-      responses: 3,
-      image: "/placeholder.svg",
-      user: "Sarah M.",
-      reputation: 85,
-      trustLevel: "trusted",
-      contactInfo: "sarah@email.com",
-      serialNumber: "ABC123456789",
-      incidentDate: "2024-12-15T14:30:00Z"
-    },
-    {
-      id: 2,
-      type: "found",
-      device: "Samsung Galaxy S24",
-      description: "Found at V&A Waterfront, blue case. The device was found near the waterfront area, appears to be in good condition. No visible damage.",
-      location: "V&A Waterfront, Cape Town",
-      timeAgo: "4 hours ago",
-      reward: null,
-      verified: false,
-      responses: 1,
-      image: "/placeholder.svg",
-      user: "Mike D.",
-      reputation: 42,
-      trustLevel: "verified",
-      contactInfo: "mike@email.com",
-      foundDate: "2024-12-15T10:00:00Z"
-    }
-  ];
+  // REMOVED: Mock data - now using real API data only
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const foundPost = mockPosts.find(p => p.id === parseInt(id || '1'));
-      setPost(foundPost || mockPosts[0]);
-      setLoading(false);
-    }, 500);
+    const fetchPostDetails = async () => {
+      try {
+        setLoading(true);
+        console.log('🔍 Fetching details for post ID:', id);
+        
+        const token = await getAuthToken();
+        const response = await fetch(`/api/v1/lost-found/reports/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const result = await response.json();
+        console.log('✅ Post details loaded:', result);
+        console.log('📋 Raw data from API:', {
+          contact_preferences: result.data?.contact_preferences,
+          photos: result.data?.photos,
+          documents: result.data?.documents,
+          device_model: result.data?.device_model
+        });
+
+        if (result.success && result.data) {
+          setPost({
+            id: result.data.id,
+            type: result.data.report_type,
+            device: result.data.device_model || result.data.device_category,
+            description: result.data.description,
+            location: result.data.location_address || 'Location not specified',
+            timeAgo: formatTimeAgo(result.data.created_at),
+            reward: result.data.reward_amount ? `R${result.data.reward_amount}` : null,
+            verified: result.data.verification_status === 'verified',
+            responses: 0, // Will be updated with real tips count
+            image: result.data.photos?.[0] || "/placeholder.svg",
+            user: result.data.users?.display_name || 'Anonymous',
+            userAvatar: result.data.users?.avatar_url,
+            reputation: result.data.user_reputation?.reputation_score || 0,
+            trustLevel: result.data.user_reputation?.trust_level || 'new',
+            serialNumber: result.data.serial_number,
+            incidentDate: result.data.incident_date,
+            contactInfo: result.data.contact_preferences?.method || 'Not specified',
+            contactPreferences: result.data.contact_preferences || {},
+            photos: result.data.photos || [],
+            documents: result.data.documents || [],
+            rawData: result.data // Keep raw data for debugging
+          });
+          
+          console.log('📊 Post data formatted:', {
+            device: result.data.device_model,
+            photos: result.data.photos?.length || 0,
+            documents: result.data.documents?.length || 0,
+            contact: result.data.contact_preferences
+          });
+        } else {
+          console.error('❌ Failed to load post details');
+          toast.error("Failed to load post details");
+          navigate("/community-board");
+        }
+      } catch (error) {
+        console.error('Error fetching post details:', error);
+        toast.error("Error loading post details");
+        navigate("/community-board");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPostDetails();
   }, [id]);
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+    return `${Math.floor(seconds / 604800)} weeks ago`;
+  };
 
   const handleContact = () => {
     toast.success("Contact form opened!");
@@ -94,7 +132,7 @@ const LostFoundDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className="bg-white border-b">
         <div className="container mx-auto px-4 py-4">
@@ -121,9 +159,9 @@ const LostFoundDetails = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 space-y-6">
+      <div className="container mx-auto px-4 py-4 space-y-4 max-w-2xl">
         {/* Main Post Card */}
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader>
             <div className="flex items-start justify-between">
               <div>
@@ -177,7 +215,9 @@ const LostFoundDetails = () => {
 
               <div>
                 <h3 className="font-semibold mb-2">Contact</h3>
-                <p className="text-muted-foreground">{post.contactInfo}</p>
+                <p className="text-muted-foreground break-all">
+                  {post.contactPreferences?.method || post.contactInfo || 'Not specified'}
+                </p>
               </div>
             </div>
 
@@ -206,6 +246,67 @@ const LostFoundDetails = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Photos */}
+        {post.photos && post.photos.length > 0 && (
+          <Card className="shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Device Photos ({post.photos.length})</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-2 gap-3">
+                {post.photos.map((photo: string, index: number) => (
+                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden border-2 border-primary/10">
+                    <img 
+                      src={photo} 
+                      alt={`Device photo ${index + 1}`}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
+                      onClick={() => window.open(photo, '_blank')}
+                      onError={(e) => {
+                        console.error('Image failed to load:', photo);
+                        (e.target as HTMLImageElement).src = '/placeholder.svg';
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Tap to view full size
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Documents */}
+        {post.documents && post.documents.length > 0 && (
+          <Card className="shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Documents ({post.documents.length})</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                {post.documents.map((doc: string, index: number) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-medium">
+                        {index === 0 && post.type === 'lost' ? 'Police Report' : `Document ${index + 1}`}
+                      </span>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => window.open(doc, '_blank')}
+                      className="text-xs"
+                    >
+                      View
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Additional Information */}
         <Card>

@@ -55,6 +55,8 @@
     "coherence:production": "npm run coherence:ai-all && npm run coherence:monitor"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.899.0",
+    "@aws-sdk/s3-request-presigner": "^3.899.0",
     "@fingerprintjs/fingerprintjs": "^4.6.2",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",

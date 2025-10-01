@@ -1,0 +1,470 @@
+/* STOLEN Platform - Shared Components Styles */
+/* Consistent styling system for all reusable components */
+
+:root {
+  /* Color System */
+  --stolen-primary: #3B82F6;
+  --stolen-primary-dark: #2563EB;
+  --stolen-secondary: #10B981;
+  --stolen-accent: #F59E0B;
+  --stolen-danger: #EF4444;
+  --stolen-warning: #F59E0B;
+  --stolen-success: #10B981;
+  
+  /* Neutral Colors */
+  --stolen-gray-50: #F9FAFB;
+  --stolen-gray-100: #F3F4F6;
+  --stolen-gray-200: #E5E7EB;
+  --stolen-gray-300: #D1D5DB;
+  --stolen-gray-400: #9CA3AF;
+  --stolen-gray-500: #6B7280;
+  --stolen-gray-600: #4B5563;
+  --stolen-gray-700: #374151;
+  --stolen-gray-800: #1F2937;
+  --stolen-gray-900: #111827;
+  
+  /* Component Specific Colors */
+  --upload-border: #E5E7EB;
+  --upload-hover: #F3F4F6;
+  --upload-active: #DBEAFE;
+  --map-marker: #3B82F6;
+  --scan-overlay: rgba(59, 130, 246, 0.1);
+  --ai-confidence-high: #10B981;
+  --ai-confidence-medium: #F59E0B;
+  --ai-confidence-low: #EF4444;
+  --blockchain-verified: #10B981;
+  --blockchain-pending: #F59E0B;
+  --blockchain-failed: #EF4444;
+  
+  /* Spacing System */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Typography */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
+  --transition-slow: 350ms ease-in-out;
+}
+
+/* Base Component Styles */
+.stolen-component {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: var(--line-height-normal);
+  color: var(--stolen-gray-900);
+}
+
+/* Upload Components */
+.stolen-upload-area {
+  border: 2px dashed var(--upload-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  text-align: center;
+  transition: all var(--transition-normal);
+  background: var(--stolen-gray-50);
+}
+
+.stolen-upload-area:hover {
+  border-color: var(--stolen-primary);
+  background: var(--upload-hover);
+}
+
+.stolen-upload-area.dragover {
+  border-color: var(--stolen-primary);
+  background: var(--upload-active);
+  transform: scale(1.02);
+}
+
+.stolen-upload-progress {
+  background: var(--stolen-gray-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  height: 8px;
+}
+
+.stolen-upload-progress-bar {
+  background: linear-gradient(90deg, var(--stolen-primary), var(--stolen-secondary));
+  height: 100%;
+  transition: width var(--transition-normal);
+}
+
+.stolen-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  background: var(--stolen-gray-100);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-sm);
+  transition: all var(--transition-fast);
+}
+
+.stolen-file-item:hover {
+  background: var(--stolen-gray-200);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Map Components */
+.stolen-map-container {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.stolen-map-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.stolen-map-controls {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  z-index: 20;
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.stolen-map-marker {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--map-marker);
+  border: 3px solid white;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.stolen-map-marker:hover {
+  transform: scale(1.2);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Scanning Components */
+.stolen-scanner-container {
+  position: relative;
+  background: var(--stolen-gray-900);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.stolen-scanner-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  border: 2px solid var(--stolen-primary);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  z-index: 10;
+}
+
+.stolen-scanner-overlay::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid var(--stolen-primary);
+  border-radius: var(--radius-lg);
+  background: var(--scan-overlay);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.stolen-scanner-corners {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--stolen-primary);
+}
+
+.stolen-scanner-corners.top-left {
+  top: -3px;
+  left: -3px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.stolen-scanner-corners.top-right {
+  top: -3px;
+  right: -3px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.stolen-scanner-corners.bottom-left {
+  bottom: -3px;
+  left: -3px;
+  border-right: none;
+  border-top: none;
+}
+
+.stolen-scanner-corners.bottom-right {
+  bottom: -3px;
+  right: -3px;
+  border-left: none;
+  border-top: none;
+}
+
+/* AI Components */
+.stolen-ai-analysis {
+  background: var(--stolen-gray-50);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--stolen-gray-200);
+}
+
+.stolen-ai-confidence {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.stolen-ai-confidence.high {
+  background: var(--ai-confidence-high);
+  color: white;
+}
+
+.stolen-ai-confidence.medium {
+  background: var(--ai-confidence-medium);
+  color: white;
+}
+
+.stolen-ai-confidence.low {
+  background: var(--ai-confidence-low);
+  color: white;
+}
+
+.stolen-ai-factor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  background: var(--stolen-gray-100);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-sm);
+  transition: all var(--transition-fast);
+}
+
+.stolen-ai-factor:hover {
+  background: var(--stolen-gray-200);
+  transform: translateX(4px);
+}
+
+.stolen-ai-factor.positive {
+  border-left: 4px solid var(--stolen-success);
+}
+
+.stolen-ai-factor.negative {
+  border-left: 4px solid var(--stolen-danger);
+}
+
+.stolen-ai-factor.neutral {
+  border-left: 4px solid var(--stolen-gray-400);
+}
+
+/* Blockchain Components */
+.stolen-blockchain-verification {
+  background: var(--stolen-gray-50);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--stolen-gray-200);
+}
+
+.stolen-blockchain-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.stolen-blockchain-status.verified {
+  background: var(--blockchain-verified);
+  color: white;
+}
+
+.stolen-blockchain-status.pending {
+  background: var(--blockchain-pending);
+  color: white;
+}
+
+.stolen-blockchain-status.failed {
+  background: var(--blockchain-failed);
+  color: white;
+}
+
+.stolen-blockchain-step {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--stolen-gray-100);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-sm);
+  transition: all var(--transition-fast);
+}
+
+.stolen-blockchain-step.completed {
+  background: var(--stolen-success);
+  color: white;
+}
+
+.stolen-blockchain-step.pending {
+  background: var(--stolen-warning);
+  color: white;
+}
+
+.stolen-blockchain-step.failed {
+  background: var(--stolen-danger);
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .stolen-upload-area {
+    padding: var(--spacing-lg);
+  }
+  
+  .stolen-scanner-overlay {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .stolen-map-controls {
+    position: static;
+    margin-top: var(--spacing-md);
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --stolen-gray-50: #1F2937;
+    --stolen-gray-100: #374151;
+    --stolen-gray-200: #4B5563;
+    --stolen-gray-300: #6B7280;
+    --stolen-gray-400: #9CA3AF;
+    --stolen-gray-500: #D1D5DB;
+    --stolen-gray-600: #E5E7EB;
+    --stolen-gray-700: #F3F4F6;
+    --stolen-gray-800: #F9FAFB;
+    --stolen-gray-900: #FFFFFF;
+  }
+}
+
+/* Animation Classes */
+.stolen-fade-in {
+  animation: fadeIn var(--transition-normal) ease-in-out;
+}
+
+.stolen-slide-up {
+  animation: slideUp var(--transition-normal) ease-in-out;
+}
+
+.stolen-scale-in {
+  animation: scaleIn var(--transition-normal) ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Utility Classes */
+.stolen-text-center { text-align: center; }
+.stolen-text-left { text-align: left; }
+.stolen-text-right { text-align: right; }
+
+.stolen-flex { display: flex; }
+.stolen-flex-col { flex-direction: column; }
+.stolen-items-center { align-items: center; }
+.stolen-justify-center { justify-content: center; }
+.stolen-justify-between { justify-content: space-between; }
+
+.stolen-gap-sm { gap: var(--spacing-sm); }
+.stolen-gap-md { gap: var(--spacing-md); }
+.stolen-gap-lg { gap: var(--spacing-lg); }
+
+.stolen-p-sm { padding: var(--spacing-sm); }
+.stolen-p-md { padding: var(--spacing-md); }
+.stolen-p-lg { padding: var(--spacing-lg); }
+
+.stolen-m-sm { margin: var(--spacing-sm); }
+.stolen-m-md { margin: var(--spacing-md); }
+.stolen-m-lg { margin: var(--spacing-lg); }
+
+.stolen-rounded-sm { border-radius: var(--radius-sm); }
+.stolen-rounded-md { border-radius: var(--radius-md); }
+.stolen-rounded-lg { border-radius: var(--radius-lg); }
+.stolen-rounded-full { border-radius: var(--radius-full); }
+
+.stolen-shadow-sm { box-shadow: var(--shadow-sm); }
+.stolen-shadow-md { box-shadow: var(--shadow-md); }
+.stolen-shadow-lg { box-shadow: var(--shadow-lg); }
+.stolen-shadow-xl { box-shadow: var(--shadow-xl); }

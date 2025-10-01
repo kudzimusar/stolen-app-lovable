@@ -46,10 +46,12 @@ const CommunityBoard = () => {
     fetchStats();
   }, []);
 
-  // Initialize with fallback data for testing
+  // REMOVED: No more mock/fallback data - using real database data only
+  // This useEffect has been disabled to ensure only real data is displayed
+  /*
   useEffect(() => {
     if (posts.length === 0 && !loading) {
-      console.log('Initializing with fallback data for testing...');
+      console.log('⚠️ No posts from API, checking if we should use fallback...');
       setPosts([
         {
           id: 1,
@@ -135,6 +137,7 @@ const CommunityBoard = () => {
       });
     }
   }, [posts.length, loading]);
+  */
 
   // Function to insert test data into database
   const insertTestData = async () => {
@@ -233,27 +236,37 @@ const CommunityBoard = () => {
       const result = await response.json();
       console.log('API Response data:', result);
       
-      if (result.success && result.data && result.data.length > 0) {
-        setPosts(result.data.map((post: any) => ({
-          id: post.id,
-          type: post.report_type,
-          device: post.device_model || post.device_category,
-          description: post.description,
-          location: post.location_address || 'Location not specified',
-          timeAgo: formatTimeAgo(post.created_at),
-          reward: post.reward_amount ? `R${post.reward_amount}` : null,
-          verified: post.verification_status === 'verified',
-          responses: post.community_tips_count || 0,
-          image: post.photos?.[0] || "/placeholder.svg",
-          user: post.users?.display_name || 'Anonymous',
-          userAvatar: post.users?.avatar_url,
-          reputation: post.user_reputation?.reputation_score || 0,
-          trustLevel: post.user_reputation?.trust_level || 'new'
-        })));
-        console.log('Successfully loaded', result.data.length, 'posts from API');
+      if (result.success && result.data) {
+        console.log('✅ API Response:', result.data.length, 'posts received');
+        
+        if (result.data.length > 0) {
+          const formattedPosts = result.data.map((post: any) => ({
+            id: post.id,
+            type: post.report_type,
+            device: post.device_model || post.device_category,
+            description: post.description,
+            location: post.location_address || 'Location not specified',
+            timeAgo: formatTimeAgo(post.created_at),
+            reward: post.reward_amount ? `R${post.reward_amount}` : null,
+            verified: post.verification_status === 'verified',
+            responses: post.community_tips_count || 0,
+            image: post.photos?.[0] || "/placeholder.svg",
+            user: post.users?.display_name || 'Anonymous',
+            userAvatar: post.users?.avatar_url,
+            reputation: post.user_reputation?.reputation_score || 0,
+            trustLevel: post.user_reputation?.trust_level || 'new',
+            status: post.status || 'active' // Add status field
+          }));
+          
+          setPosts(formattedPosts);
+          console.log('✅ Displayed', formattedPosts.length, 'posts from database');
+        } else {
+          console.log('⚠️ API returned 0 posts - database might be empty');
+          setPosts([]); // Set empty array, not fallback
+        }
       } else {
-        console.log('API returned empty data, using fallback...');
-        // Don't set posts here - let the fallback useEffect handle it
+        console.log('❌ API call failed or returned error');
+        setPosts([]); // Set empty array on error
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -285,12 +298,16 @@ const CommunityBoard = () => {
       const result = await response.json();
       console.log('Stats API Response data:', result);
       
-      if (result.success && result.data && (result.data.lost > 0 || result.data.found > 0 || result.data.reunited > 0)) {
-        setStats(result.data);
-        console.log('Successfully loaded community stats from API');
+      if (result.success && result.data) {
+        setStats({
+          lost: result.data.lost || 0,
+          found: result.data.found || 0,
+          reunited: result.data.reunited || 0
+        });
+        console.log('✅ Stats loaded - Lost:', result.data.lost, 'Found:', result.data.found, 'Reunited:', result.data.reunited);
       } else {
-        console.log('Stats API returned empty data, using fallback...');
-        // Don't set stats here - let the fallback useEffect handle it
+        console.log('⚠️ Stats API returned no data');
+        setStats({ lost: 0, found: 0, reunited: 0 });
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -312,9 +329,18 @@ const CommunityBoard = () => {
 
   // Interactive handlers
   const handlePostAction = (post: any) => {
+    // Security check: Prevent users from contacting their own posts
+    if (user && post.user === user.display_name) {
+      toast.error("❌ You cannot contact your own post!");
+      console.log('🚫 Self-contact prevented:', {
+        currentUser: user.display_name,
+        postOwner: post.user
+      });
+      return;
+    }
+
     if (post.type === "lost") {
       toast.success("Thank you! We'll connect you with the owner.");
-      // Navigate to contact form or modal
       navigate(`/lost-found/contact/${post.id}`);
     } else {
       toast.info("Opening contact form...");
@@ -339,23 +365,48 @@ const CommunityBoard = () => {
     return matchesSearch && matchesFilter && matchesTab;
   });
 
+  // Calculate real-time stats from actual posts
+  const realTimeStats = {
+    lost: posts.filter(p => p.type === 'lost').length,
+    found: posts.filter(p => p.type === 'found').length,
+    reunited: stats.reunited || 0 // This comes from API
+  };
+
   const PostCard = ({ post }: { post: typeof posts[0] }) => (
     <Card className="p-4 space-y-3">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <Badge variant={post.type === "lost" ? "destructive" : "secondary"}>
-            {post.type === "lost" ? (
-              <>
-                <AlertTriangle className="w-3 h-3 mr-1" />
-                Lost
-              </>
-            ) : (
-              <>
-                <CheckCircle className="w-3 h-3 mr-1" />
-                Found
-              </>
-            )}
-          </Badge>
+          {/* Status Badge - Dynamic based on device status */}
+          {post.status === 'contacted' ? (
+            <Badge variant="outline" className="bg-yellow-50 text-yellow-800 border-yellow-300">
+              <Clock className="w-3 h-3 mr-1" />
+              Contact Received
+            </Badge>
+          ) : post.status === 'pending_verification' ? (
+            <Badge variant="outline" className="bg-orange-50 text-orange-800 border-orange-300">
+              <AlertTriangle className="w-3 h-3 mr-1" />
+              Pending Verification
+            </Badge>
+          ) : post.status === 'reunited' ? (
+            <Badge variant="outline" className="bg-green-50 text-green-800 border-green-300">
+              <CheckCircle className="w-3 h-3 mr-1" />
+              Reunited!
+            </Badge>
+          ) : (
+            <Badge variant={post.type === "lost" ? "destructive" : "secondary"}>
+              {post.type === "lost" ? (
+                <>
+                  <AlertTriangle className="w-3 h-3 mr-1" />
+                  Lost
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  Found
+                </>
+              )}
+            </Badge>
+          )}
           {post.verified && (
             <Badge variant="outline" className="text-xs">
               <CheckCircle className="w-3 h-3 mr-1" />
@@ -414,19 +465,30 @@ const CommunityBoard = () => {
           )}
         </div>
         
-        <Button 
-          size="sm" 
-          variant={post.type === "lost" ? "default" : "outline"}
-          onClick={() => handlePostAction(post)}
-        >
-          {post.type === "lost" ? "I found this!" : "Contact owner"}
-        </Button>
+        {/* Hide button for own posts or if already contacted/reunited */}
+        {user && post.user !== user.display_name && post.status !== 'reunited' && (
+          <Button 
+            size="sm" 
+            variant={post.status === 'contacted' || post.status === 'pending_verification' ? "outline" : "default"}
+            onClick={() => handlePostAction(post)}
+            disabled={post.status === 'contacted' || post.status === 'pending_verification'}
+          >
+            {post.status === 'contacted' ? "Contact Received" :
+             post.status === 'pending_verification' ? "Verification Pending" :
+             post.type === "lost" ? "I found this!" : "Contact owner"}
+          </Button>
+        )}
+        {user && post.user === user.display_name && (
+          <Badge variant="outline" className="text-xs">
+            Your Post
+          </Badge>
+        )}
       </div>
     </Card>
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/40">
         <div className="container mx-auto px-4 py-4">
@@ -480,23 +542,23 @@ const CommunityBoard = () => {
             </Select>
           </div>
 
-          {/* Quick Stats */}
+          {/* Quick Stats - Real-time from database */}
           <div className="grid grid-cols-3 gap-4">
             <Card className="p-3 text-center">
               <div className="text-lg font-bold text-destructive">
-                {loading ? "..." : stats.lost}
+                {loading ? "..." : realTimeStats.lost}
               </div>
               <div className="text-xs text-muted-foreground">Lost Devices</div>
             </Card>
             <Card className="p-3 text-center">
               <div className="text-lg font-bold text-success">
-                {loading ? "..." : stats.found}
+                {loading ? "..." : realTimeStats.found}
               </div>
               <div className="text-xs text-muted-foreground">Found Devices</div>
             </Card>
             <Card className="p-3 text-center">
               <div className="text-lg font-bold text-primary">
-                {loading ? "..." : stats.reunited}
+                {loading ? "..." : realTimeStats.reunited}
               </div>
               <div className="text-xs text-muted-foreground">Reunited Today</div>
             </Card>
@@ -506,9 +568,9 @@ const CommunityBoard = () => {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="all">All Posts</TabsTrigger>
-            <TabsTrigger value="lost">Lost</TabsTrigger>
-            <TabsTrigger value="found">Found</TabsTrigger>
+            <TabsTrigger value="all">All ({posts.length})</TabsTrigger>
+            <TabsTrigger value="lost">Lost ({realTimeStats.lost})</TabsTrigger>
+            <TabsTrigger value="found">Found ({realTimeStats.found})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="all" className="mt-6">

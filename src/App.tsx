@@ -59,6 +59,7 @@ import DeviceCheck from "./pages/user/DeviceCheck";
 import DeviceRegister from "./pages/user/DeviceRegister";
 import MyDevices from "./pages/user/MyDevices";
 import CommunityBoard from "./pages/user/CommunityBoard";
+const CommunityRewards = lazy(() => import("./pages/user/CommunityRewards"));
 import Profile from "./pages/user/Profile";
 import DeviceWarrantyStatus from "./pages/user/DeviceWarrantyStatus";
 import Support from "./pages/user/Support";
@@ -125,6 +126,7 @@ const App = () => {
           <Route path="/device/register" element={<ProtectedRoute><DeviceRegister /></ProtectedRoute>} />
           <Route path="/my-devices" element={<ProtectedRoute><MyDevices /></ProtectedRoute>} />
           <Route path="/community-board" element={<ProtectedRoute><CommunityBoard /></ProtectedRoute>} />
+          <Route path="/community-rewards" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><CommunityRewards /></Suspense></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/device-warranty-status" element={<ProtectedRoute><DeviceWarrantyStatus /></ProtectedRoute>} />
           <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />

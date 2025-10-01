@@ -80,7 +80,11 @@
 
 ### **📨 Communication**
 - **Twilio**: SMS/WhatsApp setup required
-- **SendGrid**: Email setup required
+- **SendGrid**: ✅ **ACTIVE AND CONFIGURED**
+  - API Key: `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`
+  - Fallsafe Code: `99HK7EFNGGCXEA1HKU453GTA`
+  - From Email: `kudzimusar@gmail.com`
+  - Status: ✅ Ready for email notifications
 - **Firebase FCM**: Push notifications setup required
 
 ### **🔐 Blockchain**
