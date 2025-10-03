@@ -72,6 +72,16 @@ export default defineConfig({
         target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/send-contact-notification',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/v1\/send-contact-notification/, '')
+      },
+      '/api/v1/admin/dashboard-stats': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/admin-dashboard-stats',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/admin\/dashboard-stats/, '')
+      },
+      '/api/v1/admin/approve-report': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/admin-approve-report',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/admin\/approve-report/, '')
       }
     }
   },

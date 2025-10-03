@@ -47,173 +47,12 @@ const CommunityBoard = () => {
     fetchStats();
   }, []);
 
-  // REMOVED: No more mock/fallback data - using real database data only
-  // This useEffect has been disabled to ensure only real data is displayed
-  /*
-  useEffect(() => {
-    if (posts.length === 0 && !loading) {
-      console.log('⚠️ No posts from API, checking if we should use fallback...');
-      setPosts([
-        {
-          id: 1,
-          type: "lost",
-          device: "iPhone 15 Pro Max",
-          description: "Space Black, cracked screen protector, purple case",
-          location: "Sandton City Mall, Johannesburg",
-          timeAgo: "2 hours ago",
-          reward: "R5000",
-          verified: true,
-          responses: 3,
-          image: "/placeholder.svg",
-          user: "Sarah M.",
-          reputation: 85,
-          trustLevel: "trusted"
-        },
-        {
-          id: 2,
-          type: "found",
-          device: "Samsung Galaxy S24",
-          description: "Found at V&A Waterfront, blue case",
-          location: "V&A Waterfront, Cape Town",
-          timeAgo: "4 hours ago",
-          reward: null,
-          verified: false,
-          responses: 1,
-          image: "/placeholder.svg",
-          user: "Mike D.",
-          reputation: 42,
-          trustLevel: "verified"
-        },
-        {
-          id: 3,
-          type: "lost",
-          device: "MacBook Pro",
-          description: "Space Gray, 13-inch, South African flag sticker",
-          location: "Gateway Theatre of Shopping, Durban",
-          timeAgo: "1 day ago",
-          reward: "R8000",
-          verified: false,
-          responses: 0,
-          image: "/placeholder.svg",
-          user: "David K.",
-          reputation: 23,
-          trustLevel: "new"
-        },
-        {
-          id: 4,
-          type: "found",
-          device: "iPad Air",
-          description: "Found at OR Tambo Airport, silver color",
-          location: "OR Tambo Airport, Johannesburg",
-          timeAgo: "6 hours ago",
-          reward: null,
-          verified: true,
-          responses: 2,
-          image: "/placeholder.svg",
-          user: "Lisa T.",
-          reputation: 67,
-          trustLevel: "trusted"
-        },
-        {
-          id: 5,
-          type: "lost",
-          device: "AirPods Pro",
-          description: "Lost at Greenmarket Square, black case",
-          location: "Greenmarket Square, Cape Town",
-          timeAgo: "3 hours ago",
-          reward: "R1500",
-          verified: false,
-          responses: 1,
-          image: "/placeholder.svg",
-          user: "John P.",
-          reputation: 31,
-          trustLevel: "verified"
-        }
-      ]);
-      
-      setStats({
-        lost: 3,
-        found: 2,
-        reunited: 12
-      });
-    }
-  }, [posts.length, loading]);
-  */
+  // NO FALLBACK DATA - Only use real database data
+  // This ensures clean, production-ready data without mock content
 
-  // Function to insert test data into database
-  const insertTestData = async () => {
-    try {
-      const token = await getAuthToken();
-      if (!token) {
-        toast.error("Please log in to insert test data");
-        return;
-      }
+  // All mock data completely removed - using only real database data
 
-      const testReports = [
-        {
-          report_type: "lost",
-          device_category: "Smartphone",
-          device_model: "iPhone 15 Pro Max",
-          description: "Space Black, cracked screen protector, purple case",
-          location_lat: -26.1076,
-          location_lng: 28.0567,
-          location_address: "Sandton City Mall, Johannesburg",
-          incident_date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          reward_amount: 5000,
-          photos: ["https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=300&fit=crop"]
-        },
-        {
-          report_type: "found",
-          device_category: "Smartphone",
-          device_model: "Samsung Galaxy S24",
-          description: "Found at V&A Waterfront, blue case",
-          location_lat: -33.9048,
-          location_lng: 18.4161,
-          location_address: "V&A Waterfront, Cape Town",
-          incident_date: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-          reward_amount: 0,
-          photos: ["https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop"]
-        },
-        {
-          report_type: "lost",
-          device_category: "Laptop",
-          device_model: "MacBook Pro",
-          description: "Space Gray, 13-inch, South African flag sticker",
-          location_lat: -29.8587,
-          location_lng: 31.0218,
-          location_address: "Gateway Theatre of Shopping, Durban",
-          incident_date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          reward_amount: 8000,
-          photos: ["https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=300&fit=crop"]
-        }
-      ];
-
-      for (const report of testReports) {
-        const response = await fetch('/api/v1/lost-found/reports', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(report)
-        });
-
-        if (response.ok) {
-          console.log('Test report inserted:', report.device_model);
-        } else {
-          console.error('Failed to insert test report:', report.device_model);
-        }
-      }
-
-      toast.success("Test data inserted successfully!");
-      // Refresh the data
-      fetchPosts();
-      fetchStats();
-    } catch (error) {
-      console.error('Error inserting test data:', error);
-      toast.error("Failed to insert test data");
-    }
-  };
+  // Test data insertion function removed - using only real database data
 
   const fetchPosts = async () => {
     try {
@@ -221,10 +60,14 @@ const CommunityBoard = () => {
       console.log('Fetching posts from API...');
       
       // Get auth token from authenticated user
-      const authToken = await getAuthToken() || 
-                       localStorage.getItem('supabase.auth.token') || 
-                       localStorage.getItem('sb-lerjhxchglztvhbsdjjn-auth-token') ||
-                       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlcmpoeGNoZ2x6dHZoYnNkampuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MzAyOTIsImV4cCI6MjA2OTIwNjI5Mn0.nzbVcrz576dB30B2lcazoWhAuK-XRRdYAIxBI_qesIs';
+      const authToken = await getAuthToken();
+      
+      if (!authToken) {
+        console.log('❌ No auth token available, user not logged in');
+        setPosts([]);
+        setLoading(false);
+        return;
+      }
       
       const response = await fetch('/api/v1/lost-found/reports', {
         headers: {
@@ -283,10 +126,13 @@ const CommunityBoard = () => {
       console.log('Fetching community stats...');
       
       // Get auth token from authenticated user
-      const authToken = await getAuthToken() || 
-                       localStorage.getItem('supabase.auth.token') || 
-                       localStorage.getItem('sb-lerjhxchglztvhbsdjjn-auth-token') ||
-                       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlcmpoeGNoZ2x6dHZoYnNkampuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MzAyOTIsImV4cCI6MjA2OTIwNjI5Mn0.nzbVcrz576dB30B2lcazoWhAuK-XRRdYAIxBI_qesIs';
+      const authToken = await getAuthToken();
+      
+      if (!authToken) {
+        console.log('❌ No auth token available for stats, user not logged in');
+        setStats({ lost: 0, found: 0, reunited: 0 });
+        return;
+      }
       
       const response = await fetch('/api/v1/lost-found/community/stats', {
         headers: {
@@ -360,21 +206,44 @@ const CommunityBoard = () => {
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.device.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          post.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = selectedFilter === "all" || post.type === selectedFilter;
-    const matchesTab = activeTab === "all" || post.type === activeTab;
+    
+    // Use status for filtering instead of type
+    let matchesFilter = true;
+    let matchesTab = true;
+    
+    if (selectedFilter !== "all") {
+      if (selectedFilter === "reunited") {
+        matchesFilter = post.status === 'reunited';
+      } else if (selectedFilter === "lost") {
+        matchesFilter = post.type === 'lost' && post.status !== 'reunited';
+      } else if (selectedFilter === "found") {
+        matchesFilter = post.type === 'found' && post.status !== 'reunited';
+      }
+    }
+    
+    if (activeTab !== "all") {
+      if (activeTab === "reunited") {
+        matchesTab = post.status === 'reunited';
+      } else if (activeTab === "lost") {
+        matchesTab = post.type === 'lost' && post.status !== 'reunited';
+      } else if (activeTab === "found") {
+        matchesTab = post.type === 'found' && post.status !== 'reunited';
+      }
+    }
     
     return matchesSearch && matchesFilter && matchesTab;
   });
 
   // Calculate real-time stats from actual posts
   const realTimeStats = {
-    lost: posts.filter(p => p.type === 'lost').length,
-    found: posts.filter(p => p.type === 'found').length,
-    reunited: stats.reunited || 0 // This comes from API
+    lost: posts.filter(p => p.type === 'lost' && p.status !== 'reunited').length,
+    found: posts.filter(p => p.type === 'found' && p.status !== 'reunited').length,
+    reunited: posts.filter(p => p.status === 'reunited').length
   };
 
   const PostCard = ({ post }: { post: typeof posts[0] }) => (
     <Card className={`p-4 space-y-3 ${
+      post.status === "reunited" ? "bg-gradient-to-br from-green-50 to-emerald-50 border-l-4 border-l-green-500" :
       post.type === "found" ? "bg-gradient-to-br from-green-50 to-emerald-50 border-l-4 border-l-green-500" : ""
     }`}>
       <div className="flex items-start justify-between">
@@ -540,6 +409,7 @@ const CommunityBoard = () => {
                   <Plus className="w-5 h-5" />
                 </Link>
               </Button>
+              {/* Test Data button removed - using only real database data */}
             </div>
           </div>
         </div>
@@ -671,15 +541,7 @@ const CommunityBoard = () => {
 
         {/* Floating Action Button */}
         <div className="fixed bottom-6 right-6 flex flex-col gap-3">
-          <Button 
-            size="lg" 
-            className="rounded-full shadow-lg" 
-            onClick={insertTestData}
-            variant="outline"
-            title="Insert test data"
-          >
-            <Database className="w-6 h-6" />
-          </Button>
+          {/* Test Data button removed - using only real database data */}
           <Button size="lg" className="rounded-full shadow-lg" asChild>
             <Link to="/lost-found-report">
               <Plus className="w-6 h-6" />

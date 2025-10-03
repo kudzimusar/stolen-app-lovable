@@ -60,6 +60,7 @@ import DeviceRegister from "./pages/user/DeviceRegister";
 import MyDevices from "./pages/user/MyDevices";
 import CommunityBoard from "./pages/user/CommunityBoard";
 const CommunityRewards = lazy(() => import("./pages/user/CommunityRewards"));
+const UnifiedAdminDashboard = lazy(() => import("./pages/admin/UnifiedAdminDashboard"));
 import Profile from "./pages/user/Profile";
 import DeviceWarrantyStatus from "./pages/user/DeviceWarrantyStatus";
 import Support from "./pages/user/Support";
@@ -134,6 +135,7 @@ const App = () => {
           <Route path="/stolen-reports" element={<ProtectedRoute><StolenReports /></ProtectedRoute>} />
           <Route path="/repairs/history" element={<ProtectedRoute><UserRepairHistory /></ProtectedRoute>} />
           <Route path="/insurance-dashboard" element={<ProtectedRoute><InsuranceDashboard /></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><UnifiedAdminDashboard /></Suspense></ProtectedRoute>} />
           <Route 
             path="/law-enforcement-dashboard" 
             element={
@@ -436,7 +438,7 @@ const App = () => {
             <a href="/" style={{color: 'blue'}}>Go to Home</a>
           </div>} />
         </Routes>
-        <BottomNavigation />
+        {!window.location.pathname.startsWith('/admin') && <BottomNavigation />}
         </EnhancedUXProvider>
         </BrowserRouter>
       </TooltipProvider>
