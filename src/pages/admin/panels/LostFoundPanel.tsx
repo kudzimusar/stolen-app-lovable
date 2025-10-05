@@ -241,12 +241,71 @@ const LostFoundPanel = () => {
     }
   };
 
-  const getStatusBadge = (status: string, verificationStatus: string) => {
+  const handleApproveClaim = async (reportId: string) => {
+    try {
+      const response = await fetch(`/api/v1/admin/approve-claim`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await getAuthToken()}`
+        },
+        body: JSON.stringify({
+          report_id: reportId,
+          approval_status: 'approved',
+          admin_notes: 'Claim approved by admin'
+        })
+      });
+
+      if (response.ok) {
+        toast.success("✅ Claim approved successfully.");
+        await fetchReports();
+        setSelectedReport(null);
+      } else {
+        throw new Error('Failed to approve claim');
+      }
+    } catch (error) {
+      console.error('Error approving claim:', error);
+      toast.error("❌ Failed to approve claim. Please try again.");
+    }
+  };
+
+  const handleRejectClaim = async (reportId: string) => {
+    try {
+      const response = await fetch(`/api/v1/admin/approve-claim`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await getAuthToken()}`
+        },
+        body: JSON.stringify({
+          report_id: reportId,
+          approval_status: 'rejected',
+          admin_notes: 'Claim rejected by admin - insufficient proof of ownership'
+        })
+      });
+
+      if (response.ok) {
+        toast.success("✅ Claim rejected.");
+        await fetchReports();
+        setSelectedReport(null);
+      } else {
+        throw new Error('Failed to reject claim');
+      }
+    } catch (error) {
+      console.error('Error rejecting claim:', error);
+      toast.error("❌ Failed to reject claim. Please try again.");
+    }
+  };
+
+  const getStatusBadge = (status: string, verificationStatus: string, claimStatus?: string) => {
     if (status === 'reunited') {
       return <Badge className="bg-green-100 text-green-800 border-green-300"><CheckCircle className="w-3 h-3 mr-1" />Successfully Reunited</Badge>;
     }
     if (status === 'reward_paid') {
       return <Badge className="bg-yellow-200 text-yellow-900 border-yellow-400"><DollarSign className="w-3 h-3 mr-1" />Reward Paid</Badge>;
+    }
+    if (claimStatus === 'claim_pending') {
+      return <Badge className="bg-purple-100 text-purple-800 border-purple-300"><AlertTriangle className="w-3 h-3 mr-1" />Claim Pending</Badge>;
     }
     if (status === 'pending_verification') {
       return <Badge className="bg-orange-100 text-orange-800 border-orange-300"><Clock className="w-3 h-3 mr-1" />Awaiting Verification</Badge>;
@@ -396,10 +455,11 @@ const LostFoundPanel = () => {
 
           <Tabs defaultValue="pending" className="space-y-4">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="pending" className="text-xs">Contact Received ({stats.contacted})</TabsTrigger>
-              <TabsTrigger value="verification" className="text-xs">Awaiting Verification ({stats.pending})</TabsTrigger>
-              <TabsTrigger value="completed" className="text-xs">Successfully Reunited ({stats.reunited})</TabsTrigger>
-              <TabsTrigger value="all" className="text-xs">All Reports ({stats.total})</TabsTrigger>
+      <TabsTrigger value="pending" className="text-xs">Contact Received ({stats.contacted})</TabsTrigger>
+      <TabsTrigger value="claims" className="text-xs">Claims Pending ({stats.claim_pending})</TabsTrigger>
+      <TabsTrigger value="verification" className="text-xs">Awaiting Verification ({stats.pending})</TabsTrigger>
+      <TabsTrigger value="completed" className="text-xs">Successfully Reunited ({stats.reunited})</TabsTrigger>
+      <TabsTrigger value="all" className="text-xs">All Reports ({stats.total})</TabsTrigger>
             </TabsList>
 
             <TabsContent value="pending" className="space-y-4">
@@ -465,6 +525,67 @@ const LostFoundPanel = () => {
                   </CardContent>
                 </Card>
               ))}
+            </TabsContent>
+
+            <TabsContent value="claims" className="space-y-4">
+              {filteredReports.filter(r => r.claim_status === 'claim_pending').map((report) => (
+                <Card key={report.id} className="hover:shadow-md transition-shadow bg-yellow-50 border-yellow-200">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="font-semibold text-lg">{report.device_model}</h3>
+                        <p className="text-sm text-gray-600">{report.device_category}</p>
+                        <p className="text-xs text-gray-500">Claim submitted: {new Date(report.claim_submitted_at).toLocaleDateString()}</p>
+                      </div>
+                      <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                        <AlertTriangle className="w-3 h-3 mr-1" />Claim Pending
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <p className="text-sm font-medium">Claimant:</p>
+                        <p className="text-sm text-gray-600">{report.claimant_name || 'Unknown'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Verification Score:</p>
+                        <p className="text-sm text-gray-600">{report.claim_verification_notes || 'Not calculated'}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        onClick={() => handleApproveClaim(report.id)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1" />Approve Claim
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="destructive"
+                        onClick={() => handleRejectClaim(report.id)}
+                      >
+                        <XCircle className="w-4 h-4 mr-1" />Reject Claim
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => setSelectedReport(report)}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />View Details
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              
+              {filteredReports.filter(r => r.claim_status === 'claim_pending').length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No pending claims at the moment</p>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="verification" className="space-y-4">

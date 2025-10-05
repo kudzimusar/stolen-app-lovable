@@ -54,6 +54,10 @@ const LostFoundReport = lazy(() => import("./pages/user/LostFoundReport"));
 const LostFoundDetails = lazy(() => import("./pages/user/LostFoundDetails"));
 const LostFoundResponses = lazy(() => import("./pages/user/LostFoundResponses"));
 const LostFoundContact = lazy(() => import("./pages/user/LostFoundContact"));
+const ClaimDevice = lazy(() => import("./pages/user/ClaimDevice"));
+const ClaimDevicePublic = lazy(() => import("./pages/user/ClaimDevicePublic"));
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminOnboarding = lazy(() => import("./pages/admin/AdminOnboarding"));
 import Wallet from "./pages/payment/Wallet";
 import DeviceCheck from "./pages/user/DeviceCheck";
 import DeviceRegister from "./pages/user/DeviceRegister";
@@ -135,6 +139,8 @@ const App = () => {
           <Route path="/stolen-reports" element={<ProtectedRoute><StolenReports /></ProtectedRoute>} />
           <Route path="/repairs/history" element={<ProtectedRoute><UserRepairHistory /></ProtectedRoute>} />
           <Route path="/insurance-dashboard" element={<ProtectedRoute><InsuranceDashboard /></ProtectedRoute>} />
+          <Route path="/admin/login" element={<Suspense fallback={<div>Loading...</div>}><AdminLogin /></Suspense>} />
+          <Route path="/admin/onboarding" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><AdminOnboarding /></Suspense></ProtectedRoute>} />
           <Route path="/admin/dashboard" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><UnifiedAdminDashboard /></Suspense></ProtectedRoute>} />
           <Route 
             path="/law-enforcement-dashboard" 
@@ -429,6 +435,22 @@ const App = () => {
             element={
               <Suspense fallback={<div style={{ padding: '20px' }}>Loading Contact...</div>}>
                 <LostFoundContact />
+              </Suspense>
+            }
+          />
+          <Route 
+            path="/lost-found/claim/:id" 
+            element={
+              <Suspense fallback={<div style={{ padding: '20px' }}>Loading Claim Form...</div>}>
+                <ClaimDevice />
+              </Suspense>
+            }
+          />
+          <Route 
+            path="/claim-device" 
+            element={
+              <Suspense fallback={<div style={{ padding: '20px' }}>Loading Claim Form...</div>}>
+                <ClaimDevicePublic />
               </Suspense>
             }
           />

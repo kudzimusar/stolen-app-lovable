@@ -9,6 +9,7 @@ import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { LostFoundNotificationCenter } from "@/components/user/LostFoundNotificationCenter";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
+import { formatSerialForDisplay } from "@/utils/security";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -43,9 +44,21 @@ const CommunityBoard = () => {
 
   // Fetch posts from API
   useEffect(() => {
-    fetchPosts();
-    fetchStats();
-  }, []);
+    let isMounted = true;
+    
+    const fetchData = async () => {
+      if (isMounted) {
+        await fetchPosts();
+        await fetchStats();
+      }
+    };
+    
+    fetchData();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [user]); // Add user as dependency to prevent infinite loops
 
   // NO FALLBACK DATA - Only use real database data
   // This ensures clean, production-ready data without mock content
@@ -56,11 +69,13 @@ const CommunityBoard = () => {
 
   const fetchPosts = async () => {
     try {
+      console.log('🔄 Starting fetchPosts...');
       setLoading(true);
       console.log('Fetching posts from API...');
       
       // Get auth token from authenticated user
       const authToken = await getAuthToken();
+      console.log('🔑 Auth token obtained:', authToken ? 'Yes' : 'No');
       
       if (!authToken) {
         console.log('❌ No auth token available, user not logged in');
@@ -123,10 +138,12 @@ const CommunityBoard = () => {
 
   const fetchStats = async () => {
     try {
+      console.log('🔄 Starting fetchStats...');
       console.log('Fetching community stats...');
       
       // Get auth token from authenticated user
       const authToken = await getAuthToken();
+      console.log('🔑 Auth token for stats:', authToken ? 'Yes' : 'No');
       
       if (!authToken) {
         console.log('❌ No auth token available for stats, user not logged in');
@@ -176,8 +193,15 @@ const CommunityBoard = () => {
 
   // Interactive handlers
   const handlePostAction = (post: any) => {
+    // Security check: Only authenticated users can contact
+    if (!user) {
+      toast.error("🔒 Please log in to contact device owners");
+      navigate('/login');
+      return;
+    }
+
     // Security check: Prevent users from contacting their own posts
-    if (user && post.user === user.display_name) {
+    if (post.user === user.display_name) {
       toast.error("❌ You cannot contact your own post!");
       console.log('🚫 Self-contact prevented:', {
         currentUser: user.display_name,
@@ -186,12 +210,18 @@ const CommunityBoard = () => {
       return;
     }
 
+    // Security check: Prevent contact on claim pending devices
+    if (post.claim_status === 'claim_pending') {
+      toast.info("📋 This device is under ownership verification. Please wait for admin approval.");
+      return;
+    }
+
     if (post.type === "lost") {
       toast.success("Thank you! We'll connect you with the owner.");
       navigate(`/lost-found/contact/${post.id}`);
     } else {
-      toast.info("Opening contact form...");
-      navigate(`/lost-found/contact/${post.id}`);
+      toast.info("Opening claim form...");
+      navigate(`/lost-found/claim/${post.id}`);
     }
   };
 
@@ -300,6 +330,19 @@ const CommunityBoard = () => {
           <MapPin className="w-4 h-4" />
           {post.location}
         </div>
+        
+        {/* Security: Serial numbers partially hidden from public view */}
+        {post.serial && (
+          <div className="text-xs text-muted-foreground bg-gray-50 p-2 rounded">
+            <strong>Serial:</strong> {formatSerialForDisplay(post.serial, user, post.user_id)}
+            {user && user.id === post.user_id && (
+              <span className="ml-2 text-green-600">🔒 Full access</span>
+            )}
+            {(!user || user.id !== post.user_id) && (
+              <span className="ml-2 text-orange-600">🔒 Partial view</span>
+            )}
+          </div>
+        )}
 
         {post.reward && (
           <div className="flex items-center gap-2">
@@ -367,7 +410,17 @@ const CommunityBoard = () => {
           )}
         </div>
         
-        {/* Hide button for own posts or if already contacted/reunited */}
+        {/* Security: Contact buttons only for authenticated users, different logic for lost vs found */}
+        {!user && (post.type === "found" || post.type === "lost") && (
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={() => window.location.href = '/login'}
+          >
+            Login to {post.type === "lost" ? "Report Found" : "Claim Device"}
+          </Button>
+        )}
+        
         {user && post.user !== user.display_name && post.status !== 'reunited' && (
           <Button 
             size="sm" 
@@ -377,7 +430,7 @@ const CommunityBoard = () => {
           >
             {post.status === 'contacted' ? "Contact Received" :
              post.status === 'pending_verification' ? "Verification Pending" :
-             post.type === "lost" ? "I found this!" : "Contact owner"}
+             post.type === "lost" ? "I found this!" : "Claim Device"}
           </Button>
         )}
         {user && post.user === user.display_name && (

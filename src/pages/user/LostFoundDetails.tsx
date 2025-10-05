@@ -17,6 +17,7 @@ import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { ArrowLeft, MapPin, Clock, MessageCircle, AlertTriangle, CheckCircle, DollarSign, User, Shield, FileText, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { formatSerialForDisplay } from "@/utils/security";
 
 const LostFoundDetails = () => {
   const { id } = useParams();
@@ -255,7 +256,19 @@ const LostFoundDetails = () => {
             {post.serialNumber && (
               <div>
                 <h3 className="font-semibold mb-2">Serial Number</h3>
-                <p className="text-muted-foreground font-mono">{post.serialNumber}</p>
+                <p className="text-muted-foreground font-mono">
+                  {formatSerialForDisplay(post.serialNumber, user, post.user_id)}
+                </p>
+                {user && user.id === post.user_id && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    🔒 Full serial visible to you as the owner
+                  </p>
+                )}
+                {(!user || user.id !== post.user_id) && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    🔒 Serial number partially hidden for security
+                  </p>
+                )}
               </div>
             )}
 

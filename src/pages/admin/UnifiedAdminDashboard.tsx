@@ -87,38 +87,45 @@ const UnifiedAdminDashboard = () => {
       setLoading(true);
       const token = await getAuthToken();
       
-      // Fetch real data from admin dashboard stats API
-      const response = await fetch('/api/v1/admin/dashboard-stats', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // Fetch real data from existing endpoints
+      const [usersResponse, reportsResponse] = await Promise.all([
+        fetch('/api/v1/users/stats', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }).catch(() => ({ ok: false })),
+        fetch('/api/v1/lost-found/stats', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }).catch(() => ({ ok: false }))
+      ]);
 
-      if (response.ok) {
-        const result = await response.json();
-        const data = result.data || {};
-        
-        setStats({
-          totalUsers: data.stats?.total_users || 0,
-          activeReports: data.stats?.active_reports || 0,
-          totalTransactions: data.stats?.total_transactions || 0,
-          revenue: data.stats?.revenue || 0,
-          recoveryRate: data.stats?.recovery_rate || 0,
-          pendingApprovals: data.stats?.pending_approvals || 0
-        });
-      } else {
-        // Fallback data if API fails
-        console.log('Using fallback dashboard data');
-        setStats({
-          totalUsers: 1247,
-          activeReports: 23,
-          totalTransactions: 456,
-          revenue: 23450,
-          recoveryRate: 78,
-          pendingApprovals: 5
-        });
+      let totalUsers = 0;
+      let activeReports = 0;
+      let pendingApprovals = 0;
+
+      if (usersResponse.ok) {
+        const usersData = await usersResponse.json();
+        totalUsers = usersData.data?.total_users || 0;
       }
+
+      if (reportsResponse.ok) {
+        const reportsData = await reportsResponse.json();
+        activeReports = reportsData.data?.total_reports || 0;
+        pendingApprovals = reportsData.data?.pending_approvals || 0;
+      }
+      
+      setStats({
+        totalUsers,
+        activeReports,
+        totalTransactions: 0, // TODO: Implement when marketplace is ready
+        revenue: 0, // TODO: Implement when payment system is ready
+        recoveryRate: 0, // TODO: Calculate from reports data
+        pendingApprovals
+      });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       // Use fallback data on error

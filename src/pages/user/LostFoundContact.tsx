@@ -9,11 +9,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { ArrowLeft, MessageCircle, User, Clock, MapPin, Send, Phone, Mail } from "lucide-react";
 import { toast } from "sonner";
-import { getAuthToken } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 
 const LostFoundContact = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, getAuthToken } = useAuth();
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({

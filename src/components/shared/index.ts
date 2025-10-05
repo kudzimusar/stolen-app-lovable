@@ -15,6 +15,10 @@ import { NotificationCenter } from './notifications/NotificationCenter';
 import { MultiFactorAuth } from './security/MultiFactorAuth';
 import { EnhancedSelect } from './forms/EnhancedSelect';
 import { RealTimeUpdates } from './communication/RealTimeUpdates';
+import { LocationSelector } from './ui/LocationSelector';
+import { TrustBadge, VerifiedBadge, SecureBadge, BlockchainBadge, PremiumBadge, FeaturedBadge, OfficialBadge } from './ui/TrustBadge';
+import { FeatureCard, SecurityFeatureCard, AIFeatureCard, BlockchainFeatureCard } from './ui/FeatureCard';
+import { DocumentDownloader } from './documents/DocumentDownloader';
 
 // Re-export components
 export { PhotoUpload } from './upload/PhotoUpload';
@@ -54,6 +58,20 @@ export type { Option, EnhancedSelectProps } from './forms/EnhancedSelect';
 // Communication Components
 export { RealTimeUpdates } from './communication/RealTimeUpdates';
 export type { RealTimeUpdate, ConnectionStatus, RealTimeUpdatesProps } from './communication/RealTimeUpdates';
+
+// UI Components
+export { LocationSelector } from './ui/LocationSelector';
+export type { LocationData, LocationSelectorProps } from './ui/LocationSelector';
+
+export { TrustBadge, VerifiedBadge, SecureBadge, BlockchainBadge, PremiumBadge, FeaturedBadge, OfficialBadge } from './ui/TrustBadge';
+export type { TrustBadgeProps } from './ui/TrustBadge';
+
+export { FeatureCard, SecurityFeatureCard, AIFeatureCard, BlockchainFeatureCard } from './ui/FeatureCard';
+export type { FeatureCardProps } from './ui/FeatureCard';
+
+// Document Components
+export { DocumentDownloader } from './documents/DocumentDownloader';
+export type { DocumentDownloaderProps } from './documents/DocumentDownloader';
 
 // Component Categories for Easy Import
 export const UploadComponents = {
@@ -99,6 +117,25 @@ export const CommunicationComponents = {
   RealTimeUpdates
 };
 
+export const UIComponents = {
+  LocationSelector,
+  TrustBadge,
+  VerifiedBadge,
+  SecureBadge,
+  BlockchainBadge,
+  PremiumBadge,
+  FeaturedBadge,
+  OfficialBadge,
+  FeatureCard,
+  SecurityFeatureCard,
+  AIFeatureCard,
+  BlockchainFeatureCard
+};
+
+export const DocumentComponents = {
+  DocumentDownloader
+};
+
 // All Components
 export const SharedComponents = {
   ...UploadComponents,
@@ -110,5 +147,7 @@ export const SharedComponents = {
   ...NotificationComponents,
   ...SecurityComponents,
   ...FormComponents,
-  ...CommunicationComponents
+  ...CommunicationComponents,
+  ...UIComponents,
+  ...DocumentComponents
 };
