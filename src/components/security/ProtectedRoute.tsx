@@ -10,31 +10,67 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user);
-      } else {
-        navigate("/login");
+    let isMounted = true;
+    
+    const checkAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (!isMounted) return;
+        
+        if (error) {
+          console.error('Auth session error:', error);
+          setLoading(false);
+          setAuthChecked(true);
+          navigate("/login");
+          return;
+        }
+        
+        if (session?.user) {
+          setUser(session.user);
+        } else {
+          setUser(null);
+          navigate("/login");
+        }
+        
+        setLoading(false);
+        setAuthChecked(true);
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        if (isMounted) {
+          setLoading(false);
+          setAuthChecked(true);
+          navigate("/login");
+        }
       }
-      setLoading(false);
-    });
+    };
 
-    // Listen for auth changes
+    // Only check auth once on mount
+    if (!authChecked) {
+      checkAuth();
+    }
+
+    // Listen for auth changes only after initial check
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        setUser(session.user);
-      } else {
+      if (!isMounted || !authChecked) return;
+      
+      if (event === 'SIGNED_OUT' || !session?.user) {
+        setUser(null);
         navigate("/login");
+      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setUser(session.user);
       }
-      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [navigate, authChecked]);
 
   if (loading) {
     return (

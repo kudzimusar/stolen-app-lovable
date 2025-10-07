@@ -47,13 +47,29 @@ const Login = () => {
     setIsLoading(true);
 
     try {
+      // Add timeout to prevent infinite loading
+      const loginTimeout = setTimeout(() => {
+        if (isLoading) {
+          setIsLoading(false);
+          toast({
+            title: "Login Timeout",
+            description: "Login is taking too long. Please try again.",
+            variant: "destructive",
+          });
+        }
+      }, 10000); // 10 second timeout
+
       const credential = loginMethod === "email" ? email : phone;
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginMethod === "email" ? credential : `${credential}@placeholder.com`, // Phone auth would need different setup
         password,
       });
 
+      clearTimeout(loginTimeout);
+
       if (error) {
+        console.error('Login error:', error);
+        setIsLoading(false);
         toast({
           title: "Login Failed",
           description: error.message,

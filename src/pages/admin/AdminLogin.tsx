@@ -9,6 +9,7 @@ import { Shield, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -19,6 +20,27 @@ const AdminLogin = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Test Supabase connection on mount
+  useEffect(() => {
+    console.log('🧪 AdminLogin: Testing Supabase connection...');
+    const testConnection = async () => {
+      try {
+        const startTime = Date.now();
+        const { data, error } = await Promise.race([
+          supabase.auth.getSession(),
+          new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Connection timeout')), 3000)
+          )
+        ]);
+        const elapsed = Date.now() - startTime;
+        console.log(`🧪 Supabase connection test: ${elapsed}ms`, { hasData: !!data, error });
+      } catch (error) {
+        console.error('🧪 Supabase connection test failed:', error);
+      }
+    };
+    testConnection();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,10 +55,13 @@ const AdminLogin = () => {
       console.log('🔐 Admin login attempt:', formData.email);
       
       // Sign in using the auth system
+      console.log('📝 Calling signIn function...');
       const result = await signIn(formData.email, formData.password);
+      console.log('📝 SignIn result received:', { hasData: !!result.data, hasError: !!result.error });
       
       if (result.data && !result.error) {
         console.log('🔐 User authenticated successfully, checking admin status...');
+        console.log('🔐 User ID:', result.data.user.id);
         
         // Direct database check for admin status (simplified to avoid RLS recursion)
         const { data: adminUser, error: adminError } = await supabase

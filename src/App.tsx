@@ -9,12 +9,15 @@ import { BottomNavigation } from "@/components/navigation/BottomNavigation";
 import { EnhancedUXProvider } from "@/components/providers/EnhancedUXProvider";
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
 import { RoleBasedRedirect } from "@/components/security/RoleBasedRedirect";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Core working pages
 import Index from "./pages/user/Index";
 import Login from "./pages/user/Login";
 import Register from "./pages/user/Register";
 import Dashboard from "./pages/user/Dashboard";
+import TestAuth from "./pages/test/TestAuth";
+import DirectSupabaseTest from "./pages/test/DirectSupabaseTest";
 
 // Testing imports one by one to find the problematic one
 // import Marketplace from "./pages/marketplace/Marketplace"; // PROBLEMATIC IMPORT
@@ -87,24 +90,30 @@ const queryClient = new QueryClient({
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-        <EnhancedUXProvider
-          enableScrollMemory={false}
-          enableCrossDeviceSync={false}
-          enableFloatingControls={false}
-          enablePageSearch={false}
-          enableMicroAnimations={false}
-          scrollControlsPosition="right"
-        >
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+          <EnhancedUXProvider
+            enableScrollMemory={false}
+            enableCrossDeviceSync={false}
+            enablePageSearch={false}
+            enableMicroAnimations={false}
+            enableFormPersistence={false}
+            enableFloatingControls={false}
+            enablePageSearch={false}
+            enableMicroAnimations={false}
+            scrollControlsPosition="right"
+          >
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/debug" element={<div style={{padding: '20px', minHeight: '100vh', background: 'lightblue'}}><h1>Debug Page</h1><p>This is a test page to verify routing works.</p></div>} />
+          <Route path="/test-auth" element={<TestAuth />} />
+          <Route path="/test-supabase" element={<DirectSupabaseTest />} />
           <Route 
             path="/dashboard" 
             element={
@@ -465,6 +474,7 @@ const App = () => {
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 

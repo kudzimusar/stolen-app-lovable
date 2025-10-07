@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { generateUUID } from '../lib/utils';
 
@@ -63,17 +63,21 @@ export const useCrossDeviceContinuity = (options: DeviceContinuityOptions = {}) 
   } = options;
 
   const location = useLocation();
+  const locationRef = useRef(location);
   const [currentSession, setCurrentSession] = useState<UserSession | null>(null);
   const [connectedDevices, setConnectedDevices] = useState<UserSession[]>([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-  // Get current session data
+  // Keep location ref updated synchronously - no useEffect needed
+  locationRef.current = location;
+
+  // Get current session data - using ref to avoid dependency issues
   const getCurrentSession = useCallback((): UserSession => {
     return {
       deviceId,
       sessionId,
-      lastPage: location.pathname,
-      lastAction: `viewed_${location.pathname}`,
+      lastPage: locationRef.current.pathname,
+      lastAction: `viewed_${locationRef.current.pathname}`,
       scrollPosition: {
         x: window.scrollX,
         y: window.scrollY
@@ -86,7 +90,7 @@ export const useCrossDeviceContinuity = (options: DeviceContinuityOptions = {}) 
         height: window.innerHeight
       }
     };
-  }, [location.pathname]);
+  }, []);
 
   // Get form data from storage
   const getFormDataFromStorage = (): Record<string, any> => {
@@ -253,7 +257,7 @@ export const useCrossDeviceContinuity = (options: DeviceContinuityOptions = {}) 
     return `${Math.floor(hours / 24)}d ago`;
   };
 
-  // Auto-sync current session
+  // Auto-sync current session - now with stable getCurrentSession
   const autoSyncSession = useCallback(() => {
     if (!enabled || !autoSync) return;
 
@@ -291,7 +295,7 @@ export const useCrossDeviceContinuity = (options: DeviceContinuityOptions = {}) 
     checkOtherDevices();
   }, [enabled, loadOtherDeviceSessions, continueFromDevice]);
 
-  // Set up auto-sync interval
+  // Set up auto-sync interval - autoSyncSession is now stable
   useEffect(() => {
     if (!enabled || !autoSync) return;
 
@@ -299,7 +303,7 @@ export const useCrossDeviceContinuity = (options: DeviceContinuityOptions = {}) 
     return () => clearInterval(interval);
   }, [enabled, autoSync, syncInterval, autoSyncSession]);
 
-  // Sync on page change
+  // Sync on page change - autoSyncSession is now stable
   useEffect(() => {
     if (!enabled) return;
     
@@ -320,7 +324,7 @@ export const useCrossDeviceContinuity = (options: DeviceContinuityOptions = {}) 
     };
   }, []);
 
-  // Sync on before unload
+  // Sync on before unload - autoSyncSession is now stable
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (enabled) {

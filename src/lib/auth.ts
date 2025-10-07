@@ -56,28 +56,69 @@ export class AuthService {
 
   static async signIn(email: string, password: string) {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      console.log('🔐 AuthService.signIn: Starting authentication...');
+      
+      // Add timeout to the entire auth call
+      const authPromise = supabase.auth.signInWithPassword({
         email,
         password
       });
+      
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => {
+          console.error('🔐 AuthService.signIn: Authentication timeout after 10 seconds');
+          reject(new Error('Authentication timeout - please check your connection'));
+        }, 10000)
+      );
+      
+      const { data, error } = await Promise.race([authPromise, timeoutPromise]);
 
-      if (error) throw error;
+      console.log('🔐 AuthService.signIn: Auth response received:', { hasData: !!data, hasError: !!error });
 
-      // Get user profile
+      if (error) {
+        console.error('🔐 AuthService.signIn: Auth error:', error);
+        throw error;
+      }
+
+      // Get user profile with timeout
       if (data.user) {
-        const { data: profile } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
+        console.log('🔐 AuthService.signIn: Fetching user profile for', data.user.id);
+        
+        try {
+          // Add timeout to profile fetch
+          const profilePromise = supabase
+            .from('users')
+            .select('*')
+            .eq('id', data.user.id)
+            .maybeSingle();
+          
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
+          );
+          
+          const { data: profile, error: profileError } = await Promise.race([
+            profilePromise,
+            timeoutPromise
+          ]) as any;
 
-        if (profile) {
-          data.user = { ...data.user, ...profile };
+          console.log('🔐 AuthService.signIn: Profile fetch result:', { hasProfile: !!profile, hasError: !!profileError });
+
+          if (profile && !profileError) {
+            data.user = { ...data.user, ...profile };
+            console.log('🔐 AuthService.signIn: Profile merged successfully');
+          } else if (profileError) {
+            console.warn('🔐 AuthService.signIn: Profile fetch error (non-fatal):', profileError);
+          }
+        } catch (profileError) {
+          console.warn('🔐 AuthService.signIn: Profile fetch failed (continuing anyway):', profileError);
+          // Continue without profile - it's not critical for login
         }
       }
 
+      console.log('🔐 AuthService.signIn: Sign in completed successfully');
       return { data, error: null };
     } catch (error) {
+      console.error('🔐 AuthService.signIn: Unexpected error:', error);
       return { data: null, error };
     }
   }
@@ -99,13 +140,13 @@ export class AuthService {
       if (!user) return null;
 
       // Get user profile
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('users')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle(); // Use maybeSingle() to avoid errors when profile doesn't exist
 
-      return profile ? { ...user, ...profile } : user;
+      return (profile && !profileError) ? { ...user, ...profile } : user;
     } catch (error) {
       console.error('Error getting current user:', error);
       return null;
@@ -122,7 +163,7 @@ export class AuthService {
         .update(updates)
         .eq('id', user.id)
         .select()
-        .single();
+        .maybeSingle(); // Use maybeSingle() to avoid errors
 
       if (error) throw error;
       return { data, error: null };

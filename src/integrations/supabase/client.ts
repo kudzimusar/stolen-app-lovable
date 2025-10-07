@@ -5,13 +5,67 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://lerjhxchglztvhbsdjjn.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlcmpoeGNoZ2x6dHZoYnNkampuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MzAyOTIsImV4cCI6MjA2OTIwNjI5Mn0.nzbVcrz576dB30B2lcazoWhAuK-XRRdYAIxBI_qesIs";
 
+// Custom storage adapter that doesn't hang
+class BrowserLocalStorage {
+  getItem(key: string): string | null {
+    try {
+      return localStorage.getItem(key);
+    } catch (error) {
+      console.warn('localStorage getItem error:', error);
+      return null;
+    }
+  }
+  
+  setItem(key: string, value: string): void {
+    try {
+      localStorage.setItem(key, value);
+    } catch (error) {
+      console.warn('localStorage setItem error:', error);
+    }
+  }
+  
+  removeItem(key: string): void {
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.warn('localStorage removeItem error:', error);
+    }
+  }
+}
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+console.log('🔧 Initializing Supabase client...');
+
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: localStorage,
+    storage: new BrowserLocalStorage(),
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: false,  // Disable URL detection which can cause hangs
+    storageKey: 'sb-auth-token',
+    flowType: 'implicit'  // Use implicit flow instead of pkce
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'stolen-app-web',
+      'apikey': SUPABASE_PUBLISHABLE_KEY
+    },
+    fetch: (url, options = {}) => {
+      // Add timeout to all fetch requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      return fetch(url, {
+        ...options,
+        signal: controller.signal
+      }).finally(() => clearTimeout(timeoutId));
+    }
+  },
+  db: {
+    schema: 'public'
   }
 });
+
+console.log('✅ Supabase client initialized');

@@ -16,12 +16,15 @@ import {
   Search,
   Camera,
   FileText,
-  Shield
+  Shield,
+  CheckCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PhotoUpload, DocumentUpload, InteractiveMap } from "@/components/shared";
 import type { UploadedFile, UploadedDocument, MapLocation } from "@/components/shared";
 import { getAuthToken } from "@/lib/auth";
+import { lostFoundBlockchainService } from "@/lib/services/lost-found-blockchain-service";
+import { BlockchainVerification } from "@/components/shared/blockchain/BlockchainVerification";
 
 const LostFoundReport = () => {
   const [reportType, setReportType] = useState<"lost" | "found">("lost");
@@ -39,6 +42,9 @@ const LostFoundReport = () => {
   const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAnchoringToBlockchain, setIsAnchoringToBlockchain] = useState(false);
+  const [blockchainResult, setBlockchainResult] = useState<any>(null);
+  const [enableBlockchain, setEnableBlockchain] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -136,6 +142,59 @@ const LostFoundReport = () => {
         photos: result.data?.photos?.length || 0,
         documents: result.data?.documents?.length || 0
       });
+
+      // Anchor to blockchain if enabled
+      if (enableBlockchain && result.data?.id) {
+        setIsAnchoringToBlockchain(true);
+        try {
+          const deviceData = {
+            reportId: result.data.id,
+            deviceId: `LF_${result.data.id}`,
+            serialNumber: formData.serial || undefined,
+            imeiNumber: undefined, // Could be extracted from device info
+            deviceModel: formData.deviceName,
+            deviceBrand: formData.deviceName.split(' ')[0] || 'Unknown',
+            ownerAddress: '0x' + Math.random().toString(16).substr(2, 40), // Mock address
+            reportType: reportType,
+            location: {
+              latitude: selectedLocation?.latitude || userLocation?.lat || 0,
+              longitude: selectedLocation?.longitude || userLocation?.lng || 0,
+              address: selectedLocation?.address || formData.lastKnownLocation
+            },
+            incidentDate: new Date().toISOString(),
+            photos: uploadedPhotos.map(photo => photo.url),
+            documents: uploadedDocuments.map(doc => doc.url),
+            rewardAmount: formData.reward ? parseFloat(formData.reward.replace(/[^0-9.]/g, '')) : undefined,
+            contactMethod: formData.contactMethod,
+            isPublic: formData.publicPost
+          };
+
+          const blockchainResult = await lostFoundBlockchainService.anchorDeviceReport(deviceData);
+          setBlockchainResult(blockchainResult);
+
+          if (blockchainResult.success) {
+            toast({
+              title: "🔗 Device Anchored to Blockchain",
+              description: `Your device record is now permanently secured on the blockchain. Transaction: ${blockchainResult.transactionHash?.substring(0, 10)}...`,
+            });
+          } else {
+            toast({
+              title: "⚠️ Blockchain Anchoring Failed",
+              description: "Your report was saved but blockchain anchoring failed. You can retry later.",
+              variant: "destructive"
+            });
+          }
+        } catch (error) {
+          console.error('❌ Blockchain anchoring failed:', error);
+          toast({
+            title: "⚠️ Blockchain Anchoring Failed",
+            description: "Your report was saved but blockchain anchoring failed. You can retry later.",
+            variant: "destructive"
+          });
+        } finally {
+          setIsAnchoringToBlockchain(false);
+        }
+      }
 
       toast({
         title: `${reportType === "lost" ? "Lost" : "Found"} Device Reported`,
@@ -413,6 +472,39 @@ const LostFoundReport = () => {
               </div>
             </Card>
 
+            {/* Blockchain Security Options */}
+            <Card className="p-4 space-y-4">
+              <h3 className="font-semibold">Blockchain Security</h3>
+              
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="space-y-1">
+                  <p className="font-medium">Anchor to Blockchain</p>
+                  <p className="text-sm text-muted-foreground">
+                    Create an immutable record that cannot be tampered with
+                  </p>
+                </div>
+                <Checkbox
+                  checked={enableBlockchain}
+                  onCheckedChange={(checked) => setEnableBlockchain(checked as boolean)}
+                />
+              </div>
+              
+              {enableBlockchain && (
+                <div className="bg-primary/5 p-3 rounded-lg space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium">Blockchain Benefits</span>
+                  </div>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• Permanent, tamper-proof record</li>
+                    <li>• Verifiable ownership proof</li>
+                    <li>• Enhanced security and trust</li>
+                    <li>• Global accessibility</li>
+                  </ul>
+                </div>
+              )}
+            </Card>
+
             {/* Privacy Notice */}
             <div className="bg-muted/50 p-4 rounded-lg space-y-2">
               <div className="flex items-center gap-2">
@@ -429,10 +521,33 @@ const LostFoundReport = () => {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={isLoading || !formData.deviceName || !formData.lastKnownLocation}
+              disabled={isLoading || isAnchoringToBlockchain || !formData.deviceName || !formData.lastKnownLocation}
             >
-              {isLoading ? "Submitting..." : `Report ${reportType === "lost" ? "Lost" : "Found"} Device`}
+              {isLoading ? "Submitting..." : 
+               isAnchoringToBlockchain ? "Anchoring to Blockchain..." :
+               `Report ${reportType === "lost" ? "Lost" : "Found"} Device`}
             </Button>
+            
+            {/* Blockchain Status */}
+            {blockchainResult && (
+              <div className={`p-3 rounded-lg ${blockchainResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                <div className="flex items-center gap-2">
+                  {blockchainResult.success ? (
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-red-600" />
+                  )}
+                  <span className="text-sm font-medium">
+                    {blockchainResult.success ? 'Blockchain Anchored' : 'Blockchain Failed'}
+                  </span>
+                </div>
+                {blockchainResult.success && blockchainResult.transactionHash && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Transaction: {blockchainResult.transactionHash.substring(0, 20)}...
+                  </p>
+                )}
+              </div>
+            )}
           </form>
         </div>
       </div>

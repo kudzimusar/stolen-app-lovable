@@ -42,6 +42,7 @@ interface AdminStats {
   revenue: number;
   recoveryRate: number;
   pendingApprovals: number;
+  pendingClaims: number;
 }
 
 interface UserRole {
@@ -88,7 +89,7 @@ const UnifiedAdminDashboard = () => {
       const token = await getAuthToken();
       
       // Fetch real data from existing endpoints
-      const [usersResponse, reportsResponse] = await Promise.all([
+      const [usersResponse, reportsResponse, claimsResponse] = await Promise.all([
         fetch('/api/v1/users/stats', {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -100,12 +101,19 @@ const UnifiedAdminDashboard = () => {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
+        }).catch(() => ({ ok: false })),
+        fetch('/api/v1/admin/dashboard-stats', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }).catch(() => ({ ok: false }))
       ]);
 
       let totalUsers = 0;
       let activeReports = 0;
       let pendingApprovals = 0;
+      let pendingClaims = 0;
 
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
@@ -117,6 +125,14 @@ const UnifiedAdminDashboard = () => {
         activeReports = reportsData.data?.total_reports || 0;
         pendingApprovals = reportsData.data?.pending_approvals || 0;
       }
+
+      if (claimsResponse.ok) {
+        const claimsData = await claimsResponse.json();
+        pendingClaims = claimsData.data?.pending_claims || 0;
+        // Update other stats from claims data if available
+        if (claimsData.data?.total_reports) activeReports = claimsData.data.total_reports;
+        if (claimsData.data?.active_users) totalUsers = claimsData.data.active_users;
+      }
       
       setStats({
         totalUsers,
@@ -124,7 +140,8 @@ const UnifiedAdminDashboard = () => {
         totalTransactions: 0, // TODO: Implement when marketplace is ready
         revenue: 0, // TODO: Implement when payment system is ready
         recoveryRate: 0, // TODO: Calculate from reports data
-        pendingApprovals
+        pendingApprovals,
+        pendingClaims
       });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -135,7 +152,8 @@ const UnifiedAdminDashboard = () => {
         totalTransactions: 456,
         revenue: 23450,
         recoveryRate: 78,
-        pendingApprovals: 5
+        pendingApprovals: 5,
+        pendingClaims: 0
       });
     } finally {
       setLoading(false);
@@ -271,6 +289,20 @@ const UnifiedAdminDashboard = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Pending Claims Card */}
+        <Card className="bg-red-50 border-red-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-red-800">Pending Claims</p>
+                <p className="text-2xl font-bold text-red-900">{stats?.pendingClaims || 0}</p>
+                <p className="text-xs text-red-600">Awaiting admin review</p>
+              </div>
+              <AlertTriangle className="h-8 w-8 text-red-600" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Quick Actions Grid */}
@@ -282,6 +314,18 @@ const UnifiedAdminDashboard = () => {
               <div>
                 <h3 className="font-semibold">Approve Pending Reports</h3>
                 <p className="text-sm text-muted-foreground">{stats?.pendingApprovals || 0} pending reports</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-md transition-all">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-8 w-8 text-red-600" />
+              <div>
+                <h3 className="font-semibold">Review Device Claims</h3>
+                <p className="text-sm text-muted-foreground">{stats?.pendingClaims || 0} pending claims</p>
               </div>
             </div>
           </CardContent>

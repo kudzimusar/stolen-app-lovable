@@ -71,6 +71,24 @@ const ClaimDevice = () => {
 
         if (postData) {
           const data = postData as any;
+          
+          // Check if user has already claimed this device
+          let alreadyClaimed = false;
+          let existingClaimStatus = 'none';
+          if (user) {
+            const { data: existingClaim, error: claimError } = await supabase
+              .from('device_claims')
+              .select('id, claim_status')
+              .eq('report_id', id)
+              .eq('claimant_user_id', user.id)
+              .maybeSingle(); // Use maybeSingle() instead of single() to avoid error when no claim exists
+            
+            if (!claimError && existingClaim) {
+              alreadyClaimed = true;
+              existingClaimStatus = existingClaim.claim_status || 'pending';
+            }
+          }
+          
           setPost({
             id: data.id,
             type: data.report_type,
@@ -80,7 +98,9 @@ const ClaimDevice = () => {
             timeAgo: formatTimeAgo(data.created_at),
             reward: data.reward_amount ? `R${data.reward_amount}` : null,
             verified: data.verification_status === 'verified',
-            user: 'Anonymous' // We'll need to join with users table if needed
+            user: 'Anonymous', // We'll need to join with users table if needed
+            claimed: alreadyClaimed || data.claim_status === 'claimed',
+            claimStatus: existingClaimStatus !== 'none' ? existingClaimStatus : (data.claim_status || 'none')
           });
         } else {
           console.error('❌ Failed to load post for claim');
@@ -195,52 +215,65 @@ const ClaimDevice = () => {
         }
       }
 
-      // Create claim record in database (even if some files failed to upload)
-      const { data: claimData, error: claimError } = await supabase
-        .from('device_claims' as any)
-        .insert({
-          report_id: id,
-          claimant_user_id: user.id, // Use claimant_user_id instead of claimant_id
-          claimant_name: formData.fullName,
-          claimant_email: formData.contactEmail,
-          claimant_phone: formData.contactPhone,
-          claim_type: 'ownership_claim', // Required field
-          device_serial_provided: formData.serialNumber, // Use device_serial_provided
-          device_imei_provided: formData.imeiNumber, // Use device_imei_provided
-          purchase_date: formData.purchaseDate,
-          purchase_location: formData.purchaseLocation,
-          additional_proof: formData.additionalProof,
-          receipt_file_url: receiptUrl,
-          police_report_file_url: policeReportUrl,
-          additional_files_urls: additionalFileUrls.length > 0 ? additionalFileUrls : null,
-          claim_status: 'pending',
-          submitted_at: new Date().toISOString()
-        })
-        .select()
-        .single();
+      // Submit the claim using the Edge Function
+      const claimPayload = {
+        report_id: id,
+        claimant_name: formData.fullName,
+        claimant_email: formData.contactEmail,
+        claimant_phone: formData.contactPhone,
+        claim_type: 'ownership_claim',
+        device_serial_provided: formData.serialNumber,
+        device_imei_provided: formData.imeiNumber,
+        device_mac_provided: formData.macAddress,
+        ownership_proof: formData.additionalProof,
+        claim_description: `Ownership claim for device. Purchase date: ${formData.purchaseDate}, Location: ${formData.purchaseLocation}. Receipt: ${receiptUrl ? 'Yes' : 'No'}, Police report: ${policeReportUrl ? 'Yes' : 'No'}, Additional files: ${additionalFileUrls.length}`
+      };
 
-      if (claimError) {
-        throw new Error(claimError.message);
+      console.log('📤 Submitting claim via Edge Function...');
+      const claimResponse = await fetch('/api/v1/submit-claim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        body: JSON.stringify(claimPayload)
+      });
+
+      const claimResult = await claimResponse.json();
+
+      if (!claimResponse.ok) {
+        throw new Error(claimResult.error || 'Failed to submit claim');
       }
 
-      console.log('✅ Claim submitted successfully:', claimData);
+      console.log('✅ Claim submitted successfully via Edge Function:', claimResult);
 
-      // Update the original report with claim information
-      const { error: updateError } = await supabase
-        .from('lost_found_reports' as any)
-        .update({
-          claim_status: 'claimed',
-          claim_submitted_at: new Date().toISOString(),
-          claim_submitted_by: user.id,
-          claimant_id: user.id,
-          claimant_name: formData.fullName,
-          claimant_email: formData.contactEmail,
-          claimant_phone: formData.contactPhone
-        })
-        .eq('id', id);
+      // Send email notifications
+      try {
+        console.log('📧 Sending email notifications...');
+        
+        // Send notification to claimant
+        const emailResponse = await fetch('/api/v1/send-contact-notification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+          },
+          body: JSON.stringify({
+            to_email: formData.contactEmail,
+            to_name: formData.fullName,
+            subject: 'Device Ownership Claim Submitted - STOLEN App',
+            message: `Dear ${formData.fullName},\n\nYour ownership claim for the device has been successfully submitted and is now under review.\n\nClaim Details:\n- Device ID: ${id}\n- Serial Number: ${formData.serialNumber}\n- Submitted: ${new Date().toLocaleString()}\n\nYou will be notified once the admin reviews your claim. This process typically takes 1-3 business days.\n\nThank you for using STOLEN App.\n\nBest regards,\nSTOLEN Team`,
+            notification_type: 'claim_submitted'
+          })
+        });
 
-      if (updateError) {
-        console.error('Failed to update report:', updateError);
+        if (emailResponse.ok) {
+          console.log('✅ Email notification sent to claimant');
+        } else {
+          console.warn('⚠️ Failed to send email notification');
+        }
+      } catch (emailError) {
+        console.warn('⚠️ Email notification error:', emailError);
       }
 
       toast.success("✅ Claim submitted successfully! Your claim is under review.");
@@ -248,6 +281,9 @@ const ClaimDevice = () => {
       
       // Clear saved form data
       clearSavedData();
+      
+      // Update local state to show claim has been submitted
+      setPost(prev => prev ? { ...prev, claimed: true, claimStatus: 'pending' } : prev);
       
       // Navigate back to community board
       setTimeout(() => {
@@ -347,7 +383,23 @@ const ClaimDevice = () => {
             </p>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {post.claimed ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Shield className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p className="font-semibold mb-2">Claim Already Submitted</p>
+                <p className="text-sm">You have already submitted a claim for this device.</p>
+                {post.claimStatus === 'pending' && (
+                  <p className="text-sm mt-2 text-orange-600">Status: Under Review</p>
+                )}
+                {post.claimStatus === 'approved' && (
+                  <p className="text-sm mt-2 text-green-600">Status: Approved</p>
+                )}
+                {post.claimStatus === 'rejected' && (
+                  <p className="text-sm mt-2 text-red-600">Status: Rejected</p>
+                )}
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
               {/* Personal Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -658,6 +710,7 @@ const ClaimDevice = () => {
                 </Button>
               </div>
             </form>
+            )}
           </CardContent>
         </Card>
 

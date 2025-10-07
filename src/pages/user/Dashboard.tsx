@@ -103,33 +103,60 @@ const Dashboard = () => {
   }, [loading]);
   const [showAllActions, setShowAllActions] = useState(false);
 
-  // Load current user first
+  // Load current user first with timeout
   useEffect(() => {
+    let isMounted = true;
+    
     const loadCurrentUser = async () => {
       try {
         const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (!isMounted) return;
+        
         if (error || !user) {
+          console.warn('User not authenticated, redirecting to login');
           navigate('/login');
           return;
         }
+        
         setCurrentUser(user);
       } catch (error) {
         console.error('Error loading user:', error);
-        navigate('/login');
+        if (isMounted) {
+          navigate('/login');
+        }
       }
     };
+    
+    // Add timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      if (isMounted && !currentUser) {
+        console.warn('User load timeout - forcing dashboard to load');
+        setLoading(false);
+      }
+    }, 5000);
+    
     loadCurrentUser();
-  }, [navigate]);
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(timeout);
+    };
+  }, [navigate, currentUser]);
 
   // Load all dashboard data with robust fallbacks
   useEffect(() => {
     if (dataLoadAttempted || !currentUser) return; // Prevent multiple loads and wait for user
     
+    let isMounted = true;
+    
     const loadDashboardData = async () => {
       try {
-        // console.log('🔄 Dashboard: Starting data load...');
-        setLoading(true);
-        setDataLoadAttempted(true);
+        console.log('🔄 Dashboard: Starting data load...');
+        if (isMounted) {
+          setLoading(true);
+          setDataLoadAttempted(true);
+        }
         
         // Simple fallback data instead of complex hook
         const robustData = {
@@ -220,32 +247,40 @@ const Dashboard = () => {
 
         // Small delay to ensure smooth loading
         setTimeout(() => {
-          // console.log('🎉 Dashboard: Loading complete - showing UI');
-          setLoading(false);
+          if (isMounted) {
+            console.log('🎉 Dashboard: Loading complete - showing UI');
+            setLoading(false);
+          }
         }, 500);
         
       } catch (error) {
         console.error('Error loading dashboard data:', error);
         
         // Even if everything fails, provide minimal functional experience
-        setUserProfile({
-          isNewUser: true,
-          securityScore: 0,
-          completedGoals: 0,
-          totalGoals: 5,
-          userType: 'new',
-          nextBestAction: 'register-device'
-        });
-        setDevices([]);
-        setContextualInsights([]);
-        setRealtimeActivities([]);
-        setBlockchainStats(null);
-        setAiSuggestions([]);
-        setLoading(false);
+        if (isMounted) {
+          setUserProfile({
+            isNewUser: true,
+            securityScore: 0,
+            completedGoals: 0,
+            totalGoals: 5,
+            userType: 'new',
+            nextBestAction: 'register-device'
+          });
+          setDevices([]);
+          setContextualInsights([]);
+          setRealtimeActivities([]);
+          setBlockchainStats(null);
+          setAiSuggestions([]);
+          setLoading(false);
+        }
       }
     };
 
     loadDashboardData();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [currentUser]); // Depend on currentUser being loaded
 
   // Handler functions for interactive elements
