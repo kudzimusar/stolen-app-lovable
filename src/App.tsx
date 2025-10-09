@@ -1,15 +1,17 @@
 // Restoring working minimal version with our aiTransferEngine fix intact
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { BottomNavigation } from "@/components/navigation/BottomNavigation";
 import { EnhancedUXProvider } from "@/components/providers/EnhancedUXProvider";
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
 import { RoleBasedRedirect } from "@/components/security/RoleBasedRedirect";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { handlePageRefresh, markSuccessfulLoad } from "@/utils/refresh-handler";
 
 // Core working pages
 import Index from "./pages/user/Index";
@@ -52,7 +54,6 @@ const AboutUs = lazy(() => import("./pages/user/AboutUs"));
 const WhyStolen = lazy(() => import("./pages/user/WhyStolen"));
 const TrustBadges = lazy(() => import("./pages/user/TrustBadges"));
 const DeviceTransfer = lazy(() => import("./pages/user/DeviceTransfer"));
-const LostFoundBoard = lazy(() => import("./pages/user/LostFoundBoard"));
 const LostFoundReport = lazy(() => import("./pages/user/LostFoundReport"));
 const LostFoundDetails = lazy(() => import("./pages/user/LostFoundDetails"));
 const LostFoundResponses = lazy(() => import("./pages/user/LostFoundResponses"));
@@ -76,19 +77,26 @@ import StolenReports from "./pages/security/StolenReports";
 import UserRepairHistory from "./pages/repair/UserRepairHistory";
 import InsuranceDashboard from "./pages/insurance/InsuranceDashboard";
 // RetailerDashboard imported as lazy above
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-      retry: 2,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+// QueryClient now imported from @/lib/queryClient with HMR persistence
 
 const App = () => {
+  // Handle page refresh to prevent loops
+  useEffect(() => {
+    const { isRefresh, shouldReset } = handlePageRefresh();
+    
+    if (shouldReset) {
+      console.warn('🔄 Cleared problematic cached state after multiple refreshes');
+    }
+    
+    // Mark successful load after 2 seconds
+    const timer = setTimeout(() => {
+      markSuccessfulLoad();
+      console.log('✅ App loaded successfully');
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -140,7 +148,11 @@ const App = () => {
           <Route path="/device/register" element={<ProtectedRoute><DeviceRegister /></ProtectedRoute>} />
           <Route path="/my-devices" element={<ProtectedRoute><MyDevices /></ProtectedRoute>} />
           <Route path="/community-board" element={<ProtectedRoute><CommunityBoard /></ProtectedRoute>} />
+          {/* Alias routes for community */}
+          <Route path="/community" element={<ProtectedRoute><CommunityBoard /></ProtectedRoute>} />
+          <Route path="/community/board" element={<ProtectedRoute><CommunityBoard /></ProtectedRoute>} />
           <Route path="/community-rewards" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><CommunityRewards /></Suspense></ProtectedRoute>} />
+          <Route path="/community/rewards" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><CommunityRewards /></Suspense></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/device-warranty-status" element={<ProtectedRoute><DeviceWarrantyStatus /></ProtectedRoute>} />
           <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
@@ -405,16 +417,36 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          {/* Lost & Found Community Board - Main board using CommunityBoard component */}
           <Route 
             path="/lost-found-board" 
             element={
-              <Suspense fallback={<div style={{ padding: '20px' }}>Loading Lost & Found...</div>}>
-                <LostFoundBoard />
-              </Suspense>
+              <ProtectedRoute>
+                <CommunityBoard />
+              </ProtectedRoute>
+            }
+          />
+          {/* Alias routes for lost-found */}
+          <Route 
+            path="/lost-found" 
+            element={
+              <ProtectedRoute>
+                <CommunityBoard />
+              </ProtectedRoute>
             }
           />
           <Route 
             path="/lost-found-report" 
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<div style={{ padding: '20px' }}>Loading Report...</div>}>
+                  <LostFoundReport />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/lost-found/report" 
             element={
               <ProtectedRoute>
                 <Suspense fallback={<div style={{ padding: '20px' }}>Loading Report...</div>}>

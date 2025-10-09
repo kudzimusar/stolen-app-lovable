@@ -625,7 +625,7 @@ const Index = () => {
                   Marketplace
                 </Link>
                 <Link 
-                  to="/community-board" 
+                  to="/lost-found" 
                   className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                 >
                   <Users className="w-4 h-4" />
@@ -665,7 +665,7 @@ const Index = () => {
                   API Documentation
                 </Link>
                 <Link 
-                  to="/community-board" 
+                  to="/lost-found" 
                   className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                 >
                   <Users className="w-4 h-4" />

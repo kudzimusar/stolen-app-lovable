@@ -105,12 +105,12 @@ const ClaimDevice = () => {
         } else {
           console.error('❌ Failed to load post for claim');
           toast.error("Failed to load device details");
-          navigate("/community-board");
+          navigate("/lost-found");
         }
       } catch (error) {
         console.error('Error fetching post for claim:', error);
         toast.error("Error loading device details");
-        navigate("/community-board");
+        navigate("/lost-found");
       } finally {
         setLoading(false);
         fetchingRef.current = false;
@@ -287,7 +287,7 @@ const ClaimDevice = () => {
       
       // Navigate back to community board
       setTimeout(() => {
-        navigate("/community-board");
+        navigate("/lost-found");
       }, 2000);
     } catch (error) {
       console.error('Error submitting claim:', error);

@@ -61,12 +61,12 @@ const LostFoundContact = () => {
         } else {
           console.error('❌ Failed to load post for contact');
           toast.error("Failed to load post details");
-          navigate("/community-board");
+          navigate("/lost-found");
         }
       } catch (error) {
         console.error('Error fetching post for contact:', error);
         toast.error("Error loading post details");
-        navigate("/community-board");
+        navigate("/lost-found");
       } finally {
         setLoading(false);
       }

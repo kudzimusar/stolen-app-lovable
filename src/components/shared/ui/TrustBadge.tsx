@@ -135,3 +135,4 @@ export const OfficialBadge: React.FC<{ text?: string; className?: string }> = ({
 }) => (
   <TrustBadge type="official" text={text} className={className} />
 );
+

@@ -64,7 +64,7 @@ export const AppHeader = ({
     { label: "Marketplace", href: "/marketplace" },
     { label: "Register New Gadget", href: "/device/register" },
     { label: "Transfer", href: "/device-transfer" },
-    { label: "Lost and Found Community", href: "/community-board" },
+    { label: "Lost & Found Community", href: "/lost-found" },
     { label: "My Devices", href: "/my-devices" },
     { label: "Stolen Reports", href: "/stolen-reports" },
     { label: "Support", href: "/support" }

@@ -500,3 +500,4 @@ export const AIWalletInsights: React.FC<AIWalletInsightsProps> = ({
     </div>
   );
 };
+

@@ -78,58 +78,53 @@ export class LostFoundBlockchainService {
    */
   async anchorDeviceReport(deviceData: LostFoundDeviceData): Promise<BlockchainAnchorResult> {
     try {
-      if (!this.isInitialized) {
-        await this.initialize();
-      }
-
       console.log('🔗 Anchoring device report to blockchain:', {
         reportId: deviceData.reportId,
         deviceId: deviceData.deviceId,
         type: deviceData.reportType
       });
 
-      // 1. Create a unique device identifier
-      const deviceId = this.generateDeviceId(deviceData);
-      
-      // 2. Prepare blockchain registration data
-      const blockchainData = {
-        deviceId,
-        owner: deviceData.ownerAddress,
-        serialNumber: deviceData.serialNumber || '',
-        brand: deviceData.deviceBrand,
-        model: deviceData.deviceModel,
-        purchaseDate: deviceData.incidentDate,
-        price: deviceData.rewardAmount || 0,
-        blockchainHash: this.generateDataHash(deviceData)
-      };
+      // Call Supabase Edge Function for blockchain anchoring
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('User not authenticated');
+      }
 
-      // 3. Register device on blockchain
-      const result = await this.blockchainService.registerDevice(blockchainData);
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/real-blockchain`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          reportId: deviceData.reportId,
+          deviceData: {
+            deviceId: deviceData.deviceId,
+            serialNumber: deviceData.serialNumber,
+            deviceModel: deviceData.deviceModel,
+            deviceBrand: deviceData.deviceBrand,
+            reportType: deviceData.reportType,
+            location: deviceData.location,
+            incidentDate: deviceData.incidentDate
+          }
+        })
+      });
+
+      const result = await response.json();
 
       if (result.success) {
-        // 4. Store blockchain reference in Supabase
-        await this.storeBlockchainReference(deviceData.reportId, {
-          transactionHash: result.hash!,
-          blockNumber: result.blockNumber!,
-          gasUsed: result.gasUsed!,
-          gasFee: result.cost!,
-          network: 'polygon', // Using Polygon for lower fees
-          deviceId,
-          dataHash: blockchainData.blockchainHash
-        });
-
-        console.log('✅ Device report anchored to blockchain:', result.hash);
+        console.log('✅ Device report anchored to blockchain:', result.data.transactionHash);
 
         return {
           success: true,
-          transactionHash: result.hash,
-          blockNumber: result.blockNumber,
-          gasUsed: result.gasUsed,
-          gasFee: result.cost,
-          network: 'polygon'
+          transactionHash: result.data.transactionHash,
+          blockNumber: result.data.blockNumber,
+          gasUsed: result.data.gasUsed,
+          gasFee: result.data.gasFee,
+          network: result.data.network
         };
       } else {
-        throw new Error(result.error || 'Blockchain registration failed');
+        throw new Error(result.error || 'Blockchain anchoring failed');
       }
 
     } catch (error) {
@@ -150,77 +145,25 @@ export class LostFoundBlockchainService {
     try {
       console.log('🔍 Verifying device on blockchain:', { deviceId, reportId });
 
-      const verificationSteps = [
-        {
-          step: 'Connect to blockchain network',
-          status: 'pending' as const,
-          details: 'Establishing connection to blockchain'
+      // Call Supabase Edge Function for blockchain verification
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/blockchain-verification-edge-function`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabase.supabaseKey
         },
-        {
-          step: 'Query device registry',
-          status: 'pending' as const,
-          details: 'Searching for device in blockchain registry'
-        },
-        {
-          step: 'Verify data integrity',
-          status: 'pending' as const,
-          details: 'Checking if data matches blockchain record'
-        },
-        {
-          step: 'Confirm ownership',
-          status: 'pending' as const,
-          details: 'Verifying device ownership'
-        }
-      ];
+        body: JSON.stringify({
+          reportId,
+          deviceId
+        })
+      });
 
-      // Simulate verification process
-      for (let i = 0; i < verificationSteps.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        verificationSteps[i].status = 'completed';
-      }
+      const result = await response.json();
 
-      // Get blockchain record from Supabase
-      const { data: blockchainRecord, error } = await supabase
-        .from('blockchain_transactions')
-        .select('*')
-        .eq('transaction_id', reportId)
-        .single();
-
-      if (error || !blockchainRecord) {
-        return {
-          isVerified: false,
-          confidence: 0,
-          verificationSteps: verificationSteps.map(step => ({
-            ...step,
-            status: 'failed' as const
-          }))
-        };
-      }
-
-      // Verify on blockchain
-      const deviceData = await this.blockchainService.getDeviceData(deviceId);
-      
-      if (deviceData) {
-        return {
-          isVerified: true,
-          confidence: 0.95,
-          blockchainRecord: {
-            transactionHash: blockchainRecord.transaction_hash,
-            blockNumber: blockchainRecord.block_number,
-            timestamp: new Date(blockchainRecord.created_at),
-            network: blockchainRecord.network
-          },
-          verificationSteps
-        };
+      if (result.success) {
+        return result.data;
       } else {
-        return {
-          isVerified: false,
-          confidence: 0.1,
-          verificationSteps: verificationSteps.map(step => ({
-            ...step,
-            status: 'failed' as const
-          }))
-        };
+        throw new Error(result.error || 'Verification failed');
       }
 
     } catch (error) {
@@ -360,3 +303,4 @@ export class LostFoundBlockchainService {
 
 // Export singleton instance
 export const lostFoundBlockchainService = new LostFoundBlockchainService();
+

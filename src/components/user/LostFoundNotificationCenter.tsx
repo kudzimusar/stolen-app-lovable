@@ -208,11 +208,11 @@ export const LostFoundNotificationCenter = () => {
           break;
         default:
           console.log('→ Navigating to community board (fallback)');
-          navigate("/community-board");
+          navigate("/lost-found");
       }
     } else {
       console.warn('⚠️ No report ID found, going to community board');
-      navigate("/community-board");
+      navigate("/lost-found");
     }
     
     setOpen(false);
@@ -400,7 +400,7 @@ export const LostFoundNotificationCenter = () => {
                     size="sm"
                     className="w-full"
                     onClick={() => {
-                      navigate("/community-board");
+                      navigate("/lost-found");
                       setOpen(false);
                     }}
                   >

@@ -131,7 +131,7 @@ export const useRobustData = () => {
         title: 'Community Activity',
         description: 'Recent recoveries in your area',
         action: 'Help Community',
-        href: '/community-board',
+        href: '/lost-found',
         priority: 'low' as const,
         color: 'bg-purple-50 border-purple-200'
       }

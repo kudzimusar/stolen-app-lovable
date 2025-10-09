@@ -18,6 +18,7 @@ import { ArrowLeft, MapPin, Clock, MessageCircle, AlertTriangle, CheckCircle, Do
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { formatSerialForDisplay } from "@/utils/security";
+import { BlockchainVerificationBadge } from "@/components/lost-found/BlockchainVerificationBadge";
 
 const LostFoundDetails = () => {
   const { id } = useParams();
@@ -87,12 +88,12 @@ const LostFoundDetails = () => {
         } else {
           console.error('❌ Failed to load post details');
           toast.error("Failed to load post details");
-          navigate("/community-board");
+          navigate("/lost-found");
         }
       } catch (error) {
         console.error('Error fetching post details:', error);
         toast.error("Error loading post details");
-        navigate("/community-board");
+        navigate("/lost-found");
       } finally {
         setLoading(false);
       }
@@ -294,6 +295,16 @@ const LostFoundDetails = () => {
                 </p>
               </div>
             </div>
+
+            {/* Blockchain Verification Badge */}
+            {post.id && (
+              <BlockchainVerificationBadge
+                reportId={post.id}
+                deviceId={`LF_${post.id}`}
+                showDetails={true}
+                className="mt-4"
+              />
+            )}
 
             <div className="flex items-center justify-between pt-4 border-t">
               <div className="flex items-center gap-4">

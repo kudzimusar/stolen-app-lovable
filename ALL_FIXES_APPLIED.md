@@ -162,3 +162,4 @@ Once the app loads, test in this order:
 4. Any red errors in console
 
 Then I can apply more targeted fixes! 🎯
+

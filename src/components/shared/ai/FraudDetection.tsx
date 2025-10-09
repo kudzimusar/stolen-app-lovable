@@ -363,3 +363,4 @@ export const FraudDetection: React.FC<FraudDetectionProps> = ({
     </div>
   );
 };
+

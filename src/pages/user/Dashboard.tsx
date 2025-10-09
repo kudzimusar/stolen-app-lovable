@@ -103,9 +103,10 @@ const Dashboard = () => {
   }, [loading]);
   const [showAllActions, setShowAllActions] = useState(false);
 
-  // Load current user first with timeout
+  // Load current user first with timeout - runs ONCE on mount
   useEffect(() => {
     let isMounted = true;
+    let timeoutId: NodeJS.Timeout;
     
     const loadCurrentUser = async () => {
       try {
@@ -129,8 +130,8 @@ const Dashboard = () => {
     };
     
     // Add timeout to prevent infinite loading
-    const timeout = setTimeout(() => {
-      if (isMounted && !currentUser) {
+    timeoutId = setTimeout(() => {
+      if (isMounted) {
         console.warn('User load timeout - forcing dashboard to load');
         setLoading(false);
       }
@@ -140,9 +141,10 @@ const Dashboard = () => {
     
     return () => {
       isMounted = false;
-      clearTimeout(timeout);
+      clearTimeout(timeoutId);
     };
-  }, [navigate, currentUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount - DO NOT add currentUser as dependency!
 
   // Load all dashboard data with robust fallbacks
   useEffect(() => {
@@ -374,7 +376,7 @@ const Dashboard = () => {
     {
       icon: <Users className="w-5 h-5" />,
       label: "Lost & Found",
-      href: "/community-board",
+      href: "/lost-found",
       variant: "outline" as const
     },
     {

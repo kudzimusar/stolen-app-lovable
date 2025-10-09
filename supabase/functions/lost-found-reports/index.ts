@@ -10,6 +10,7 @@ interface LostFoundReport {
   id?: string;
   user_id?: string;
   report_type: "lost" | "found";
+  device_id?: string; // Connect to My Devices
   device_category: string;
   device_model?: string;
   serial_number?: string;
@@ -121,10 +122,25 @@ async function handleCreateReport(req: Request, supabase: any, user: any): Promi
     throw new Error("Missing required fields: report_type, device_category, description");
   }
 
+  // Validate device_id if provided (must belong to user)
+  if (reportData.device_id) {
+    const { data: device, error: deviceError } = await supabase
+      .from("devices")
+      .select("id, current_owner_id")
+      .eq("id", reportData.device_id)
+      .eq("current_owner_id", user.id)
+      .single();
+    
+    if (deviceError || !device) {
+      throw new Error("Device not found or you don't own this device");
+    }
+  }
+
   // Prepare report data
   const reportPayload = {
     user_id: user.id,
     report_type: reportData.report_type,
+    device_id: reportData.device_id || null, // Connect to My Devices
     device_category: reportData.device_category,
     device_model: reportData.device_model,
     serial_number: reportData.serial_number,

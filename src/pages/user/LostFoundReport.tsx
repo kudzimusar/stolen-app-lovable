@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -17,7 +18,11 @@ import {
   Camera,
   FileText,
   Shield,
-  CheckCircle
+  CheckCircle,
+  Smartphone,
+  Laptop,
+  Tablet,
+  Monitor
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PhotoUpload, DocumentUpload, InteractiveMap } from "@/components/shared";
@@ -26,9 +31,22 @@ import { getAuthToken } from "@/lib/auth";
 import { lostFoundBlockchainService } from "@/lib/services/lost-found-blockchain-service";
 import { BlockchainVerification } from "@/components/shared/blockchain/BlockchainVerification";
 
+interface Device {
+  id: string;
+  serial_number: string;
+  device_name: string;
+  brand: string;
+  model: string;
+  color?: string;
+  device_type: string;
+  purchase_price: number;
+  status: string;
+}
+
 const LostFoundReport = () => {
   const [reportType, setReportType] = useState<"lost" | "found">("lost");
   const [formData, setFormData] = useState({
+    deviceId: "",
     deviceName: "",
     serial: "",
     lastKnownLocation: "",
@@ -45,8 +63,76 @@ const LostFoundReport = () => {
   const [isAnchoringToBlockchain, setIsAnchoringToBlockchain] = useState(false);
   const [blockchainResult, setBlockchainResult] = useState<any>(null);
   const [enableBlockchain, setEnableBlockchain] = useState(true);
+  const [userDevices, setUserDevices] = useState<Device[]>([]);
+  const [loadingDevices, setLoadingDevices] = useState(false);
+  const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Fetch user's devices from My Devices
+  const fetchUserDevices = async () => {
+    if (reportType !== "lost") return; // Only fetch for lost reports
+    
+    try {
+      setLoadingDevices(true);
+      const token = await getAuthToken();
+      if (!token) return;
+
+      const response = await fetch('/api/v1/devices/my-devices', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.devices) {
+          setUserDevices(result.devices);
+          console.log('📱 Fetched user devices for Lost & Found:', result.devices);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user devices:', error);
+    } finally {
+      setLoadingDevices(false);
+    }
+  };
+
+  // Load user devices when component mounts or report type changes
+  useEffect(() => {
+    fetchUserDevices();
+  }, [reportType]);
+
+  // Handle device selection
+  const handleDeviceSelect = (deviceId: string) => {
+    const device = userDevices.find(d => d.id === deviceId);
+    setSelectedDevice(device || null);
+    setFormData(prev => ({
+      ...prev,
+      deviceId: deviceId,
+      deviceName: device ? `${device.brand} ${device.model}` : "",
+      serial: device ? device.serial_number : ""
+    }));
+  };
+
+  // Get device icon based on type
+  const getDeviceIcon = (deviceType: string) => {
+    switch (deviceType?.toLowerCase()) {
+      case 'phone':
+      case 'smartphone':
+        return <Smartphone className="w-4 h-4" />;
+      case 'laptop':
+        return <Laptop className="w-4 h-4" />;
+      case 'tablet':
+        return <Tablet className="w-4 h-4" />;
+      case 'desktop':
+      case 'computer':
+        return <Monitor className="w-4 h-4" />;
+      default:
+        return <Smartphone className="w-4 h-4" />;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +162,7 @@ const LostFoundReport = () => {
       // Prepare report data with uploaded files and location
       const reportData = {
         report_type: reportType,
+        device_id: formData.deviceId || null, // Connect to My Devices if available
         device_category: formData.deviceName.split(' ')[0] || 'Unknown',
         device_model: formData.deviceName,
         serial_number: formData.serial || null,
@@ -202,7 +289,7 @@ const LostFoundReport = () => {
       });
       
       // Navigate to community board and force refresh
-      navigate("/community-board");
+      navigate("/lost-found");
       window.location.reload(); // Force refresh to show new data
     } catch (error) {
       console.error('Error submitting report:', error);
@@ -274,6 +361,42 @@ const LostFoundReport = () => {
             {/* Device Information */}
             <Card className="p-4 space-y-4">
               <h3 className="font-semibold">Device Information</h3>
+              
+              {reportType === "lost" && userDevices.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Select Your Device</Label>
+                  <Select onValueChange={handleDeviceSelect} value={formData.deviceId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={loadingDevices ? "Loading your devices..." : "Choose from your registered devices"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {userDevices.map((device) => (
+                        <SelectItem key={device.id} value={device.id}>
+                          <div className="flex items-center gap-2">
+                            {getDeviceIcon(device.device_type)}
+                            <span>{device.brand} {device.model}</span>
+                            <span className="text-xs text-muted-foreground">({device.serial_number})</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Select from your registered devices in My Devices, or enter manually below
+                  </p>
+                </div>
+              )}
+
+              {reportType === "lost" && userDevices.length === 0 && !loadingDevices && (
+                <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
+                  <p className="text-sm text-yellow-800">
+                    No devices found in My Devices. Register your device first or enter details manually below.
+                  </p>
+                  <Link to="/my-devices" className="text-sm text-yellow-700 underline">
+                    Go to My Devices
+                  </Link>
+                </div>
+              )}
               
               <div className="space-y-2">
                 <Label htmlFor="deviceName">Device Name/Model</Label>

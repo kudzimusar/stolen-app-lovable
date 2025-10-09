@@ -115,23 +115,50 @@ const UnifiedAdminDashboard = () => {
       let pendingApprovals = 0;
       let pendingClaims = 0;
 
-      if (usersResponse.ok) {
-        const usersData = await usersResponse.json();
-        totalUsers = usersData.data?.total_users || 0;
+      // Parse responses safely - check if HTML error page was returned
+      try {
+        if (usersResponse.ok) {
+          const text = await usersResponse.text();
+          if (text.startsWith('{')) {
+            const usersData = JSON.parse(text);
+            totalUsers = usersData.data?.total_users || 0;
+          } else {
+            console.warn('Users API returned HTML, using fallback');
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to parse users response:', error);
       }
 
-      if (reportsResponse.ok) {
-        const reportsData = await reportsResponse.json();
-        activeReports = reportsData.data?.total_reports || 0;
-        pendingApprovals = reportsData.data?.pending_approvals || 0;
+      try {
+        if (reportsResponse.ok) {
+          const text = await reportsResponse.text();
+          if (text.startsWith('{')) {
+            const reportsData = JSON.parse(text);
+            activeReports = reportsData.data?.total_reports || 0;
+            pendingApprovals = reportsData.data?.pending_approvals || 0;
+          } else {
+            console.warn('Reports API returned HTML, using fallback');
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to parse reports response:', error);
       }
 
-      if (claimsResponse.ok) {
-        const claimsData = await claimsResponse.json();
-        pendingClaims = claimsData.data?.pending_claims || 0;
-        // Update other stats from claims data if available
-        if (claimsData.data?.total_reports) activeReports = claimsData.data.total_reports;
-        if (claimsData.data?.active_users) totalUsers = claimsData.data.active_users;
+      try {
+        if (claimsResponse.ok) {
+          const text = await claimsResponse.text();
+          if (text.startsWith('{')) {
+            const claimsData = JSON.parse(text);
+            pendingClaims = claimsData.data?.pending_claims || 0;
+            if (claimsData.data?.total_reports) activeReports = claimsData.data.total_reports;
+            if (claimsData.data?.active_users) totalUsers = claimsData.data.active_users;
+          } else {
+            console.warn('Claims API returned HTML, using fallback');
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to parse claims response:', error);
       }
       
       setStats({

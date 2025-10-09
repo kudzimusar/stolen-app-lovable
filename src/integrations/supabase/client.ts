@@ -5,6 +5,19 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://lerjhxchglztvhbsdjjn.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlcmpoeGNoZ2x6dHZoYnNkampuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MzAyOTIsImV4cCI6MjA2OTIwNjI5Mn0.nzbVcrz576dB30B2lcazoWhAuK-XRRdYAIxBI_qesIs";
 
+// Use window global AND import.meta.hot.data to persist across HMR refreshes
+declare global {
+  interface Window {
+    __supabaseClient?: ReturnType<typeof createClient<Database>>;
+  }
+}
+
+// Prevent multiple initializations - persists across HMR using Vite's HMR data
+let clientInstance: ReturnType<typeof createClient<Database>> | null = 
+  (import.meta.hot?.data.supabaseClient) || 
+  window.__supabaseClient || 
+  null;
+
 // Custom storage adapter that doesn't hang
 class BrowserLocalStorage {
   getItem(key: string): string | null {
@@ -36,9 +49,15 @@ class BrowserLocalStorage {
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-console.log('🔧 Initializing Supabase client...');
+function getSupabaseClient() {
+  if (clientInstance) {
+    console.log('♻️ Reusing existing Supabase client');
+    return clientInstance;
+  }
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  console.log('🔧 Initializing NEW Supabase client...');
+
+  clientInstance = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: new BrowserLocalStorage(),
     persistSession: true,
@@ -53,9 +72,9 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
       'apikey': SUPABASE_PUBLISHABLE_KEY
     },
     fetch: (url, options = {}) => {
-      // Add timeout to all fetch requests
+      // Add timeout to all fetch requests - increased to 30 seconds per expert recommendation
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
       
       return fetch(url, {
         ...options,
@@ -66,6 +85,25 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   db: {
     schema: 'public'
   }
-});
+  });
 
-console.log('✅ Supabase client initialized');
+  console.log('✅ Supabase client initialized');
+  
+  // Store in both window global AND HMR data to persist across HMR
+  window.__supabaseClient = clientInstance!;
+  if (import.meta.hot) {
+    import.meta.hot.data.supabaseClient = clientInstance!;
+  }
+  
+  return clientInstance!;
+}
+
+// HMR cleanup - preserve client across hot reloads
+if (import.meta.hot) {
+  import.meta.hot.dispose((data) => {
+    console.log('🔥 HMR: Preserving Supabase client');
+    data.supabaseClient = clientInstance;
+  });
+}
+
+export const supabase = getSupabaseClient();

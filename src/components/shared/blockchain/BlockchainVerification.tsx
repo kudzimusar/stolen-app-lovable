@@ -407,3 +407,4 @@ export const BlockchainVerification: React.FC<BlockchainVerificationProps> = ({
     </div>
   );
 };
+

@@ -8,20 +8,33 @@ import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { AppHeader } from "@/components/navigation/AppHeader";
 import { BackButton } from "@/components/navigation/BackButton";
-import { UploadComponent } from "@/components/forms/UploadComponent";
+import { PhotoUpload } from "@/components/shared/upload/PhotoUpload";
 import { QRScanner } from "@/components/ui/QRScanner";
 import { EnhancedSelect, DEVICE_TYPES, DEVICE_BRANDS, SA_CITIES } from "@/components/forms/EnhancedSelect";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Camera, Upload, Scan, MapPin, Shield, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useFormPersistence } from "@/hooks/useFormPersistence";
+import { useFormPersistence } from "@/components/providers/EnhancedUXProvider";
+import { supabase } from "@/integrations/supabase/client";
 
 const DeviceRegister = () => {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState<string>('');
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Get current user ID
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+    };
+    getUser();
+  }, []);
   
   // Enhanced form persistence
   const {
@@ -30,12 +43,7 @@ const DeviceRegister = () => {
     clearFormData,
     submitAndClear,
     isDirty
-  } = useFormPersistence({
-    formId: 'device-register',
-    autoSaveInterval: 3000, // Save every 3 seconds
-    warnOnDataLoss: true,
-    clearOnSubmit: true
-  });
+  } = useFormPersistence('device-register');
 
   // Initialize form data with defaults
   const [formData, setFormData] = useState({
@@ -93,11 +101,11 @@ const DeviceRegister = () => {
     switch (step) {
       case 1:
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="text-center space-y-2">
-              <Shield className="w-12 h-12 text-primary mx-auto" />
-              <h2 className="text-xl font-semibold">Device Information</h2>
-              <p className="text-muted-foreground">Enter your device details to get started</p>
+              <Shield className="w-10 h-10 sm:w-12 sm:h-12 text-primary mx-auto" />
+              <h2 className="text-lg sm:text-xl font-semibold">Device Information</h2>
+              <p className="text-sm sm:text-base text-muted-foreground">Enter your device details to get started</p>
             </div>
             
             <div className="space-y-4">
@@ -143,21 +151,35 @@ const DeviceRegister = () => {
               
               <div className="space-y-2">
                 <Label htmlFor="serialNumber">Serial Number *</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="serialNumber"
-                    placeholder="Enter device serial number"
-                    value={formData.serialNumber}
-                    onChange={(e) => setFormData({...formData, serialNumber: e.target.value})}
-                    required
-                  />
-                  <QRScanner 
-                    onScanSuccess={(data) => {
-                      // Extract serial from QR data
-                      const serial = data.split(':').pop() || '';
-                      setFormData({...formData, serialNumber: serial});
-                    }}
-                  />
+                <Input
+                  id="serialNumber"
+                  placeholder="Enter device serial number"
+                  value={formData.serialNumber}
+                  onChange={(e) => setFormData({...formData, serialNumber: e.target.value})}
+                  required
+                />
+                
+                {/* QR Scanner Section */}
+                <div className="mt-3">
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Scan className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">QR Code Scanner</h4>
+                        <p className="text-sm text-gray-600">Quick device identification</p>
+                      </div>
+                    </div>
+                    
+                    <QRScanner 
+                      onScanSuccess={(data) => {
+                        // Extract serial from QR data
+                        const serial = data.split(':').pop() || '';
+                        setFormData({...formData, serialNumber: serial});
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
               
@@ -176,28 +198,50 @@ const DeviceRegister = () => {
         
       case 2:
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="text-center space-y-2">
-              <Camera className="w-12 h-12 text-primary mx-auto" />
-              <h2 className="text-xl font-semibold">Device Photos</h2>
-              <p className="text-muted-foreground">Add photos to verify your device</p>
+              <Camera className="w-10 h-10 sm:w-12 sm:h-12 text-primary mx-auto" />
+              <h2 className="text-lg sm:text-xl font-semibold">Device Photos</h2>
+              <p className="text-sm sm:text-base text-muted-foreground">Add photos to verify your device</p>
             </div>
             
             <div className="space-y-4">
-              <UploadComponent
-                variant="photo"
-                accept="image/*"
+              <PhotoUpload
+                variant="device-photo"
                 multiple={true}
                 maxSize={10}
-                onUpload={(files) => setFormData({...formData, photos: files.map(f => f as any)})}
+                enableLocation={true}
+                enableOCR={false}
+                enableCompression={true}
+                enableDragDrop={true}
+                enableCamera={true}
+                userId={userId || 'anonymous'}
+                onUpload={(files) => {
+                  console.log('Device photos uploaded:', files);
+                  setFormData(prev => ({
+                    ...prev,
+                    photos: files as any // Store the full file objects
+                  }));
+                }}
               />
               
-              <UploadComponent
+              <PhotoUpload
                 variant="receipt"
-                accept="image/*,application/pdf"
                 multiple={false}
                 maxSize={5}
-                onUpload={(files) => setFormData({...formData, receipt: files[0] as any})}
+                enableLocation={false}
+                enableOCR={true}
+                enableCompression={true}
+                enableDragDrop={true}
+                enableCamera={false}
+                userId={userId || 'anonymous'}
+                onUpload={(files) => {
+                  console.log('Receipt uploaded:', files);
+                  setFormData(prev => ({
+                    ...prev,
+                    receipt: files[0] as any // Store the full file object
+                  }));
+                }}
               />
               
               <div className="space-y-2">
@@ -215,15 +259,15 @@ const DeviceRegister = () => {
         
       case 3:
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="text-center space-y-2">
-              <MapPin className="w-12 h-12 text-primary mx-auto" />
-              <h2 className="text-xl font-semibold">Purchase Details</h2>
-              <p className="text-muted-foreground">Help us verify your ownership</p>
+              <MapPin className="w-10 h-10 sm:w-12 sm:h-12 text-primary mx-auto" />
+              <h2 className="text-lg sm:text-xl font-semibold">Purchase Details</h2>
+              <p className="text-sm sm:text-base text-muted-foreground">Help us verify your ownership</p>
             </div>
             
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="purchaseDate">Purchase Date</Label>
                   <Input
@@ -277,11 +321,11 @@ const DeviceRegister = () => {
         
       case 4:
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="text-center space-y-2">
-              <CheckCircle className="w-12 h-12 text-success mx-auto" />
-              <h2 className="text-xl font-semibold">Review & Submit</h2>
-              <p className="text-muted-foreground">Confirm your device information</p>
+              <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-success mx-auto" />
+              <h2 className="text-lg sm:text-xl font-semibold">Review & Submit</h2>
+              <p className="text-sm sm:text-base text-muted-foreground">Confirm your device information</p>
             </div>
             
             <Card className="p-4 space-y-3">
@@ -318,13 +362,14 @@ const DeviceRegister = () => {
     <div className="min-h-screen bg-background">
       <AppHeader title="Register Device" showBackButton={true} backTo="/dashboard" />
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-4 pb-24 sm:pb-6">
         {/* Mobile Back Navigation - Fallback */}
         <div className="md:hidden mb-4">
           <BackButton />
         </div>
+        
         {/* Progress */}
-        <div className="mb-6 space-y-2">
+        <div className="mb-4 sm:mb-6 space-y-2">
           <div className="flex justify-between text-sm">
             <span>Step {step} of 4</span>
             <span>{Math.round(progress)}%</span>
@@ -333,13 +378,13 @@ const DeviceRegister = () => {
         </div>
 
         {/* Why Register Banner */}
-        <div className="mb-8 p-4 bg-primary/5 border border-primary/10 rounded-lg">
+        <div className="mb-6 sm:mb-8 p-3 sm:p-4 bg-primary/5 border border-primary/10 rounded-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-primary" />
+              <Shield className="w-4 h-4 text-primary flex-shrink-0" />
               <span className="text-sm font-medium">Why register with STOLEN?</span>
             </div>
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
               <Link to="/why-stolen" className="text-primary hover:text-primary/80">
                 Learn More →
               </Link>
@@ -351,10 +396,10 @@ const DeviceRegister = () => {
         <div className="max-w-md mx-auto">
           {renderStep()}
           
-          {/* Navigation */}
-          <div className="flex gap-4 mt-8">
+          {/* Navigation - Fixed positioning for mobile */}
+          <div className="flex gap-3 sm:gap-4 mt-6 sm:mt-8 pb-4 sm:pb-0">
             {step > 1 && (
-              <Button variant="outline" onClick={handleBack} className="flex-1">
+              <Button variant="outline" onClick={handleBack} className="flex-1 h-12">
                 Back
               </Button>
             )}
@@ -362,7 +407,7 @@ const DeviceRegister = () => {
             {step < 4 ? (
               <Button 
                 onClick={handleNext} 
-                className="flex-1"
+                className="flex-1 h-12"
                 disabled={!formData.deviceName || !formData.serialNumber}
               >
                 Next
@@ -370,7 +415,7 @@ const DeviceRegister = () => {
             ) : (
               <Button 
                 onClick={handleSubmit} 
-                className="flex-1"
+                className="flex-1 h-12"
                 disabled={isLoading}
               >
                 {isLoading ? "Registering..." : "Register Device"}

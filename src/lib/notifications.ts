@@ -71,7 +71,7 @@ export class NotificationService {
         window.focus();
         if (options?.data?.reportId) {
           // Navigate to specific report
-          window.location.href = `/community-board#report-${options.data.reportId}`;
+          window.location.href = `/lost-found#report-${options.data.reportId}`;
         }
         notification.close();
       };

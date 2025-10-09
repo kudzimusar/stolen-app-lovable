@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { LostFoundNotificationCenter } from "@/components/user/LostFoundNotificationCenter";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/lib/auth";
+import { useAuth, getAuthToken } from "@/lib/auth";
 import { formatSerialForDisplay } from "@/utils/security";
 import { toast } from "sonner";
 import {
@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 
 const CommunityBoard = () => {
-  const { user, getAuthToken } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
@@ -41,33 +41,13 @@ const CommunityBoard = () => {
     found: 0,
     reunited: 0
   });
+  
+  // Use refs to track fetch state without causing re-renders
+  const hasFetchedRef = useRef(false);
+  const currentUserIdRef = useRef<string | null>(null);
 
-  // Fetch posts from API
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchData = async () => {
-      if (isMounted) {
-        await fetchPosts();
-        await fetchStats();
-      }
-    };
-    
-    fetchData();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [user]); // Add user as dependency to prevent infinite loops
-
-  // NO FALLBACK DATA - Only use real database data
-  // This ensures clean, production-ready data without mock content
-
-  // All mock data completely removed - using only real database data
-
-  // Test data insertion function removed - using only real database data
-
-  const fetchPosts = async () => {
+  // Wrap fetchPosts in useCallback to prevent infinite loops
+  const fetchPosts = useCallback(async () => {
     try {
       console.log('🔄 Starting fetchPosts...');
       setLoading(true);
@@ -134,9 +114,9 @@ const CommunityBoard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // getAuthToken is now a stable standalone function
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       console.log('🔄 Starting fetchStats...');
       console.log('Fetching community stats...');
@@ -178,7 +158,53 @@ const CommunityBoard = () => {
       console.log('Stats API failed, using fallback stats...');
       // Don't set stats here - let the fallback useEffect handle it
     }
-  };
+  }, []); // getAuthToken is now a stable standalone function
+
+  // Fetch posts from API - runs once on mount or when user ID changes
+  useEffect(() => {
+    // Wait for auth to complete
+    if (authLoading) {
+      console.log('⏳ Waiting for auth to complete...');
+      return;
+    }
+    
+    // Skip if no user
+    if (!user?.id) {
+      console.log('⚠️ No user - skipping fetch');
+      hasFetchedRef.current = false;
+      currentUserIdRef.current = null;
+      setLoading(false);
+      return;
+    }
+
+    // Skip if already fetched for this specific user
+    if (hasFetchedRef.current && currentUserIdRef.current === user.id) {
+      console.log('✋ Already fetched for user', user.id, '- skipping');
+      return;
+    }
+    
+    let isMounted = true;
+    
+    const fetchData = async () => {
+      console.log('🎯 Fetching data for user:', user.id);
+      
+      await fetchPosts();
+      await fetchStats();
+      
+      if (isMounted) {
+        hasFetchedRef.current = true;
+        currentUserIdRef.current = user.id;
+        console.log('✅ Data fetch completed and marked for user:', user.id);
+      }
+    };
+    
+    fetchData();
+    
+    return () => {
+      isMounted = false;
+    };
+    // Only depend on user.id (primitive) and authLoading
+  }, [user?.id, authLoading, fetchPosts, fetchStats]);
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -471,7 +497,7 @@ const CommunityBoard = () => {
       <div className="container mx-auto px-4 py-6 space-y-6">
         {/* Page Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold">Community Board</h1>
+          <h1 className="text-2xl font-bold">Lost & Found Community</h1>
           <p className="text-muted-foreground">
             Help others find their lost devices or reunite with yours
           </p>

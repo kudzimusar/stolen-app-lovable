@@ -77,12 +77,12 @@ const LostFoundResponses = () => {
         } else {
           console.error('❌ Failed to load post/responses');
           toast.error("Failed to load post details");
-          navigate("/community-board");
+          navigate("/lost-found");
         }
       } catch (error) {
         console.error('Error fetching post/responses:', error);
         toast.error("Error loading data");
-        navigate("/community-board");
+        navigate("/lost-found");
       } finally {
         setLoading(false);
       }

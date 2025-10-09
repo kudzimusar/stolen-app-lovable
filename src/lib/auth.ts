@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export interface User {
   id: string;
@@ -8,6 +9,8 @@ export interface User {
   avatar_url?: string;
   role?: string;
 }
+
+export type { SupabaseUser };
 
 export interface AuthState {
   user: User | null;
@@ -205,6 +208,29 @@ export class AuthService {
       return null;
     }
   }
+
+  // Get current session
+  static async getCurrentUser(): Promise<SupabaseUser | null> {
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      return session?.user ?? null;
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
+  }
+
+  // Listen to auth state changes with event filtering
+  static onAuthStateChange(callback: (user: SupabaseUser | null) => void) {
+    return supabase.auth.onAuthStateChange((event, session) => {
+      // Only respond to meaningful events
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+        console.log(`🔐 Auth event: ${event}`);
+        callback(session?.user ?? null);
+      }
+    });
+  }
 }
 
 // Standalone function for getting auth token
@@ -215,41 +241,70 @@ export async function getAuthToken(): Promise<string | null> {
 // Hook for React components
 
 export function useAuth() {
-  const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    loading: true,
-    error: null
-  });
+  // Separate state variables to prevent object recreation
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  
+  // Prevent double initialization
+  const initialized = useRef(false);
 
   useEffect(() => {
+    // Guard against double initialization
+    if (initialized.current) {
+      console.log('⚠️ useAuth already initialized - skipping');
+      return;
+    }
+    initialized.current = true;
+
+    let mounted = true;
+
+    console.log('🔐 Initializing auth...');
+
     // Get initial session
-    AuthService.getCurrentUser().then(user => {
-      setAuthState({
-        user,
-        loading: false,
-        error: null
+    AuthService.getCurrentUser()
+      .then(currentUser => {
+        if (mounted) {
+          console.log('✅ Initial auth check complete:', currentUser?.id || 'No user');
+          setUser(currentUser);
+          setLoading(false);
+        }
+      })
+      .catch(err => {
+        if (mounted) {
+          console.error('❌ Auth initialization error:', err);
+          setError(err);
+          setLoading(false);
+        }
       });
-    });
 
     // Listen for auth changes
-    const { data: { subscription } } = AuthService.onAuthStateChange((user) => {
-      setAuthState({
-        user,
-        loading: false,
-        error: null
-      });
+    const { data: { subscription } } = AuthService.onAuthStateChange((newUser) => {
+      if (mounted) {
+        console.log('🔄 Auth state changed:', newUser?.id || 'No user');
+        setUser(newUser);
+        setLoading(false);
+        setError(null);
+      }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      console.log('🧹 Cleaning up auth subscription');
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []); // Empty deps - runs once per mount
 
-  return {
-    ...authState,
+  // Return stable object reference using PRIMITIVE dependencies only
+  return useMemo(() => ({
+    user,
+    loading,
+    error,
     signUp: AuthService.signUp,
     signIn: AuthService.signIn,
     signOut: AuthService.signOut,
     updateProfile: AuthService.updateProfile,
     resetPassword: AuthService.resetPassword,
     getAuthToken: AuthService.getAuthToken
-  };
+  }), [user?.id, loading, error]); // Only primitive values!
 }

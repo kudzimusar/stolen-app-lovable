@@ -424,3 +424,4 @@ export const RealTimeUpdates: React.FC<RealTimeUpdatesProps> = ({
     </div>
   );
 };
+

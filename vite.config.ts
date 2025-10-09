@@ -82,6 +82,22 @@ export default defineConfig({
         target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/admin-approve-report',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/v1\/admin\/approve-report/, '')
+      },
+      '/api/v1/devices/my-devices': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/my-devices',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/devices\/my-devices/, ''),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('My Devices Request:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('My Devices Response:', proxyRes.statusCode, req.url);
+          });
+        },
       }
     }
   },

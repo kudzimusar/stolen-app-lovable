@@ -148,3 +148,4 @@ const DirectSupabaseTest = () => {
 };
 
 export default DirectSupabaseTest;
+
