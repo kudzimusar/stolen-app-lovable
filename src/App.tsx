@@ -45,6 +45,7 @@ const InsurancePolicies = lazy(() => import("./pages/insurance/InsurancePolicies
 const ProductDetail = lazy(() => import("./pages/marketplace/ProductDetail"));
 const ListMyDevice = lazy(() => import("./pages/marketplace/ListMyDevice"));
 const HotDealsFeed = lazy(() => import("./pages/marketplace/HotDealsFeed"));
+const HotDeals = lazy(() => import("./pages/marketplace/HotDeals"));
 const Cart = lazy(() => import("./pages/marketplace/Cart"));
 const Checkout = lazy(() => import("./pages/marketplace/Checkout"));
 const Wishlist = lazy(() => import("./pages/marketplace/Wishlist"));
@@ -65,6 +66,7 @@ const AdminOnboarding = lazy(() => import("./pages/admin/AdminOnboarding"));
 import Wallet from "./pages/payment/Wallet";
 import DeviceCheck from "./pages/user/DeviceCheck";
 import DeviceRegister from "./pages/user/DeviceRegister";
+import DeviceDetails from "./pages/user/DeviceDetails";
 import MyDevices from "./pages/user/MyDevices";
 import CommunityBoard from "./pages/user/CommunityBoard";
 const CommunityRewards = lazy(() => import("./pages/user/CommunityRewards"));
@@ -76,6 +78,10 @@ import PaymentHistory from "./pages/payment/PaymentHistory";
 import StolenReports from "./pages/security/StolenReports";
 import UserRepairHistory from "./pages/repair/UserRepairHistory";
 import InsuranceDashboard from "./pages/insurance/InsuranceDashboard";
+
+// Additional missing components
+const DeviceCertificate = lazy(() => import("./pages/user/DeviceCertificate"));
+const RepairCertificates = lazy(() => import("./pages/repair/RepairCertificates"));
 // RetailerDashboard imported as lazy above
 // QueryClient now imported from @/lib/queryClient with HMR persistence
 
@@ -111,8 +117,6 @@ const App = () => {
             enableMicroAnimations={false}
             enableFormPersistence={false}
             enableFloatingControls={false}
-            enablePageSearch={false}
-            enableMicroAnimations={false}
             scrollControlsPosition="right"
           >
         <Routes>
@@ -146,6 +150,7 @@ const App = () => {
           <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
           <Route path="/device/check" element={<ProtectedRoute><DeviceCheck /></ProtectedRoute>} />
           <Route path="/device/register" element={<ProtectedRoute><DeviceRegister /></ProtectedRoute>} />
+          <Route path="/device/:id" element={<ProtectedRoute><DeviceDetails /></ProtectedRoute>} />
           <Route path="/my-devices" element={<ProtectedRoute><MyDevices /></ProtectedRoute>} />
           <Route path="/community-board" element={<ProtectedRoute><CommunityBoard /></ProtectedRoute>} />
           {/* Alias routes for community */}
@@ -344,9 +349,19 @@ const App = () => {
             }
           />
           <Route 
+            path="/hot-deals" 
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<div style={{ padding: '20px' }}>Loading Hot Deals...</div>}>
+                  <HotDeals />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route 
             path="/hot-deals-feed" 
             element={
-              <Suspense fallback={<div style={{ padding: '20px' }}>Loading Hot Deals...</div>}>
+              <Suspense fallback={<div style={{ padding: '20px' }}>Loading Hot Deals Feed...</div>}>
                 <HotDealsFeed />
               </Suspense>
             }

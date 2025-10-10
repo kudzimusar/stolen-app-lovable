@@ -174,3 +174,5 @@ async function generateBlockchainTransaction(deviceData: any): Promise<string> {
   return `0x${hashHex.substring(0, 64)}`
 }
 
+
+

@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { AppHeader } from "@/components/navigation/AppHeader";
 import { QRScanner } from "@/components/ui/QRScanner";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { getAuthToken } from "@/lib/auth";
 import { 
   ArrowLeft, 
   Smartphone, 
@@ -19,11 +22,24 @@ import {
   FileCheck, 
   Clock,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  Loader2
 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+
+interface Device {
+  id: string;
+  device_name: string;
+  brand: string;
+  model: string;
+  serial_number: string;
+  status: string;
+  blockchain_hash?: string;
+}
 
 const DeviceTransfer = () => {
+  const [searchParams] = useSearchParams();
+  const deviceId = searchParams.get('deviceId');
+  
   const [selectedDevice, setSelectedDevice] = useState("");
   const [recipientInfo, setRecipientInfo] = useState({
     email: "",
@@ -33,13 +49,56 @@ const DeviceTransfer = () => {
   });
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [transferStep, setTransferStep] = useState(1);
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const mockDevices = [
-    { id: "1", name: "iPhone 14 Pro", serial: "F2LLD123ABC", status: "verified" },
-    { id: "2", name: "MacBook Air M2", serial: "C02YL456DEF", status: "verified" },
-    { id: "3", name: "AirPods Pro", serial: "GLDM789GHI", status: "verified" }
-  ];
+  useEffect(() => {
+    fetchUserDevices();
+  }, []);
+
+  useEffect(() => {
+    if (deviceId && devices.length > 0) {
+      setSelectedDevice(deviceId);
+    }
+  }, [deviceId, devices]);
+
+  const fetchUserDevices = async () => {
+    try {
+      setLoading(true);
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('No auth token available');
+      }
+
+      const response = await fetch('/api/v1/devices/my-devices', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setDevices(result.devices.filter((device: Device) => device.status === 'active'));
+      } else {
+        throw new Error(result.error || 'Failed to load devices');
+      }
+    } catch (error) {
+      console.error('Error fetching devices:', error);
+      toast({
+        title: "Error Loading Devices",
+        description: error instanceof Error ? error.message : "Failed to load devices",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleQRScan = (result: string) => {
     setRecipientInfo(prev => ({ ...prev, qrCode: result }));
@@ -115,26 +174,41 @@ const DeviceTransfer = () => {
                 <CardDescription>Choose the device to transfer</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {mockDevices.map((device) => (
-                  <div 
-                    key={device.id}
-                    className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                      selectedDevice === device.id ? 'border-primary bg-primary/5' : 'border-border'
-                    }`}
-                    onClick={() => setSelectedDevice(device.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium">{device.name}</h3>
-                        <p className="text-sm text-muted-foreground">{device.serial}</p>
-                      </div>
-                      <Badge variant="default">
-                        <Shield className="w-3 h-3 mr-1" />
-                        {device.status}
-                      </Badge>
-                    </div>
+                {loading ? (
+                  <div className="text-center py-4">
+                    <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+                    <p className="text-muted-foreground">Loading your devices...</p>
                   </div>
-                ))}
+                ) : devices.length === 0 ? (
+                  <div className="text-center py-4">
+                    <p className="text-muted-foreground">No active devices found.</p>
+                    <Link to="/device/register">
+                      <Button variant="outline" className="mt-2">Register Device</Button>
+                    </Link>
+                  </div>
+                ) : (
+                  devices.map((device) => (
+                    <div 
+                      key={device.id}
+                      className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                        selectedDevice === device.id ? 'border-primary bg-primary/5' : 'border-border'
+                      }`}
+                      onClick={() => setSelectedDevice(device.id)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-medium">{device.device_name}</h3>
+                          <p className="text-sm text-muted-foreground">{device.brand} {device.model}</p>
+                          <p className="text-xs text-muted-foreground font-mono">{device.serial_number}</p>
+                        </div>
+                        <Badge variant="default">
+                          <Shield className="w-3 h-3 mr-1" />
+                          {device.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))
+                )}
               </CardContent>
             </Card>
 
@@ -217,7 +291,7 @@ const DeviceTransfer = () => {
               <div className="bg-muted p-4 rounded-lg">
                 <h3 className="font-medium mb-2">Transfer Details:</h3>
                 <div className="space-y-1 text-sm">
-                  <p><strong>Device:</strong> {mockDevices.find(d => d.id === selectedDevice)?.name}</p>
+                  <p><strong>Device:</strong> {devices.find(d => d.id === selectedDevice)?.device_name}</p>
                   <p><strong>Recipient:</strong> {recipientInfo.email || "Via QR Code"}</p>
                   <p><strong>Status:</strong> Pending verification</p>
                 </div>

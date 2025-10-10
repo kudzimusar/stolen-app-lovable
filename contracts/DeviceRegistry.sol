@@ -150,3 +150,5 @@ contract DeviceRegistry {
     }
 }
 
+
+

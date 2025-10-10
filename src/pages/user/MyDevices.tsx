@@ -55,6 +55,8 @@ interface DeviceStats {
   total: number;
   active: number;
   reported: number;
+  lost?: number;
+  stolen?: number;
   totalValue: number;
   insured: number;
 }
@@ -218,7 +220,7 @@ const MyDevices = () => {
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="container mx-auto px-4 pt-4 pb-24 sm:pt-6 sm:pb-6 max-w-7xl">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
               <Loader2 className="w-12 h-12 mx-auto animate-spin text-primary mb-4" />
@@ -232,20 +234,11 @@ const MyDevices = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader />
-      
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Mobile Back Navigation - Fallback */}
-        <div className="md:hidden mb-4">
-          <BackButton />
-        </div>
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">My Devices</h1>
-            <p className="text-muted-foreground">
-              Manage all your registered devices in one place
-            </p>
-          </div>
+      <AppHeader 
+        title="My Devices"
+        showBackButton={true}
+        backTo="/dashboard"
+        rightActions={
           <div className="flex gap-2">
             <Button 
               variant="outline" 
@@ -255,56 +248,96 @@ const MyDevices = () => {
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             </Button>
-          <Button asChild>
-            <Link to="/device/register">
-              <Plus className="w-4 h-4 mr-2" />
-              Register Device
-            </Link>
-          </Button>
+            <Button asChild>
+              <Link to="/device/register">
+                <Plus className="w-4 h-4 mr-2" />
+                Register Device
+              </Link>
+            </Button>
           </div>
+        }
+      />
+      
+      <div className="container mx-auto px-4 pt-4 pb-24 sm:pt-6 sm:pb-6 max-w-7xl">
+        {/* Page Description */}
+        <div className="mb-6 sm:mb-8">
+          <p className="text-sm sm:text-base text-muted-foreground text-center">
+            Manage all your registered devices in one place
+          </p>
         </div>
 
-        {/* Compact Stats Overview */}
-        <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Quick Stats</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              <div className="flex items-center gap-2">
-              <Smartphone className="w-4 h-4 text-blue-600 flex-shrink-0" />
-              <div className="min-w-0">
-                <p className="text-lg font-semibold text-gray-900">{deviceStats.total}</p>
-                <p className="text-xs text-gray-500 truncate">Total</p>
-              </div>
+        {/* Compact Stats Overview - Redesigned */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-3 sm:p-4 mb-4 sm:mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs sm:text-sm font-semibold text-blue-900">Quick Overview</h3>
+            <div className="flex items-center gap-1 text-xs text-blue-600">
+              <Shield className="w-3 h-3" />
+              <span>Secured</span>
             </div>
+          </div>
           
-              <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-green-600 flex-shrink-0" />
-              <div className="min-w-0">
-                <p className="text-lg font-semibold text-gray-900">{deviceStats.active}</p>
-                <p className="text-xs text-gray-500 truncate">Active</p>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+            <div className="text-center">
+              <div className="flex items-center justify-center w-8 h-8 mx-auto mb-1 bg-blue-100 rounded-full">
+                <Smartphone className="w-4 h-4 text-blue-600" />
               </div>
+              <p className="text-sm sm:text-base font-bold text-gray-900">{deviceStats.total}</p>
+              <p className="text-xs text-gray-600">Total</p>
             </div>
-          
-              <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
-              <div className="min-w-0">
-                <p className="text-lg font-semibold text-gray-900">{deviceStats.reported}</p>
-                <p className="text-xs text-gray-500 truncate">Reported</p>
+            
+            <div className="text-center">
+              <div className="flex items-center justify-center w-8 h-8 mx-auto mb-1 bg-green-100 rounded-full">
+                <Shield className="w-4 h-4 text-green-600" />
               </div>
+              <p className="text-sm sm:text-base font-bold text-gray-900">{deviceStats.active}</p>
+              <p className="text-xs text-gray-600">Active</p>
             </div>
-          
-              <div className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-purple-600 flex-shrink-0" />
-              <div className="min-w-0">
-                <p className="text-lg font-semibold text-gray-900">R{deviceStats.totalValue.toLocaleString()}</p>
-                <p className="text-xs text-gray-500 truncate">Value</p>
+            
+            <div className="text-center">
+              <div className="flex items-center justify-center w-8 h-8 mx-auto mb-1 bg-red-100 rounded-full">
+                <AlertTriangle className="w-4 h-4 text-red-600" />
               </div>
+              <p className="text-sm sm:text-base font-bold text-gray-900">{deviceStats.reported}</p>
+              <p className="text-xs text-gray-600">Reported</p>
             </div>
+            
+            <div className="text-center">
+              <div className="flex items-center justify-center w-8 h-8 mx-auto mb-1 bg-orange-100 rounded-full">
+                <Eye className="w-4 h-4 text-orange-600" />
+              </div>
+              <p className="text-sm sm:text-base font-bold text-gray-900">{deviceStats.lost || 0}</p>
+              <p className="text-xs text-gray-600">Lost</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="flex items-center justify-center w-8 h-8 mx-auto mb-1 bg-purple-100 rounded-full">
+                <DollarSign className="w-4 h-4 text-purple-600" />
+              </div>
+              <p className="text-sm sm:text-base font-bold text-gray-900">R{deviceStats.totalValue.toLocaleString()}</p>
+              <p className="text-xs text-gray-600">Value</p>
+            </div>
+          </div>
           
-              <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-blue-600 flex-shrink-0" />
-              <div className="min-w-0">
-                <p className="text-lg font-semibold text-gray-900">{deviceStats.insured}</p>
-                <p className="text-xs text-gray-500 truncate">Insured</p>
+          {/* Mobile-only additional stats */}
+          <div className="sm:hidden mt-3 pt-3 border-t border-blue-200">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center w-6 h-6 bg-indigo-100 rounded-full">
+                    <Shield className="w-3 h-3 text-indigo-600" />
+                  </div>
+                  <span className="text-xs text-gray-600">Insured</span>
+                </div>
+                <span className="text-sm font-bold text-gray-900">{deviceStats.insured}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center w-6 h-6 bg-gray-100 rounded-full">
+                    <AlertTriangle className="w-3 h-3 text-gray-600" />
+                  </div>
+                  <span className="text-xs text-gray-600">Stolen</span>
+                </div>
+                <span className="text-sm font-bold text-gray-900">{deviceStats.stolen || 0}</span>
               </div>
             </div>
           </div>
@@ -403,6 +436,22 @@ const MyDevices = () => {
                     </div>
                   )}
 
+                  {/* Stolen Verified Badge - Official Company Recognition */}
+                  {device.status === 'active' && (
+                    <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-green-50 to-blue-50 border border-green-300 rounded-md">
+                      <div className="flex items-center justify-center w-6 h-6 bg-green-600 rounded-full">
+                        <Shield className="w-3 h-3 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-green-800">STOLEN VERIFIED</p>
+                        <p className="text-xs text-green-600">Clean Badge - Verified Device</p>
+                      </div>
+                      <Badge variant="default" className="bg-green-600 text-white text-xs px-2 py-1">
+                        CERTIFIED
+                      </Badge>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>{device.photoCount} photos</span>
                     <span>{device.transfers} transfers</span>
@@ -418,11 +467,29 @@ const MyDevices = () => {
                     
                     {device.status === 'active' && (
                       <Button variant="outline" size="sm" asChild className="text-xs">
-                          <Link to={`/hot-deals?deviceId=${device.id}`}>
+                        <Link to={`/hot-deals?deviceId=${device.id}`}>
                           <Clock className="w-3 h-3 mr-1" />
-                            Sell
-                          </Link>
-                        </Button>
+                          Sell
+                        </Link>
+                      </Button>
+                    )}
+                    
+                    {device.status === 'active' && (
+                      <Button variant="outline" size="sm" asChild className="text-xs">
+                        <Link to={`/device-transfer?deviceId=${device.id}`}>
+                          <ArrowUpRight className="w-3 h-3 mr-1" />
+                          Transfer
+                        </Link>
+                      </Button>
+                    )}
+                    
+                    {device.status === 'active' && (
+                      <Button variant="outline" size="sm" asChild className="text-xs">
+                        <Link to={`/repair/booking?deviceId=${device.id}`}>
+                          <Shield className="w-3 h-3 mr-1" />
+                          Repair
+                        </Link>
+                      </Button>
                     )}
                     
                     {device.status === 'lost' && (

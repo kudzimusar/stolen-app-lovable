@@ -98,6 +98,22 @@ export default defineConfig({
             console.log('My Devices Response:', proxyRes.statusCode, req.url);
           });
         },
+      },
+      '/api/v1/devices/register': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/register-device',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/devices\/register/, ''),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Device Registration Request:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Device Registration Response:', proxyRes.statusCode, req.url);
+          });
+        },
       }
     }
   },

@@ -11,6 +11,9 @@ import { AppHeader } from "@/components/navigation/AppHeader";
 import { BackButton } from "@/components/navigation/BackButton";
 import { TrustBadge } from "@/components/ui/TrustBadge";
 import { useToast } from "@/hooks/use-toast";
+import { useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { getAuthToken } from "@/lib/auth";
 import { 
   MapPin, 
   Star, 
@@ -42,6 +45,9 @@ interface RepairShop {
 }
 
 const RepairBooking = () => {
+  const [searchParams] = useSearchParams();
+  const deviceId = searchParams.get('deviceId');
+  
   const [selectedShop, setSelectedShop] = useState<RepairShop | null>(null);
   const [deviceInfo, setDeviceInfo] = useState({
     brand: "",
@@ -53,6 +59,7 @@ const RepairBooking = () => {
   const [appointmentDate, setAppointmentDate] = useState("");
   const [appointmentTime, setAppointmentTime] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const repairShops: RepairShop[] = [
@@ -103,6 +110,45 @@ const RepairBooking = () => {
     }
   ];
 
+  const fetchDeviceData = async () => {
+    if (!deviceId) return;
+    
+    try {
+      setLoading(true);
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('No auth token available');
+      }
+
+      const { data: deviceData, error } = await supabase
+        .from('devices')
+        .select('device_name, brand, model, serial_number')
+        .eq('id', deviceId)
+        .single();
+
+      if (error) {
+        throw new Error(`Failed to fetch device: ${error.message}`);
+      }
+
+      if (deviceData) {
+        setDeviceInfo(prev => ({
+          ...prev,
+          brand: deviceData.brand || '',
+          model: `${deviceData.brand} ${deviceData.model}` || deviceData.device_name || ''
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching device data:', error);
+      toast({
+        title: "Error Loading Device",
+        description: error instanceof Error ? error.message : "Failed to load device data",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleBookRepair = () => {
     if (!selectedShop || !deviceInfo.brand || !deviceInfo.model || !deviceInfo.issue) {
       toast({
@@ -127,7 +173,8 @@ const RepairBooking = () => {
 
   useEffect(() => {
     document.title = "Book Repair | STOLEN – Find Verified Repair Shops";
-  }, []);
+    fetchDeviceData();
+  }, [deviceId]);
 
   return (
     <div className="min-h-screen bg-background">

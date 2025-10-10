@@ -25,3 +25,5 @@ COMMENT ON COLUMN lost_found_reports.blockchain_anchored_at IS 'Timestamp when r
 GRANT SELECT ON lost_found_reports TO anon, authenticated;
 GRANT UPDATE (blockchain_tx_hash, blockchain_anchored, blockchain_anchored_at) ON lost_found_reports TO authenticated;
 
+
+

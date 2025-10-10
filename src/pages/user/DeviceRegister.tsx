@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { AppHeader } from "@/components/navigation/AppHeader";
 import { BackButton } from "@/components/navigation/BackButton";
-import { PhotoUpload } from "@/components/shared/upload/PhotoUpload";
+import { PhotoUpload, UploadedFile } from "@/components/shared/upload/PhotoUpload";
 import { QRScanner } from "@/components/ui/QRScanner";
 import { EnhancedSelect, DEVICE_TYPES, DEVICE_BRANDS, SA_CITIES } from "@/components/forms/EnhancedSelect";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -58,8 +59,12 @@ const DeviceRegister = () => {
     purchaseLocation: "",
     description: "",
     enableLocation: false,
-    photos: [] as File[],
-    receipt: null as File | null,
+    // Document uploads with systematic categorization
+    photos: [] as UploadedFile[], // Device photos
+    receipt: null as UploadedFile | null, // Proof of Purchase
+    userIdentity: null as UploadedFile | null, // User Identity Verification
+    warrantyDocument: null as UploadedFile | null, // Warranty/Insurance Document
+    registrationCertificate: null as UploadedFile | null, // Registration Certificate
     ...persistedData // Override with persisted data
   });
 
@@ -86,15 +91,121 @@ const DeviceRegister = () => {
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    toast({
-      title: "Device Registered Successfully!",
-      description: "Your device has been secured on the blockchain.",
-    });
-    
-    navigate("/dashboard");
+    try {
+      // Validate required fields
+      if (!formData.serialNumber || !formData.deviceName || !formData.brand || (!formData.model && !formData.deviceType)) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in all required fields (Device Name, Brand, Serial Number, Model)",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Get authentication token
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to register a device",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Prepare device data for API call
+      const deviceData = {
+        serialNumber: formData.serialNumber,
+        imei: formData.imeiNumber || undefined,
+        deviceName: formData.deviceName,
+        brand: formData.brand,
+        model: formData.model || formData.deviceName || formData.deviceType, // Ensure model is never empty
+        color: formData.description || undefined,
+        purchaseDate: formData.purchaseDate || undefined,
+        purchasePrice: formData.purchasePrice ? parseFloat(formData.purchasePrice.toString().replace(/[^0-9.]/g, '')) : undefined,
+        // Systematic document categorization
+        devicePhotos: formData.photos?.map(photo => photo.url).filter(url => url) || [],
+        proofOfPurchaseUrl: formData.receipt?.url || undefined,
+        userIdentityUrl: formData.userIdentity?.url || undefined,
+        warrantyDocumentUrl: formData.warrantyDocument?.url || undefined,
+        registrationCertificateUrl: formData.registrationCertificate?.url || undefined,
+        insurancePolicyId: undefined // Can be linked to warranty document
+      };
+
+      // Additional validation to ensure model is not empty
+      if (!deviceData.model || deviceData.model.trim() === '') {
+        toast({
+          title: "Missing Model Information",
+          description: "Please provide a device model",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('📱 Registering device for user:', user.id);
+      console.log('📋 Device data:', deviceData);
+      console.log('📋 Device data JSON:', JSON.stringify(deviceData, null, 2));
+      console.log('📋 Photos array:', formData.photos);
+      console.log('📋 Receipt:', formData.receipt);
+
+      // Call the register-device edge function
+      const { data, error } = await supabase.functions.invoke('register-device', {
+        body: deviceData
+      });
+
+      if (error) {
+        console.error('❌ Registration error:', error);
+        console.error('❌ Error details:', JSON.stringify(error, null, 2));
+        throw new Error(error.message || 'Failed to register device');
+      }
+
+      console.log('✅ Registration response:', data);
+
+      // Success!
+      toast({
+        title: "Device Registered Successfully!",
+        description: `${formData.deviceName} has been secured on the blockchain.`,
+      });
+
+      // Clear form data
+      clearFormData();
+      setFormData({
+        deviceName: "",
+        serialNumber: "",
+        imeiNumber: "",
+        model: "",
+        brand: "",
+        deviceType: "",
+        purchaseDate: "",
+        purchasePrice: "",
+        purchaseLocation: "",
+        description: "",
+        enableLocation: false,
+        // Clear all document uploads
+        photos: [] as UploadedFile[],
+        receipt: null as UploadedFile | null,
+        userIdentity: null as UploadedFile | null,
+        warrantyDocument: null as UploadedFile | null,
+        registrationCertificate: null as UploadedFile | null
+      });
+
+      // Navigate to My Devices to see the new device
+      navigate("/my-devices");
+
+    } catch (error) {
+      console.error('❌ Device registration error:', error);
+      toast({
+        title: "Registration Failed",
+        description: error instanceof Error ? error.message : "Failed to register device. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const renderStep = () => {
@@ -201,48 +312,150 @@ const DeviceRegister = () => {
           <div className="space-y-4 sm:space-y-6">
             <div className="text-center space-y-2">
               <Camera className="w-10 h-10 sm:w-12 sm:h-12 text-primary mx-auto" />
-              <h2 className="text-lg sm:text-xl font-semibold">Device Photos</h2>
-              <p className="text-sm sm:text-base text-muted-foreground">Add photos to verify your device</p>
+              <h2 className="text-lg sm:text-xl font-semibold">Ownership Evidence</h2>
+              <p className="text-sm sm:text-base text-muted-foreground">Upload required documents for blockchain verification</p>
             </div>
             
-            <div className="space-y-4">
-              <PhotoUpload
-                variant="device-photo"
-                multiple={true}
-                maxSize={10}
-                enableLocation={true}
-                enableOCR={false}
-                enableCompression={true}
-                enableDragDrop={true}
-                enableCamera={true}
-                userId={userId || 'anonymous'}
-                onUpload={(files) => {
-                  console.log('Device photos uploaded:', files);
-                  setFormData(prev => ({
-                    ...prev,
-                    photos: files as any // Store the full file objects
-                  }));
-                }}
-              />
-              
-              <PhotoUpload
-                variant="receipt"
-                multiple={false}
-                maxSize={5}
-                enableLocation={false}
-                enableOCR={true}
-                enableCompression={true}
-                enableDragDrop={true}
-                enableCamera={false}
-                userId={userId || 'anonymous'}
-                onUpload={(files) => {
-                  console.log('Receipt uploaded:', files);
-                  setFormData(prev => ({
-                    ...prev,
-                    receipt: files[0] as any // Store the full file object
-                  }));
-                }}
-              />
+            <div className="space-y-6">
+              {/* 1. Device Photos */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <h3 className="font-semibold text-base">Device Photos</h3>
+                  <Badge variant="outline" className="text-xs">Required</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">Upload clear photos showing the device from multiple angles</p>
+                <PhotoUpload
+                  variant="device-photo"
+                  multiple={true}
+                  maxSize={10}
+                  enableLocation={true}
+                  enableOCR={false}
+                  enableCompression={true}
+                  enableDragDrop={true}
+                  enableCamera={true}
+                  userId={userId || 'anonymous'}
+                  onUpload={(files) => {
+                    console.log('Device photos uploaded:', files);
+                    setFormData(prev => ({
+                      ...prev,
+                      photos: files
+                    }));
+                  }}
+                />
+              </div>
+
+              {/* 2. Proof of Purchase (Receipt) */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <h3 className="font-semibold text-base">Proof of Purchase</h3>
+                  <Badge variant="outline" className="text-xs">Required</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">Upload receipt, invoice, or purchase confirmation</p>
+                <PhotoUpload
+                  variant="receipt"
+                  multiple={false}
+                  maxSize={5}
+                  enableLocation={false}
+                  enableOCR={true}
+                  enableCompression={true}
+                  enableDragDrop={true}
+                  enableCamera={false}
+                  userId={userId || 'anonymous'}
+                  onUpload={(files) => {
+                    console.log('Proof of Purchase uploaded:', files);
+                    setFormData(prev => ({
+                      ...prev,
+                      receipt: files[0] || null
+                    }));
+                  }}
+                />
+              </div>
+
+              {/* 3. User Identity Verification */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <h3 className="font-semibold text-base">Identity Verification</h3>
+                  <Badge variant="outline" className="text-xs">Required</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">Upload national ID, passport, or driver's license for verification</p>
+                <PhotoUpload
+                  variant="document"
+                  multiple={false}
+                  maxSize={5}
+                  enableLocation={false}
+                  enableOCR={true}
+                  enableCompression={true}
+                  enableDragDrop={true}
+                  enableCamera={false}
+                  userId={userId || 'anonymous'}
+                  onUpload={(files) => {
+                    console.log('User Identity uploaded:', files);
+                    setFormData(prev => ({
+                      ...prev,
+                      userIdentity: files[0] || null
+                    }));
+                  }}
+                />
+              </div>
+
+              {/* 4. Warranty/Insurance Document */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  <h3 className="font-semibold text-base">Warranty/Insurance</h3>
+                  <Badge variant="secondary" className="text-xs">Optional</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">Upload warranty certificate or insurance policy document</p>
+                <PhotoUpload
+                  variant="document"
+                  multiple={false}
+                  maxSize={5}
+                  enableLocation={false}
+                  enableOCR={true}
+                  enableCompression={true}
+                  enableDragDrop={true}
+                  enableCamera={false}
+                  userId={userId || 'anonymous'}
+                  onUpload={(files) => {
+                    console.log('Warranty/Insurance uploaded:', files);
+                    setFormData(prev => ({
+                      ...prev,
+                      warrantyDocument: files[0] || null
+                    }));
+                  }}
+                />
+              </div>
+
+              {/* 5. Registration Certificate (for secondary sellers) */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                  <h3 className="font-semibold text-base">Registration Certificate</h3>
+                  <Badge variant="secondary" className="text-xs">Optional</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">Upload previous registration certificate if this is a secondary sale</p>
+                <PhotoUpload
+                  variant="document"
+                  multiple={false}
+                  maxSize={5}
+                  enableLocation={false}
+                  enableOCR={true}
+                  enableCompression={true}
+                  enableDragDrop={true}
+                  enableCamera={false}
+                  userId={userId || 'anonymous'}
+                  onUpload={(files) => {
+                    console.log('Registration Certificate uploaded:', files);
+                    setFormData(prev => ({
+                      ...prev,
+                      registrationCertificate: files[0] || null
+                    }));
+                  }}
+                />
+              </div>
               
               <div className="space-y-2">
                 <Label htmlFor="description">Additional Description</Label>

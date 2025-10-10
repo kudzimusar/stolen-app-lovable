@@ -10,8 +10,10 @@ import { AppHeader } from "@/components/navigation/AppHeader";
 import { BottomNavigation } from "@/components/navigation/BottomNavigation";
 import UrgencyBoost from "@/components/marketplace/UrgencyBoost";
 import AutoRelistOptions from "@/components/marketplace/AutoRelistOptions";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { getAuthToken } from "@/lib/auth";
 import { 
   Clock, 
   Flame as Fire, 
@@ -25,9 +27,23 @@ import {
   Calendar
 } from "lucide-react";
 
+interface RegisteredDevice {
+  id: string;
+  device_name: string;
+  brand: string;
+  model: string;
+  serial_number: string;
+  purchase_price?: number;
+  status: string;
+  blockchain_hash?: string;
+}
+
 const HotDeals = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const deviceId = searchParams.get('deviceId');
+  
   const [entryMode, setEntryMode] = useState<'selection' | 'registered' | 'quick'>('selection');
   const [price, setPrice] = useState("");
   const [openToOffers, setOpenToOffers] = useState(false);
@@ -36,6 +52,9 @@ const HotDeals = () => {
   const [deviceName, setDeviceName] = useState("");
   const [serialNumber, setSerialNumber] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
+  const [registeredDevices, setRegisteredDevices] = useState<RegisteredDevice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDevice, setSelectedDevice] = useState<RegisteredDevice | null>(null);
 
   useEffect(() => {
     document.title = "Hot Deals | STOLEN";
@@ -46,14 +65,59 @@ const HotDeals = () => {
       return m;
     })();
     metaDesc.setAttribute('content', 'Create quick sale listings for immediate offers. Fast deals for time-sensitive device sales on STOLEN marketplace.');
+    
+    fetchUserDevices();
   }, []);
 
-  // Mock registered devices - in real app would come from API
-  const registeredDevices = [
-    { id: 1, name: "iPhone 15 Pro Max", model: "256GB Natural Titanium", serial: "ABC123456789", estimatedValue: 18999 },
-    { id: 2, name: "MacBook Pro M3", model: "14-inch 512GB", serial: "DEF987654321", estimatedValue: 32999 },
-    { id: 3, name: "Samsung Galaxy S24 Ultra", model: "512GB Titanium Black", serial: "GHI456789123", estimatedValue: 14999 }
-  ];
+  useEffect(() => {
+    if (deviceId && registeredDevices.length > 0) {
+      const device = registeredDevices.find(d => d.id === deviceId);
+      if (device) {
+        setSelectedDevice(device);
+        setEntryMode('registered');
+        setDeviceName(device.device_name);
+        setSerialNumber(device.serial_number);
+        setPrice(device.purchase_price?.toString() || "");
+      }
+    }
+  }, [deviceId, registeredDevices]);
+
+  const fetchUserDevices = async () => {
+    try {
+      setLoading(true);
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('No auth token available');
+      }
+
+      const response = await fetch('/api/v1/devices/my-devices', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setRegisteredDevices(result.devices);
+      } else {
+        throw new Error(result.error || 'Failed to load devices');
+      }
+    } catch (error) {
+      console.error('Error fetching devices:', error);
+      toast({
+        title: "Error Loading Devices",
+        description: error instanceof Error ? error.message : "Failed to load devices",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const urgencyOptions = [
     { value: "today-only", label: "Today Only", color: "bg-destructive text-destructive-foreground" },
@@ -182,32 +246,47 @@ const HotDeals = () => {
             <div className="space-y-4">
               <Label className="text-base font-semibold">Select Device to List</Label>
               <div className="grid gap-3">
-                {registeredDevices.map((device) => (
+                {loading ? (
+                  <div className="text-center py-4">
+                    <p className="text-muted-foreground">Loading your devices...</p>
+                  </div>
+                ) : registeredDevices.length === 0 ? (
+                  <div className="text-center py-4">
+                    <p className="text-muted-foreground">No devices found. Register a device first.</p>
+                    <Link to="/device/register">
+                      <Button variant="outline" className="mt-2">Register Device</Button>
+                    </Link>
+                  </div>
+                ) : (
+                  registeredDevices.filter(device => device.status === 'active').map((device) => (
                   <Card 
                     key={device.id}
                     className={`p-4 cursor-pointer transition-all border-2 ${
-                      deviceName === device.name 
+                      deviceName === device.device_name 
                         ? 'border-primary bg-primary/5' 
                         : 'hover:border-primary/50'
                     }`}
                     onClick={() => {
-                      setDeviceName(device.name);
-                      setPrice(device.estimatedValue.toString());
+                      setDeviceName(device.device_name);
+                      setSerialNumber(device.serial_number);
+                      setPrice(device.purchase_price?.toString() || "");
+                      setSelectedDevice(device);
                     }}
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="font-medium">{device.name}</h4>
-                        <p className="text-sm text-muted-foreground">{device.model}</p>
-                        <p className="text-xs text-muted-foreground">Serial: {device.serial}</p>
+                        <h4 className="font-medium">{device.device_name}</h4>
+                        <p className="text-sm text-muted-foreground">{device.brand} {device.model}</p>
+                        <p className="text-xs text-muted-foreground">Serial: {device.serial_number}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">R{device.estimatedValue.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">Est. value</p>
+                        <p className="font-semibold">R{device.purchase_price?.toLocaleString() || 'N/A'}</p>
+                        <p className="text-xs text-muted-foreground">Purchase price</p>
                       </div>
                     </div>
                   </Card>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           )}

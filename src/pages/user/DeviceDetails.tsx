@@ -1,10 +1,14 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { TrustBadge } from "@/components/ui/TrustBadge";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { getAuthToken } from "@/lib/auth";
 import {
   ArrowLeft,
   Shield,
@@ -15,66 +19,169 @@ import {
   AlertTriangle,
   Smartphone,
   Share2,
-  Download
+  Download,
+  Loader2,
+  ExternalLink
 } from "lucide-react";
+
+interface Device {
+  id: string;
+  device_name: string;
+  brand: string;
+  model: string;
+  serial_number: string;
+  status: string;
+  purchase_date?: string;
+  purchase_price?: number;
+  last_seen_location?: string;
+  color?: string;
+  registration_date: string;
+  device_photos?: string[];
+  blockchain_hash?: string;
+  blockchain_verified?: boolean;
+  insurance_policy_id?: string;
+  current_owner_id: string;
+  user_identity_url?: string;
+  warranty_document_url?: string;
+  registration_certificate_url?: string;
+  receipt_url?: string;
+}
+
+interface RepairHistory {
+  id: string;
+  date: string;
+  shop: string;
+  issue: string;
+  cost: string;
+  verified: boolean;
+}
+
+interface OwnershipHistory {
+  date: string;
+  event: string;
+  details: string;
+  verified: boolean;
+}
 
 const DeviceDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
-  // Mock device data
-  const device = {
-    id: id || "1",
-    name: "iPhone 15 Pro",
-    brand: "Apple",
-    model: "A2848",
-    serial: "ABC123DEF456",
-    status: "verified",
-    purchaseDate: "2024-01-15",
-    purchasePrice: "$999",
-    location: "Cape Town, WC",
-    description: "Space Black 128GB, excellent condition",
-    owner: "John D.",
-    registrationDate: "2024-01-16",
-    insuranceLinked: true,
-    photos: [
-      "/placeholder.svg",
-      "/placeholder.svg"
-    ]
+  const [device, setDevice] = useState<Device | null>(null);
+  const [repairHistory, setRepairHistory] = useState<RepairHistory[]>([]);
+  const [ownershipHistory, setOwnershipHistory] = useState<OwnershipHistory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (id) {
+      fetchDeviceDetails();
+    }
+  }, [id]);
+
+  const fetchDeviceDetails = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('No auth token available');
+      }
+
+      // Fetch device details
+      const { data: deviceData, error: deviceError } = await supabase
+        .from('devices')
+        .select(`
+          id, device_name, brand, model, serial_number, status,
+          purchase_date, purchase_price, last_seen_location, color,
+          registration_date, device_photos, blockchain_hash,
+          insurance_policy_id, current_owner_id, receipt_url
+        `)
+        .eq('id', id)
+        .single();
+
+      if (deviceError) {
+        throw new Error(`Failed to fetch device: ${deviceError.message}`);
+      }
+
+      if (!deviceData) {
+        throw new Error('Device not found');
+      }
+
+      setDevice(deviceData as Device);
+
+      // Fetch ownership history
+      const { data: ownershipData, error: ownershipError } = await supabase
+        .from('ownership_history')
+        .select(`
+          id, transfer_type, verified, blockchain_hash,
+          new_owner_id, previous_owner_id
+        `)
+        .eq('device_id', id)
+        .order('id', { ascending: false });
+
+      if (!ownershipError && ownershipData) {
+        const formattedOwnership = ownershipData.map(record => ({
+          date: new Date().toLocaleDateString(), // Use current date as fallback
+          event: record.transfer_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          details: `Transferred to ${record.new_owner_id} ${record.verified ? '(Verified)' : '(Pending)'}`,
+          verified: record.verified
+        }));
+        setOwnershipHistory(formattedOwnership);
+      }
+
+      // Mock repair history for now (can be connected to repair system later)
+      setRepairHistory([
+        {
+          id: "1",
+          date: new Date().toLocaleDateString(),
+          shop: "STOLEN Platform",
+          issue: "Initial registration",
+          cost: "Free",
+          verified: true
+        }
+      ]);
+
+    } catch (error) {
+      console.error('Error fetching device details:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load device details');
+      toast({
+        title: "Error Loading Device",
+        description: error instanceof Error ? error.message : "Failed to load device details",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const repairHistory = [
-    {
-      id: 1,
-      date: "2024-02-20",
-      shop: "TechFix Pro",
-      issue: "Screen replacement",
-      cost: "$199",
-      verified: true
-    },
-    {
-      id: 2,
-      date: "2024-01-16",
-      shop: "STOLEN Platform",
-      issue: "Initial registration",
-      cost: "Free",
-      verified: true
-    }
-  ];
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto" />
+          <p className="text-muted-foreground">Loading device details...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const ownershipHistory = [
-    {
-      date: "2024-01-16",
-      event: "Device registered",
-      details: "Registered by John D. with proof of purchase",
-      verified: true
-    },
-    {
-      date: "2024-01-15",
-      event: "Purchased",
-      details: "Purchased from Apple Store",
-      verified: true
-    }
-  ];
+  if (error || !device) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <AlertTriangle className="w-8 h-8 text-destructive mx-auto" />
+          <p className="text-destructive">{error || 'Device not found'}</p>
+          <Button onClick={() => navigate('/my-devices')} variant="outline">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to My Devices
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -118,23 +225,23 @@ const DeviceDetails = () => {
             
             <div className="flex-1 space-y-2">
               <div className="flex items-center justify-between">
-                <h1 className="text-xl font-bold">{device.name}</h1>
+                <h1 className="text-xl font-bold">{device.device_name}</h1>
                 {getStatusBadge(device.status)}
               </div>
               
               <div className="space-y-1 text-sm text-muted-foreground">
                 <p>{device.brand} • {device.model}</p>
-                <p className="font-mono">{device.serial}</p>
+                <p className="font-mono">{device.serial_number}</p>
               </div>
               
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  Registered {device.registrationDate}
+                  Registered {new Date(device.registration_date).toLocaleDateString()}
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="w-4 h-4" />
-                  {device.location}
+                  {device.last_seen_location || 'Location not specified'}
                 </div>
               </div>
             </div>
@@ -175,19 +282,19 @@ const DeviceDetails = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Serial Number:</span>
-                  <span className="font-mono">{device.serial}</span>
+                  <span className="font-mono">{device.serial_number}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Purchase Date:</span>
-                  <span>{device.purchaseDate}</span>
+                  <span>{device.purchase_date ? new Date(device.purchase_date).toLocaleDateString() : 'Not specified'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Purchase Price:</span>
-                  <span>{device.purchasePrice}</span>
+                  <span>{device.purchase_price ? `R${device.purchase_price.toLocaleString()}` : 'Not specified'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Description:</span>
-                  <span>{device.description}</span>
+                  <span className="text-muted-foreground">Color:</span>
+                  <span>{device.color || 'Not specified'}</span>
                 </div>
               </div>
             </Card>
@@ -197,15 +304,36 @@ const DeviceDetails = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Blockchain Verification</span>
-                  <Shield className="w-4 h-4 text-success" />
+                  {device.blockchain_hash ? (
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-green-600" />
+                      <span className="text-xs text-green-600">Verified</span>
+                    </div>
+                  ) : (
+                    <Shield className="w-4 h-4 text-muted-foreground" />
+                  )}
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Insurance Linked</span>
-                  <Shield className="w-4 h-4 text-success" />
+                  {device.insurance_policy_id ? (
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-green-600" />
+                      <span className="text-xs text-green-600">Linked</span>
+                    </div>
+                  ) : (
+                    <Shield className="w-4 h-4 text-muted-foreground" />
+                  )}
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Location Tracking</span>
-                  <Shield className="w-4 h-4 text-success" />
+                  {device.last_seen_location ? (
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-green-600" />
+                      <span className="text-xs text-green-600">Active</span>
+                    </div>
+                  ) : (
+                    <Shield className="w-4 h-4 text-muted-foreground" />
+                  )}
                 </div>
               </div>
             </Card>
