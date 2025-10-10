@@ -7,6 +7,7 @@ import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { TrustBadge } from "@/components/ui/TrustBadge";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import EnterpriseLocationManager from "@/components/location/EnterpriseLocationManager";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthToken } from "@/lib/auth";
 import {
@@ -24,6 +25,14 @@ import {
   ExternalLink
 } from "lucide-react";
 
+// Utility function to hash serial numbers for security (reused from Lost & Found feature)
+const hashSerialNumber = (serial: string): string => {
+  if (!serial) return "Not available";
+  // Show first 4 and last 4 characters with asterisks in between
+  if (serial.length <= 8) return serial;
+  return `${serial.substring(0, 4)}****${serial.substring(serial.length - 4)}`;
+};
+
 interface Device {
   id: string;
   device_name: string;
@@ -34,6 +43,11 @@ interface Device {
   purchase_date?: string;
   purchase_price?: number;
   last_seen_location?: string;
+  registration_location_address?: string;
+  registration_location_lat?: number;
+  registration_location_lng?: number;
+  last_seen_location_lat?: number;
+  last_seen_location_lng?: number;
   color?: string;
   registration_date: string;
   device_photos?: string[];
@@ -185,14 +199,20 @@ const DeviceDetails = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case "active":
+        return <TrustBadge type="secure" text="Active & Verified" />;
       case "verified":
         return <TrustBadge type="secure" text="Verified Clean" />;
       case "stolen":
         return <Badge variant="destructive">Reported Stolen</Badge>;
+      case "lost":
+        return <Badge variant="secondary">Reported Lost</Badge>;
       case "needs-attention":
         return <Badge variant="secondary">Needs Attention</Badge>;
+      case "inactive":
+        return <Badge variant="outline">Inactive</Badge>;
       default:
-        return <Badge variant="outline">Unknown Status</Badge>;
+        return <Badge variant="outline">Status: {status || 'Active'}</Badge>;
     }
   };
 
@@ -203,19 +223,43 @@ const DeviceDetails = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Button variant="ghost" size="icon" asChild>
-              <Link to="/dashboard">
+              <Link to="/my-devices">
                 <ArrowLeft className="w-5 h-5" />
               </Link>
             </Button>
             <STOLENLogo />
-            <Button variant="ghost" size="icon">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => {
+                if (device.blockchain_hash && device.blockchain_hash.startsWith('0x')) {
+                  window.open(`https://mumbai.polygonscan.com/tx/${device.blockchain_hash}`, '_blank');
+                } else {
+                  // Fallback: share device info
+                  const shareData = {
+                    title: `${device.device_name} - STOLEN Verified Device`,
+                    text: `Check out my verified device: ${device.brand} ${device.model} - Secured on blockchain`,
+                    url: window.location.href
+                  };
+                  if (navigator.share) {
+                    navigator.share(shareData);
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast({
+                      title: "Link Copied",
+                      description: "Device link copied to clipboard",
+                    });
+                  }
+                }
+              }}
+            >
               <Share2 className="w-5 h-5" />
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 space-y-6">
+      <div className="container mx-auto px-4 py-6 pb-24 md:pb-6 space-y-6">
         {/* Device Overview */}
         <Card className="p-6">
           <div className="flex items-start gap-4">
@@ -231,7 +275,7 @@ const DeviceDetails = () => {
               
               <div className="space-y-1 text-sm text-muted-foreground">
                 <p>{device.brand} • {device.model}</p>
-                <p className="font-mono">{device.serial_number}</p>
+                <p className="font-mono">{hashSerialNumber(device.serial_number)}</p>
               </div>
               
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -241,7 +285,9 @@ const DeviceDetails = () => {
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="w-4 h-4" />
-                  {device.last_seen_location || 'Location not specified'}
+                  <span className="truncate">
+                    {device.last_seen_location || 'Location not specified'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -250,20 +296,25 @@ const DeviceDetails = () => {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-4">
-          <Button variant="outline" className="h-auto py-4 flex-col gap-2">
-            <Download className="w-5 h-5" />
-            <span className="text-xs">Download Certificate</span>
+          <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
+            <Link to={`/device/${device.id}/certificate`}>
+              <Download className="w-5 h-5" />
+              <span className="text-xs">Download Certificate</span>
+            </Link>
           </Button>
-          <Button variant="outline" className="h-auto py-4 flex-col gap-2">
-            <AlertTriangle className="w-5 h-5" />
-            <span className="text-xs">Report Issue</span>
+          <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
+            <Link to={`/lost-found-report?deviceId=${device.id}&reportType=lost`}>
+              <AlertTriangle className="w-5 h-5" />
+              <span className="text-xs">Report Issue</span>
+            </Link>
           </Button>
         </div>
 
         {/* Device Information Tabs */}
         <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="location">Location</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
             <TabsTrigger value="repairs">Repairs</TabsTrigger>
           </TabsList>
@@ -282,7 +333,7 @@ const DeviceDetails = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Serial Number:</span>
-                  <span className="font-mono">{device.serial_number}</span>
+                  <span className="font-mono">{hashSerialNumber(device.serial_number)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Purchase Date:</span>
@@ -338,7 +389,31 @@ const DeviceDetails = () => {
               </div>
             </Card>
           </TabsContent>
-          
+
+          <TabsContent value="location" className="space-y-4">
+            <EnterpriseLocationManager
+              deviceId={device.id}
+              deviceName={device.device_name}
+              showAdvancedFeatures={true}
+              enableRealTimeTracking={true}
+              onLocationUpdate={(location) => {
+                console.log('Location updated:', location);
+                toast({
+                  title: "Location Updated",
+                  description: "Device location has been successfully updated",
+                });
+              }}
+              onGeofenceAlert={(geofence, location) => {
+                console.log('Geofence alert:', geofence, location);
+                toast({
+                  title: "Geofence Alert",
+                  description: `Device entered/left geofence: ${geofence.name}`,
+                  variant: "default"
+                });
+              }}
+            />
+          </TabsContent>
+
           <TabsContent value="history" className="space-y-4">
             <div className="space-y-3">
               {ownershipHistory.map((event, index) => (
@@ -388,9 +463,11 @@ const DeviceDetails = () => {
               ))}
             </div>
             
-            <Button variant="outline" className="w-full">
-              <History className="w-4 h-4 mr-2" />
-              Log New Repair
+            <Button variant="outline" className="w-full" asChild>
+              <Link to={`/repair/booking?deviceId=${device.id}`}>
+                <History className="w-4 h-4 mr-2" />
+                Log New Repair
+              </Link>
             </Button>
           </TabsContent>
         </Tabs>

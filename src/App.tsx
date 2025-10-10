@@ -511,6 +511,30 @@ const App = () => {
             }
           />
 
+          {/* Certificate Routes */}
+          <Route 
+            path="/device/:deviceId/certificate" 
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<div style={{ padding: '20px' }}>Loading Certificate...</div>}>
+                  <DeviceCertificate />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Repair Certificate Routes */}
+          <Route 
+            path="/repair/certificates" 
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<div style={{ padding: '20px' }}>Loading Repair Certificates...</div>}>
+                  <RepairCertificates />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+
           <Route path="*" element={<div style={{padding: '20px'}}>
             <h2>Page Not Found</h2>
             <a href="/" style={{color: 'blue'}}>Go to Home</a>

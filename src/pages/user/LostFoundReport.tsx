@@ -8,7 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   MapPin,
@@ -44,9 +44,15 @@ interface Device {
 }
 
 const LostFoundReport = () => {
-  const [reportType, setReportType] = useState<"lost" | "found">("lost");
+  const [searchParams] = useSearchParams();
+  const deviceId = searchParams.get('deviceId');
+  const reportTypeParam = searchParams.get('reportType');
+  
+  const [reportType, setReportType] = useState<"lost" | "found">(
+    (reportTypeParam as "lost" | "found") || "lost"
+  );
   const [formData, setFormData] = useState({
-    deviceId: "",
+    deviceId: deviceId || "",
     deviceName: "",
     serial: "",
     lastKnownLocation: "",

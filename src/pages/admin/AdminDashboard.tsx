@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,24 +15,86 @@ import {
   Settings,
   Activity,
   DollarSign,
-  Package
+  Package,
+  Smartphone,
+  Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { getAuthToken } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminDashboard = () => {
   const [timeRange, setTimeRange] = useState("24h");
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    totalBusinesses: 0,
+    pendingVerifications: 0,
+    systemHealth: 0,
+    totalDevices: 0,
+    totalTransactions: 0,
+    revenue: 0,
+    blockchainVerified: 0,
+    stolenDevices: 0,
+    lostDevices: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  // Mock data - would come from API
-  const stats = {
-    totalUsers: 15847,
-    activeUsers: 12456,
-    totalBusinesses: 2847,
-    pendingVerifications: 23,
-    systemHealth: 98.5,
-    totalDevices: 89654,
-    totalTransactions: 45678,
-    revenue: 147890
+  // Fetch real admin statistics
+  const fetchAdminStats = async () => {
+    try {
+      setLoading(true);
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('No auth token available');
+      }
+
+      // Call the comprehensive admin stats function
+      const { data: statsData, error: statsError } = await supabase
+        .rpc('get_comprehensive_admin_stats');
+
+      if (statsError) {
+        console.error('Error fetching admin stats:', statsError);
+        throw new Error('Failed to fetch admin statistics');
+      }
+
+      if (statsData) {
+        const userStats = statsData.user_stats || {};
+        const deviceStats = statsData.device_stats || {};
+        const lostFoundStats = statsData.lost_found_stats || {};
+        const financialStats = statsData.financial_stats || {};
+
+        setStats({
+          totalUsers: userStats.total_users || 0,
+          activeUsers: userStats.active_users || 0,
+          totalBusinesses: 0, // Will be added when business system is implemented
+          pendingVerifications: lostFoundStats.pending_claims || 0,
+          systemHealth: statsData.system_health === 'HEALTHY' ? 98.5 : 85.0,
+          totalDevices: deviceStats.total_devices || 0,
+          totalTransactions: lostFoundStats.total_reports || 0,
+          revenue: financialStats.total_revenue || 0,
+          blockchainVerified: deviceStats.blockchain_verified || 0,
+          stolenDevices: deviceStats.stolen_devices || 0,
+          lostDevices: deviceStats.lost_devices || 0
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching admin stats:', error);
+      toast({
+        title: "Error Loading Statistics",
+        description: error instanceof Error ? error.message : "Failed to load admin statistics",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchAdminStats();
+  }, []);
 
   const recentActivity = [
     { id: 1, type: "user_registration", message: "New user registered: John Doe", time: "2 min ago", severity: "info" },
@@ -144,10 +206,34 @@ const AdminDashboard = () => {
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Businesses</p>
-                  <p className="text-xl sm:text-2xl font-bold">{stats.totalBusinesses.toLocaleString()}</p>
+                  <p className="text-sm text-muted-foreground">Total Devices</p>
+                  <p className="text-xl sm:text-2xl font-bold">{loading ? <Loader2 className="w-6 h-6 animate-spin" /> : stats.totalDevices.toLocaleString()}</p>
                 </div>
-                <Building className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+                <Smartphone className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Blockchain Verified</p>
+                  <p className="text-xl sm:text-2xl font-bold">{loading ? <Loader2 className="w-6 h-6 animate-spin" /> : stats.blockchainVerified.toLocaleString()}</p>
+                </div>
+                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-success" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Stolen Devices</p>
+                  <p className="text-xl sm:text-2xl font-bold">{loading ? <Loader2 className="w-6 h-6 animate-spin" /> : stats.stolenDevices.toLocaleString()}</p>
+                </div>
+                <AlertTriangle className="w-6 h-6 sm:w-8 sm:h-8 text-destructive" />
               </div>
             </CardContent>
           </Card>

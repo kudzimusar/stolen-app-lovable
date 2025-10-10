@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Download, 
   FileText, 
-  Certificate, 
+  Award, 
   Receipt, 
   FileCheck,
   Loader2,
@@ -45,7 +45,7 @@ export const DocumentDownloader: React.FC<DocumentDownloaderProps> = ({
 
   const getDocumentIcon = () => {
     const icons = {
-      certificate: Certificate,
+      certificate: Award,
       receipt: Receipt,
       report: FileText,
       invoice: FileCheck,

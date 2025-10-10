@@ -4,28 +4,88 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BackButton } from "@/components/navigation/BackButton";
 import { Shield, Download, Home, CheckCircle, Calendar, User, Smartphone } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { getAuthToken } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
 
 const DeviceCertificate = () => {
   const { deviceId } = useParams();
+  const [deviceData, setDeviceData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { toast } = useToast();
 
-  // Mock device data - in real app, fetch based on deviceId
-  const deviceData = {
-    id: deviceId || "dev_123456",
-    name: "iPhone 15 Pro",
-    brand: "Apple",
-    model: "A2848",
-    serialNumber: "F2LW0**8P",
-    imeiNumber: "35***********03",
-    owner: "John D.",
-    ownerVerified: true,
-    status: "verified",
-    registrationDate: "2024-01-15",
-    lastVerification: "2024-01-20",
-    verificationScore: 98,
-    blockchainTxId: "0x7d4f8a9e2b1c6d8f3a5e9c7b2d8f4a6e1c9d7f3a8e5b2c6d9f1a4e7c3d8f6a2e9",
-    certificateId: "CERT-2024-001234",
-    issuedDate: new Date().toISOString(),
-    location: "Cape Town, South Africa"
+  useEffect(() => {
+    if (deviceId) {
+      fetchDeviceData();
+    }
+  }, [deviceId]);
+
+  const fetchDeviceData = async () => {
+    try {
+      setLoading(true);
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('No auth token available');
+      }
+
+      const { data: device, error: deviceError } = await supabase
+        .from('devices')
+        .select(`
+          id, device_name, brand, model, serial_number, imei,
+          status, registration_date, last_seen_location, blockchain_hash,
+          current_owner_id, purchase_date, purchase_price, color
+        `)
+        .eq('id', deviceId)
+        .single();
+
+      if (deviceError) {
+        throw new Error(`Failed to fetch device: ${deviceError.message}`);
+      }
+
+      if (!device) {
+        throw new Error('Device not found');
+      }
+
+      // Get current user information (owner)
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      // Transform device data for certificate
+      const certificateData = {
+        id: device.id,
+        name: device.device_name,
+        brand: device.brand,
+        model: device.model,
+        serialNumber: device.serial_number,
+        imeiNumber: device.imei || "Not available",
+        owner: user?.user_metadata?.full_name || user?.email || "Unknown",
+        ownerVerified: true,
+        status: device.status,
+        registrationDate: new Date(device.registration_date).toLocaleDateString(),
+        lastVerification: new Date().toLocaleDateString(),
+        verificationScore: device.status === 'active' ? 98 : 85,
+        blockchainTxId: device.blockchain_hash || "Not yet recorded",
+        certificateId: `CERT-${new Date().getFullYear()}-${device.serial_number.slice(-6)}`,
+        issuedDate: new Date().toISOString(),
+        location: device.last_seen_location || "Location not specified",
+        purchaseDate: device.purchase_date,
+        purchasePrice: device.purchase_price,
+        color: device.color
+      };
+
+      setDeviceData(certificateData);
+    } catch (error) {
+      console.error('Error fetching device data:', error);
+      setError(error.message);
+      toast({
+        title: "Error Loading Certificate",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDownloadPDF = () => {
@@ -36,6 +96,34 @@ const DeviceCertificate = () => {
   const handlePrint = () => {
     window.print();
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p>Loading certificate...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !deviceData) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 mb-4">
+            <Shield className="w-12 h-12 mx-auto mb-2" />
+            <p>Error loading certificate</p>
+            <p className="text-sm text-muted-foreground">{error}</p>
+          </div>
+          <Button asChild>
+            <Link to="/my-devices">Back to My Devices</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-4">
