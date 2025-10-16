@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, memo, useCallback } from "react";
 import { useOptimizedApiCall, usePerformanceMonitoring, useDebouncedSearch } from "@/hooks/usePerformanceOptimization";
+import { getAuthToken } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -54,7 +55,7 @@ const Marketplace = () => {
   const navigate = useNavigate();
   
   // Performance monitoring
-  usePerformanceMonitoring('marketplace');
+  usePerformanceMonitoring();
   const { tokensFromPath, search: taxonomySearch, roots } = useTaxonomy();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -94,6 +95,61 @@ const Marketplace = () => {
 
   // Quick view state
   const [quickViewItem, setQuickViewItem] = useState<any | null>(null);
+
+  // Real data fetching
+  const [realListings, setRealListings] = useState<any[]>([]);
+  const [loadingRealData, setLoadingRealData] = useState(false);
+  const [dataSource, setDataSource] = useState<'real' | 'mock' | 'both'>('both'); // For comparison
+  const [realDataError, setRealDataError] = useState<string | null>(null);
+
+  // Fetch real listings from API
+  useEffect(() => {
+    const fetchRealListings = async () => {
+      try {
+        setLoadingRealData(true);
+        setRealDataError(null);
+        
+        console.log('🔍 Fetching real marketplace listings...');
+        
+        const token = await getAuthToken();
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json'
+        };
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch('/api/v1/marketplace/listings?limit=100', {
+          headers
+        });
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        console.log('✅ Real listings fetched:', result);
+        
+        if (result.success && result.listings) {
+          setRealListings(result.listings);
+          console.log(`📊 Loaded ${result.listings.length} real listings from database`);
+        } else {
+          console.warn('⚠️ No listings returned from API');
+          setRealListings([]);
+        }
+      } catch (error: any) {
+        console.error('❌ Error fetching real listings:', error);
+        setRealDataError(error.message);
+        setRealListings([]);
+      } finally {
+        setLoadingRealData(false);
+      }
+    };
+
+    fetchRealListings();
+  }, []); // Fetch once on mount
 
   useEffect(() => {
     // Basic SEO for SPA route
@@ -448,7 +504,19 @@ const allListings = [
   // Filter and search logic
   const filteredListings = useMemo(() => {
     const tokens = tokensFromPath(taxonomyPath);
-    let data = allListings.filter((listing) => {
+    
+    // Combine real and mock data based on dataSource selection
+    let sourceData: any[] = [];
+    if (dataSource === 'real') {
+      sourceData = realListings;
+    } else if (dataSource === 'mock') {
+      sourceData = allListings;
+    } else {
+      // 'both' - combine with real listings first, then mock
+      sourceData = [...realListings, ...allListings];
+    }
+    
+    let data = sourceData.filter((listing) => {
       const titleLc = listing.title.toLowerCase();
       const matchesSearch = titleLc.includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === "all" || listing.category === selectedCategory;
@@ -479,6 +547,8 @@ const allListings = [
     warrantyOnly,
     sortBy,
     taxonomyPath,
+    realListings,
+    dataSource
   ]);
 
   // Pagination logic
@@ -577,6 +647,30 @@ const allListings = [
               <p className="text-sm md:text-base text-muted-foreground">
                 Buy and sell verified electronics with confidence
               </p>
+              {/* Data Source Indicator */}
+              <div className="flex items-center gap-2 mt-2 justify-center lg:justify-start">
+                {loadingRealData && (
+                  <Badge variant="outline" className="text-xs">
+                    <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin mr-1" />
+                    Loading real data...
+                  </Badge>
+                )}
+                {!loadingRealData && realListings.length > 0 && (
+                  <Badge variant="default" className="text-xs bg-green-600">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    {realListings.length} Real Listings
+                  </Badge>
+                )}
+                {!loadingRealData && realDataError && (
+                  <Badge variant="destructive" className="text-xs">
+                    <AlertTriangle className="w-3 h-3 mr-1" />
+                    API Error
+                  </Badge>
+                )}
+                <Badge variant="outline" className="text-xs">
+                  {allListings.length} Mock Listings
+                </Badge>
+              </div>
             </div>
             
             {/* Quick Actions in Header */}
@@ -686,6 +780,24 @@ const allListings = [
                       value={sortBy}
                       onValueChange={setSortBy}
                     />
+                    <div className="space-y-2 p-3 bg-muted rounded-lg">
+                      <div className="text-sm font-medium">Data Source (Testing)</div>
+                      <EnhancedSelect
+                        placeholder="Select Data Source"
+                        options={[
+                          { value: 'both', label: '🔄 Both (Real + Mock)' },
+                          { value: 'real', label: '✅ Real Data Only' },
+                          { value: 'mock', label: '📦 Mock Data Only' },
+                        ]}
+                        value={dataSource}
+                        onValueChange={(val: 'real' | 'mock' | 'both') => setDataSource(val)}
+                      />
+                      {dataSource === 'both' && (
+                        <p className="text-xs text-muted-foreground">
+                          Showing real listings first, then mock data
+                        </p>
+                      )}
+                    </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Lost & Found only</span>
                       <Switch checked={lostFoundOnly} onCheckedChange={setLostFoundOnly} />

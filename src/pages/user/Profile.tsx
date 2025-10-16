@@ -441,7 +441,7 @@ const Profile = () => {
                       <Badge variant="secondary">{device.status}</Badge>
                     )}
                     <Button variant="outline" size="sm" asChild>
-                      <Link to={`/device-details?id=${device.id}`}>View</Link>
+                      <Link to={`/device/${device.id}`}>View</Link>
                     </Button>
                   </div>
                 </div>

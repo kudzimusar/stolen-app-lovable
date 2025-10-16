@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { getAuthToken } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,94 @@ export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [listing, setListing] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [compareOpen, setCompareOpen] = useState(false);
+
+  // Fetch real listing data
+  useEffect(() => {
+    const fetchListing = async () => {
+      if (!id) {
+        setError('No listing ID provided');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        console.log('🔍 Fetching listing details for ID:', id);
+        
+        // First try to get from marketplace-listings API
+        const token = await getAuthToken();
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json'
+        };
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(`/api/v1/marketplace/listings?listingId=${id}`, {
+          headers
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.listings && result.listings.length > 0) {
+            setListing(result.listings[0]);
+            console.log('✅ Real listing data loaded:', result.listings[0]);
+          } else {
+            // Fallback to mock data if no real listing found
+            console.log('⚠️ No real listing found, using mock data');
+            setListing({
+              id: id,
+              title: "iPhone 15 Pro Max 256GB",
+              price: 18999,
+              condition: "Like New",
+              warrantyMonths: 8,
+              brand: "Apple",
+              model: "iPhone 15 Pro Max",
+              images: [],
+              seller: "TechDeals Pro",
+              sellerType: "retailer",
+              rating: 4.8,
+              location: "Johannesburg",
+              province: "gauteng",
+              blockchainVerified: true,
+              blockchainHash: "0x1234567890abcdef"
+            });
+          }
+        } else {
+          throw new Error(`API error: ${response.status}`);
+        }
+      } catch (error: any) {
+        console.error('❌ Error fetching listing:', error);
+        setError(error.message);
+        // Fallback to mock data
+        setListing({
+          id: id,
+          title: "iPhone 15 Pro Max 256GB",
+          price: 18999,
+          condition: "Like New",
+          warrantyMonths: 8,
+          brand: "Apple",
+          model: "iPhone 15 Pro Max",
+          images: [],
+          seller: "TechDeals Pro",
+          sellerType: "retailer",
+          rating: 4.8,
+          location: "Johannesburg",
+          province: "gauteng",
+          blockchainVerified: true,
+          blockchainHash: "0x1234567890abcdef"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchListing();
+  }, [id]);
 
   useEffect(() => {
     document.title = `Product Details | STOLEN – Listing #${id}`;
@@ -46,12 +135,34 @@ export default function ProductDetail() {
     canonical.href = window.location.href;
   }, [id]);
 
-  const price = 18999;
-  const [compareOpen, setCompareOpen] = useState(false);
   const similar = [
     { id: 2, title: "MacBook Pro M3 14-inch", price: 32999, condition: "Excellent", warrantyMonths: 10 },
     { id: 3, title: "Samsung Galaxy S24 Ultra", price: 14999, condition: "Good", warrantyMonths: 6 }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading listing details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!listing) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600">Listing not found</p>
+          <button onClick={() => navigate('/marketplace')} className="mt-4 text-blue-600 hover:underline">
+            Return to Marketplace
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -92,14 +203,14 @@ export default function ProductDetail() {
               <Badge variant="secondary" className="bg-secondary">Warranty 8 months</Badge>
               <span className="inline-flex items-center text-sm text-muted-foreground"><MapPin className="w-4 h-4 mr-1"/> Johannesburg, Gauteng</span>
             </div>
-            <p className="text-2xl font-bold text-primary">ZAR {new Intl.NumberFormat('en-ZA').format(price)}</p>
+            <p className="text-2xl font-bold text-primary">ZAR {new Intl.NumberFormat('en-ZA').format(listing.price)}</p>
             <div className="flex flex-wrap gap-2">
               <Button onClick={() => navigate(`/checkout/${id}`)}>Buy Now (Escrow)</Button>
               <Button variant="outline" onClick={() => {
                 try {
                   const raw = localStorage.getItem('cart') || '[]';
                   const cart = JSON.parse(raw);
-                  cart.push({ id: Number(id), title: 'iPhone 15 Pro Max 256GB', price });
+                  cart.push({ id: Number(id), title: listing.title, price: listing.price });
                   localStorage.setItem('cart', JSON.stringify(cart));
                   toast({ title: 'Added to cart', description: 'Item added. Go to cart to checkout.' });
                 } catch (error) {
@@ -155,7 +266,7 @@ export default function ProductDetail() {
                 try {
                   const raw = localStorage.getItem('wishlist') || '[]';
                   const list = JSON.parse(raw);
-                  list.push({ id: Number(id), title: 'iPhone 15 Pro Max 256GB', price, location: 'Johannesburg', province: 'gauteng', condition: 'Like New', stolenStatus: 'clean' });
+                  list.push({ id: Number(id), title: listing.title, price: listing.price, location: listing.location, province: listing.province, condition: listing.condition, stolenStatus: 'clean' });
                   localStorage.setItem('wishlist', JSON.stringify(list));
                   toast({ title: 'Saved', description: 'Added to your wishlist.' });
                 } catch (error) {
@@ -294,10 +405,10 @@ export default function ProductDetail() {
         currentPage="product"
         currentDevice={{
           id,
-          title: "iPhone 15 Pro Max 256GB",
-          price: 18999,
-          seller: "TechDeals Pro",
-          location: "Johannesburg, Gauteng"
+          title: listing.title,
+          price: listing.price,
+          seller: listing.seller,
+          location: `${listing.location}, ${listing.province}`
         }}
         userContext={{
           viewingProduct: true

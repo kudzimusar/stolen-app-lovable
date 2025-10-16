@@ -436,6 +436,34 @@ const MyDevices = () => {
                     </div>
                   )}
 
+                  {/* Marketplace Status Badge */}
+                  {device.marketplaceStatus?.isListed && (
+                    <div className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                      <DollarSign className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-medium text-blue-800">Listed on Marketplace</p>
+                          {device.marketplaceStatus.isFeatured && (
+                            <Badge className="text-xs px-1 py-0 bg-orange-500">
+                              Featured
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-blue-600 truncate">
+                          R{device.marketplaceStatus.listingPrice?.toLocaleString()} • {device.marketplaceStatus.viewCount} views
+                        </p>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-5 w-5 p-0"
+                        onClick={() => navigate(`/marketplace/product/${device.marketplaceStatus.listingId}`)}
+                      >
+                        <Eye className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  )}
+
                   {/* Stolen Verified Badge - Official Company Recognition */}
                   {device.status === 'active' && (
                     <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-green-50 to-blue-50 border border-green-300 rounded-md">

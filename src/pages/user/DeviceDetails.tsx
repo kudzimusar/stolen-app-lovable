@@ -7,7 +7,7 @@ import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { TrustBadge } from "@/components/ui/TrustBadge";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import EnterpriseLocationManager from "@/components/location/EnterpriseLocationManager";
+import { deviceLocationService, DeviceLocationData } from "@/services/device-location-service";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthToken } from "@/lib/auth";
 import {
@@ -85,14 +85,55 @@ const DeviceDetails = () => {
   const [device, setDevice] = useState<Device | null>(null);
   const [repairHistory, setRepairHistory] = useState<RepairHistory[]>([]);
   const [ownershipHistory, setOwnershipHistory] = useState<OwnershipHistory[]>([]);
+  const [locationData, setLocationData] = useState<DeviceLocationData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [locationLoading, setLocationLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
       fetchDeviceDetails();
+      loadLocationData();
     }
   }, [id]);
+
+  const loadLocationData = async () => {
+    if (!id) return;
+    
+    try {
+      setLocationLoading(true);
+      const location = await deviceLocationService.getCurrentDeviceLocation(id);
+      setLocationData(location);
+    } catch (error) {
+      console.error('Error loading location data:', error);
+      setLocationData(null);
+    } finally {
+      setLocationLoading(false);
+    }
+  };
+
+  const updateLocation = async () => {
+    if (!id) return;
+    
+    try {
+      setLocationLoading(true);
+      const newLocation = await deviceLocationService.updateDeviceLocationWithGPS(id);
+      setLocationData(newLocation);
+      toast({
+        title: "Location Updated",
+        description: `Device location updated to ${deviceLocationService.formatLocationForDisplay(newLocation)}`,
+      });
+    } catch (error) {
+      console.error('Error updating location:', error);
+      toast({
+        title: "Location Update Failed",
+        description: "Failed to update device location. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLocationLoading(false);
+    }
+  };
 
   const fetchDeviceDetails = async () => {
     try {
@@ -286,8 +327,21 @@ const DeviceDetails = () => {
                 <div className="flex items-center gap-1">
                   <MapPin className="w-4 h-4" />
                   <span className="truncate">
-                    {device.last_seen_location || 'Location not specified'}
+                    {locationData ? deviceLocationService.formatLocationForDisplay(locationData) : 'Location not specified'}
                   </span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={updateLocation}
+                    disabled={locationLoading}
+                    className="h-6 w-6 p-0 ml-1"
+                  >
+                    {locationLoading ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <MapPin className="w-3 h-3" />
+                    )}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -391,27 +445,64 @@ const DeviceDetails = () => {
           </TabsContent>
 
           <TabsContent value="location" className="space-y-4">
-            <EnterpriseLocationManager
-              deviceId={device.id}
-              deviceName={device.device_name}
-              showAdvancedFeatures={true}
-              enableRealTimeTracking={true}
-              onLocationUpdate={(location) => {
-                console.log('Location updated:', location);
-                toast({
-                  title: "Location Updated",
-                  description: "Device location has been successfully updated",
-                });
-              }}
-              onGeofenceAlert={(geofence, location) => {
-                console.log('Geofence alert:', geofence, location);
-                toast({
-                  title: "Geofence Alert",
-                  description: `Device entered/left geofence: ${geofence.name}`,
-                  variant: "default"
-                });
-              }}
-            />
+            <Card className="p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Current Location</h3>
+                <Button 
+                  onClick={updateLocation}
+                  disabled={locationLoading}
+                  size="sm"
+                >
+                  {locationLoading ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <MapPin className="w-4 h-4 mr-2" />
+                  )}
+                  Update Location
+                </Button>
+              </div>
+              
+              {locationData ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-medium">{deviceLocationService.formatLocationForDisplay(locationData)}</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Coordinates:</span>
+                      <p className="font-mono">{locationData.latitude.toFixed(6)}, {locationData.longitude.toFixed(6)}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Accuracy:</span>
+                      <p>{deviceLocationService.getLocationAccuracyDescription(locationData.accuracy)}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Source:</span>
+                      <p className="capitalize">{locationData.source}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Last Updated:</span>
+                      <p>{locationData.timestamp.toLocaleString()}</p>
+                    </div>
+                  </div>
+                  
+                  {locationData.verified && (
+                    <div className="flex items-center gap-2 text-green-600">
+                      <Shield className="w-4 h-4" />
+                      <span className="text-sm">Location Verified</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>No location data available</p>
+                  <p className="text-sm">Click "Update Location" to get current position</p>
+                </div>
+              )}
+            </Card>
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4">

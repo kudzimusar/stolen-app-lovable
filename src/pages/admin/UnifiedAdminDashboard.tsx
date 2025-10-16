@@ -34,6 +34,7 @@ import StakeholderPanel from "./panels/StakeholderPanel";
 import FinancialPanel from "./panels/FinancialPanel";
 import SecurityPanel from "./panels/SecurityPanel";
 import SystemSettingsPanel from "./panels/SystemSettingsPanel";
+import UsersPanel from "./panels/UsersPanel";
 
 interface AdminStats {
   totalUsers: number;
@@ -60,7 +61,8 @@ const UnifiedAdminDashboard = () => {
     totalTransactions: 0,
     revenue: 0,
     recoveryRate: 0,
-    pendingApprovals: 0
+    pendingApprovals: 0,
+    pendingClaims: 0
   });
   const [loading, setLoading] = useState(true);
   const [userRole] = useState<UserRole>({
@@ -88,7 +90,41 @@ const UnifiedAdminDashboard = () => {
       setLoading(true);
       const token = await getAuthToken();
       
-      // Fetch real data from existing endpoints
+      // Try to fetch real data from database first
+      try {
+        const { supabase } = await import('@/integrations/supabase/client');
+        
+        // Call the comprehensive admin stats function
+        const { data: statsData, error: statsError } = await supabase
+          .rpc('get_comprehensive_admin_stats');
+
+        if (!statsError && statsData) {
+          console.log('✅ Admin stats fetched from database:', statsData);
+          
+          const userStats = statsData.user_stats || {};
+          const deviceStats = statsData.device_stats || {};
+          const lostFoundStats = statsData.lost_found_stats || {};
+          const financialStats = statsData.financial_stats || {};
+
+          setStats({
+            totalUsers: userStats.total_users || 0,
+            activeReports: lostFoundStats.total_reports || 0,
+            totalTransactions: lostFoundStats.total_reports || 0,
+            revenue: financialStats.total_revenue || 0,
+            recoveryRate: lostFoundStats.reunited_reports ? 
+              (lostFoundStats.reunited_reports / lostFoundStats.total_reports * 100) : 0,
+            pendingApprovals: lostFoundStats.pending_claims || 0,
+            pendingClaims: lostFoundStats.pending_claims || 0
+          });
+          return; // Success, exit early
+        } else {
+          console.error('❌ Database RPC error:', statsError);
+        }
+      } catch (dbError) {
+        console.error('❌ Database fetch failed:', dbError);
+      }
+      
+      // Fallback to existing API endpoints (keep original functionality)
       const [usersResponse, reportsResponse, claimsResponse] = await Promise.all([
         fetch('/api/v1/users/stats', {
           headers: {
@@ -117,8 +153,8 @@ const UnifiedAdminDashboard = () => {
 
       // Parse responses safely - check if HTML error page was returned
       try {
-        if (usersResponse.ok) {
-          const text = await usersResponse.text();
+        if (usersResponse.ok && 'text' in usersResponse) {
+          const text = await (usersResponse as Response).text();
           if (text.startsWith('{')) {
             const usersData = JSON.parse(text);
             totalUsers = usersData.data?.total_users || 0;
@@ -131,8 +167,8 @@ const UnifiedAdminDashboard = () => {
       }
 
       try {
-        if (reportsResponse.ok) {
-          const text = await reportsResponse.text();
+        if (reportsResponse.ok && 'text' in reportsResponse) {
+          const text = await (reportsResponse as Response).text();
           if (text.startsWith('{')) {
             const reportsData = JSON.parse(text);
             activeReports = reportsData.data?.total_reports || 0;
@@ -146,8 +182,8 @@ const UnifiedAdminDashboard = () => {
       }
 
       try {
-        if (claimsResponse.ok) {
-          const text = await claimsResponse.text();
+        if (claimsResponse.ok && 'text' in claimsResponse) {
+          const text = await (claimsResponse as Response).text();
           if (text.startsWith('{')) {
             const claimsData = JSON.parse(text);
             pendingClaims = claimsData.data?.pending_claims || 0;
@@ -425,7 +461,7 @@ const UnifiedAdminDashboard = () => {
       case "overview":
         return renderOverviewPanel();
       case "users":
-        return <div className="p-6"><h2 className="text-2xl font-bold mb-4">User Management</h2><p>User management panel coming soon...</p></div>;
+        return <UsersPanel />;
       case "lost-found":
         return <LostFoundPanel />;
       case "marketplace":
@@ -460,7 +496,7 @@ const UnifiedAdminDashboard = () => {
             <div>
               <h1 className="text-3xl font-bold">Admin Dashboard</h1>
               <p className="text-muted-foreground">
-                Welcome back, {user?.display_name || 'Super Admin'} ({userRole.name})
+                Welcome back, {user?.user_metadata?.full_name || 'Super Admin'} ({userRole.name})
               </p>
             </div>
             <div className="flex items-center gap-4">

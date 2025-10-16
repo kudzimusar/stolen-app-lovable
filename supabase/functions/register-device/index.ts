@@ -15,6 +15,9 @@ interface DeviceRegistrationRequest {
   color?: string;
   purchaseDate?: string;
   purchasePrice?: number;
+  storageCapacity?: string;
+  deviceCondition?: string;
+  warrantyMonths?: number;
   devicePhotos?: string[];
   proofOfPurchaseUrl?: string;
   userIdentityUrl?: string;
@@ -29,14 +32,12 @@ serve(async (req) => {
   }
 
   try {
-    // ✅ FIX: Add proper null check for Authorization header
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       throw new Error("Authorization header missing");
     }
     const token = authHeader.replace("Bearer ", "");
     
-    // ✅ FIX: Create Supabase client with user's JWT token for RLS
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
@@ -72,40 +73,42 @@ serve(async (req) => {
       throw new Error("Device with this serial number already registered");
     }
 
-    // REAL blockchain registration using Polygon Mumbai
     let blockchainHash: string;
     try {
-      // Call the real blockchain anchor service
       const blockchainResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/blockchain-anchor-real`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`
         },
         body: JSON.stringify({
-          deviceData: {
-            deviceId: deviceData.serialNumber,
-            deviceModel: deviceData.model,
-            deviceBrand: deviceData.brand,
-            reportType: 'device_registration'
-          }
+          deviceId: deviceData.serialNumber,
+          deviceName: deviceData.deviceName,
+          brand: deviceData.brand,
+          model: deviceData.model,
+          ownerId: user.id
         })
       });
 
       if (blockchainResponse.ok) {
         const blockchainResult = await blockchainResponse.json();
         blockchainHash = blockchainResult.data.transactionHash;
-        console.log('✅ Device registered on REAL blockchain:', blockchainHash);
+        console.log('Device registered on blockchain:', blockchainHash);
       } else {
-        // Fallback to mock if blockchain fails
         blockchainHash = `fallback_hash_${Date.now()}`;
-        console.warn('⚠️ Blockchain registration failed, using fallback hash');
+        console.warn('Blockchain registration failed, using fallback hash');
       }
     } catch (error) {
-      // Fallback to mock if blockchain fails
       blockchainHash = `fallback_hash_${Date.now()}`;
-      console.error('❌ Blockchain registration error:', error);
-      console.warn('⚠️ Using fallback hash for device registration');
+      console.error('Blockchain registration error:', error);
+      console.warn('Using fallback hash for device registration');
+    }
+
+    let warrantyExpiryDate = null;
+    if (deviceData.warrantyMonths && deviceData.warrantyMonths > 0) {
+      const expiryDate = new Date();
+      expiryDate.setMonth(expiryDate.getMonth() + deviceData.warrantyMonths);
+      warrantyExpiryDate = expiryDate.toISOString().split('T')[0];
     }
 
     const { data: newDevice, error: insertError } = await supabaseClient
@@ -119,8 +122,13 @@ serve(async (req) => {
         color: deviceData.color,
         purchase_date: deviceData.purchaseDate,
         purchase_price: deviceData.purchasePrice,
+        storage_capacity: deviceData.storageCapacity,
+        device_condition: deviceData.deviceCondition,
+        warranty_months: deviceData.warrantyMonths,
+        warranty_expiry_date: warrantyExpiryDate,
         current_owner_id: user.id,
         device_photos: deviceData.devicePhotos,
+        proof_of_purchase_url: deviceData.proofOfPurchaseUrl,
         receipt_url: deviceData.proofOfPurchaseUrl,
         user_identity_url: deviceData.userIdentityUrl,
         warranty_document_url: deviceData.warrantyDocumentUrl,

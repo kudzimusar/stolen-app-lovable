@@ -19,6 +19,29 @@ import { useToast } from "@/hooks/use-toast";
 import { useFormPersistence } from "@/components/providers/EnhancedUXProvider";
 import { supabase } from "@/integrations/supabase/client";
 
+// Storage capacity options
+const STORAGE_OPTIONS = [
+  { value: "16GB", label: "16GB" },
+  { value: "32GB", label: "32GB" },
+  { value: "64GB", label: "64GB" },
+  { value: "128GB", label: "128GB" },
+  { value: "256GB", label: "256GB" },
+  { value: "512GB", label: "512GB" },
+  { value: "1TB", label: "1TB" },
+  { value: "2TB", label: "2TB" },
+  { value: "4TB", label: "4TB" },
+  { value: "Other", label: "Other" }
+];
+
+// Device condition options
+const CONDITION_OPTIONS = [
+  { value: "Excellent", label: "Excellent - Like new, no visible wear" },
+  { value: "Very Good", label: "Very Good - Minor wear, fully functional" },
+  { value: "Good", label: "Good - Some wear, fully functional" },
+  { value: "Fair", label: "Fair - Noticeable wear, fully functional" },
+  { value: "Poor", label: "Poor - Heavy wear or damage" }
+];
+
 const DeviceRegister = () => {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,6 +77,9 @@ const DeviceRegister = () => {
     model: "",
     brand: "",
     deviceType: "",
+    storageCapacity: "", // e.g., "128GB", "256GB", "512GB", "1TB"
+    deviceCondition: "", // Excellent, Very Good, Good, Fair, Poor
+    warrantyMonths: "", // Remaining warranty duration in months
     purchaseDate: "",
     purchasePrice: "",
     purchaseLocation: "",
@@ -126,6 +152,10 @@ const DeviceRegister = () => {
         color: formData.description || undefined,
         purchaseDate: formData.purchaseDate || undefined,
         purchasePrice: formData.purchasePrice ? parseFloat(formData.purchasePrice.toString().replace(/[^0-9.]/g, '')) : undefined,
+        // New marketplace-ready fields
+        storageCapacity: formData.storageCapacity || undefined,
+        deviceCondition: formData.deviceCondition || undefined,
+        warrantyMonths: formData.warrantyMonths ? parseInt(formData.warrantyMonths) : undefined,
         // Systematic document categorization
         devicePhotos: formData.photos?.map(photo => photo.url).filter(url => url) || [],
         proofOfPurchaseUrl: formData.receipt?.url || undefined,
@@ -166,8 +196,8 @@ const DeviceRegister = () => {
       console.log('✅ Registration response:', data);
 
       // Success!
-      toast({
-        title: "Device Registered Successfully!",
+    toast({
+      title: "Device Registered Successfully!",
         description: `${formData.deviceName} has been secured on the blockchain.`,
       });
 
@@ -180,6 +210,9 @@ const DeviceRegister = () => {
         model: "",
         brand: "",
         deviceType: "",
+        storageCapacity: "",
+        deviceCondition: "",
+        warrantyMonths: "",
         purchaseDate: "",
         purchasePrice: "",
         purchaseLocation: "",
@@ -262,13 +295,13 @@ const DeviceRegister = () => {
               
               <div className="space-y-2">
                 <Label htmlFor="serialNumber">Serial Number *</Label>
-                <Input
-                  id="serialNumber"
-                  placeholder="Enter device serial number"
-                  value={formData.serialNumber}
-                  onChange={(e) => setFormData({...formData, serialNumber: e.target.value})}
-                  required
-                />
+                  <Input
+                    id="serialNumber"
+                    placeholder="Enter device serial number"
+                    value={formData.serialNumber}
+                    onChange={(e) => setFormData({...formData, serialNumber: e.target.value})}
+                    required
+                  />
                 
                 {/* QR Scanner Section */}
                 <div className="mt-3">
@@ -283,13 +316,13 @@ const DeviceRegister = () => {
                       </div>
                     </div>
                     
-                    <QRScanner 
-                      onScanSuccess={(data) => {
-                        // Extract serial from QR data
-                        const serial = data.split(':').pop() || '';
-                        setFormData({...formData, serialNumber: serial});
-                      }}
-                    />
+                  <QRScanner 
+                    onScanSuccess={(data) => {
+                      // Extract serial from QR data
+                      const serial = data.split(':').pop() || '';
+                      setFormData({...formData, serialNumber: serial});
+                    }}
+                  />
                   </div>
                 </div>
               </div>
@@ -302,6 +335,41 @@ const DeviceRegister = () => {
                   value={formData.imeiNumber || ""}
                   onChange={(e) => setFormData({...formData, imeiNumber: e.target.value})}
                 />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="storageCapacity">Storage Capacity</Label>
+                <EnhancedSelect
+                  placeholder="Select storage capacity"
+                  options={STORAGE_OPTIONS}
+                  value={formData.storageCapacity}
+                  onValueChange={(value) => setFormData({...formData, storageCapacity: value})}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="deviceCondition">Device Condition *</Label>
+                <EnhancedSelect
+                  placeholder="Select device condition"
+                  options={CONDITION_OPTIONS}
+                  value={formData.deviceCondition}
+                  onValueChange={(value) => setFormData({...formData, deviceCondition: value})}
+                />
+                <p className="text-xs text-muted-foreground">Honest assessment helps build trust with buyers</p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="warrantyMonths">Warranty Remaining (months)</Label>
+                <Input
+                  id="warrantyMonths"
+                  type="number"
+                  placeholder="e.g., 12 (leave empty if no warranty)"
+                  value={formData.warrantyMonths}
+                  onChange={(e) => setFormData({...formData, warrantyMonths: e.target.value})}
+                  min="0"
+                  max="120"
+                />
+                <p className="text-xs text-muted-foreground">Enter 0 if warranty has expired or leave empty if unknown</p>
               </div>
             </div>
           </div>
@@ -327,8 +395,8 @@ const DeviceRegister = () => {
                 <p className="text-sm text-muted-foreground">Upload clear photos showing the device from multiple angles</p>
                 <PhotoUpload
                   variant="device-photo"
-                  multiple={true}
-                  maxSize={10}
+                multiple={true}
+                maxSize={10}
                   enableLocation={true}
                   enableOCR={false}
                   enableCompression={true}
@@ -354,7 +422,7 @@ const DeviceRegister = () => {
                 </div>
                 <p className="text-sm text-muted-foreground">Upload receipt, invoice, or purchase confirmation</p>
                 <PhotoUpload
-                  variant="receipt"
+                variant="receipt"
                   multiple={false}
                   maxSize={5}
                   enableLocation={false}
@@ -439,8 +507,8 @@ const DeviceRegister = () => {
                 <p className="text-sm text-muted-foreground">Upload previous registration certificate if this is a secondary sale</p>
                 <PhotoUpload
                   variant="document"
-                  multiple={false}
-                  maxSize={5}
+                multiple={false}
+                maxSize={5}
                   enableLocation={false}
                   enableOCR={true}
                   enableCompression={true}
