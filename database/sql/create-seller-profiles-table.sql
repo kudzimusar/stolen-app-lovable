@@ -23,7 +23,11 @@ CREATE TABLE IF NOT EXISTS public.seller_profiles (
 -- Enable RLS
 ALTER TABLE public.seller_profiles ENABLE ROW LEVEL SECURITY;
 
--- Create policies
+-- Create policies (drop existing if they exist)
+DROP POLICY IF EXISTS "Users can view all seller profiles" ON public.seller_profiles;
+DROP POLICY IF EXISTS "Users can insert their own seller profile" ON public.seller_profiles;
+DROP POLICY IF EXISTS "Users can update their own seller profile" ON public.seller_profiles;
+
 CREATE POLICY "Users can view all seller profiles" ON public.seller_profiles
     FOR SELECT USING (true);
 
@@ -47,6 +51,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_seller_profiles_updated_at ON public.seller_profiles;
 CREATE TRIGGER trigger_update_seller_profiles_updated_at
     BEFORE UPDATE ON public.seller_profiles
     FOR EACH ROW

@@ -50,6 +50,14 @@ const Cart = lazy(() => import("./pages/marketplace/Cart"));
 const Checkout = lazy(() => import("./pages/marketplace/Checkout"));
 const Wishlist = lazy(() => import("./pages/marketplace/Wishlist"));
 
+// Missing marketplace pages
+const OwnershipHistory = lazy(() => import("./pages/user/OwnershipHistory"));
+const HotBuyerRequest = lazy(() => import("./pages/marketplace/HotBuyerRequest"));
+const InsuranceQuote = lazy(() => import("./pages/insurance/InsuranceQuote"));
+const SellerProfile = lazy(() => import("./pages/stakeholders/SellerProfile"));
+const ContactSeller = lazy(() => import("./pages/marketplace/ContactSeller"));
+const ReportListing = lazy(() => import("./pages/marketplace/ReportListing"));
+
 // Additional user pages
 const AboutUs = lazy(() => import("./pages/user/AboutUs"));
 const WhyStolen = lazy(() => import("./pages/user/WhyStolen"));
@@ -392,6 +400,68 @@ const App = () => {
               <ProtectedRoute>
                 <Suspense fallback={<div style={{ padding: '20px' }}>Loading Wishlist...</div>}>
                   <Wishlist />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Missing Marketplace Routes */}
+          <Route 
+            path="/ownership-history" 
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<div style={{ padding: '20px' }}>Loading Ownership History...</div>}>
+                  <OwnershipHistory />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/hot-buyer-request" 
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<div style={{ padding: '20px' }}>Loading Quick Request...</div>}>
+                  <HotBuyerRequest />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/insurance-quote/:id" 
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<div style={{ padding: '20px' }}>Loading Insurance Quote...</div>}>
+                  <InsuranceQuote />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/seller/:id" 
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<div style={{ padding: '20px' }}>Loading Seller Profile...</div>}>
+                  <SellerProfile />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/seller/:id/contact" 
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<div style={{ padding: '20px' }}>Loading Contact Seller...</div>}>
+                  <ContactSeller />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/report-listing/:id" 
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<div style={{ padding: '20px' }}>Loading Report Listing...</div>}>
+                  <ReportListing />
                 </Suspense>
               </ProtectedRoute>
             }

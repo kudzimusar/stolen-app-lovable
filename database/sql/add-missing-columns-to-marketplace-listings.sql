@@ -52,7 +52,7 @@ BEGIN
     -- Create base slug from title, brand, and model
     base_slug := LOWER(REGEXP_REPLACE(
         COALESCE(listing_title, device_brand || '-' || device_model), 
-        '[^a-zA-Z0-9]+', '-', 'g'
+        '[^a-zA-Z0-9]+', '-'
     ));
     
     -- Remove leading/trailing dashes
@@ -125,7 +125,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create trigger for new and updated listings
+-- Create trigger for new and updated listings (drop if exists)
+DROP TRIGGER IF EXISTS trigger_auto_generate_listing_slug ON public.marketplace_listings;
 CREATE TRIGGER trigger_auto_generate_listing_slug
     BEFORE INSERT OR UPDATE ON public.marketplace_listings
     FOR EACH ROW
@@ -144,6 +145,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_conversion_rate ON public.marketplace_listings;
 CREATE TRIGGER trigger_update_conversion_rate
     BEFORE UPDATE OF views_count, inquiry_count ON public.marketplace_listings
     FOR EACH ROW

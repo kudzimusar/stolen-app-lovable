@@ -46,7 +46,7 @@ export const useFormPersistence = <T extends FormData>(
       }, {} as Partial<T>);
 
       localStorage.setItem(storageKey, JSON.stringify(filteredData));
-    } catch (error) {
+      } catch (error) {
       console.warn('Failed to save form data to localStorage:', error);
     }
   }, [storageKey, excludeFields]);

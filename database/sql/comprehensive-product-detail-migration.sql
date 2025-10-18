@@ -219,19 +219,30 @@ ALTER TABLE public.device_risk_assessment ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.price_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.device_reviews ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies for seller_profiles
+-- Create RLS policies for seller_profiles (drop if exists to avoid conflicts)
+DROP POLICY IF EXISTS "Users can view all seller profiles" ON public.seller_profiles;
+DROP POLICY IF EXISTS "Users can insert their own seller profile" ON public.seller_profiles;
+DROP POLICY IF EXISTS "Users can update their own seller profile" ON public.seller_profiles;
+
 CREATE POLICY "Users can view all seller profiles" ON public.seller_profiles FOR SELECT USING (true);
 CREATE POLICY "Users can insert their own seller profile" ON public.seller_profiles FOR INSERT WITH CHECK (user_id = auth.uid());
 CREATE POLICY "Users can update their own seller profile" ON public.seller_profiles FOR UPDATE USING (user_id = auth.uid());
 
--- Create RLS policies for device_verifications
+-- Create RLS policies for device_verifications (drop if exists)
+DROP POLICY IF EXISTS "Users can view verifications for their devices" ON public.device_verifications;
+DROP POLICY IF EXISTS "Anyone can view public device verifications" ON public.device_verifications;
+DROP POLICY IF EXISTS "System can insert verifications" ON public.device_verifications;
+
 CREATE POLICY "Users can view verifications for their devices" ON public.device_verifications FOR SELECT USING (
     EXISTS (SELECT 1 FROM public.devices WHERE id = device_id AND current_owner_id = auth.uid())
 );
 CREATE POLICY "Anyone can view public device verifications" ON public.device_verifications FOR SELECT USING (status = 'verified');
 CREATE POLICY "System can insert verifications" ON public.device_verifications FOR INSERT WITH CHECK (true);
 
--- Create RLS policies for device_ownership_history
+-- Create RLS policies for device_ownership_history (drop if exists)
+DROP POLICY IF EXISTS "Users can view ownership history for their devices" ON public.device_ownership_history;
+DROP POLICY IF EXISTS "Users can insert ownership history" ON public.device_ownership_history;
+
 CREATE POLICY "Users can view ownership history for their devices" ON public.device_ownership_history FOR SELECT USING (
     EXISTS (SELECT 1 FROM public.devices WHERE id = device_id AND current_owner_id = auth.uid()) OR
     owner_id = auth.uid() OR
@@ -242,7 +253,10 @@ CREATE POLICY "Users can insert ownership history" ON public.device_ownership_hi
     EXISTS (SELECT 1 FROM public.devices WHERE id = device_id AND current_owner_id = auth.uid())
 );
 
--- Create RLS policies for device_repairs
+-- Create RLS policies for device_repairs (drop if exists)
+DROP POLICY IF EXISTS "Users can view repairs for their devices" ON public.device_repairs;
+DROP POLICY IF EXISTS "Users can insert repairs for their devices" ON public.device_repairs;
+
 CREATE POLICY "Users can view repairs for their devices" ON public.device_repairs FOR SELECT USING (
     EXISTS (SELECT 1 FROM public.devices WHERE id = device_id AND current_owner_id = auth.uid())
 );
@@ -250,7 +264,10 @@ CREATE POLICY "Users can insert repairs for their devices" ON public.device_repa
     EXISTS (SELECT 1 FROM public.devices WHERE id = device_id AND current_owner_id = auth.uid())
 );
 
--- Create RLS policies for device_certificates
+-- Create RLS policies for device_certificates (drop if exists)
+DROP POLICY IF EXISTS "Users can view certificates for their devices" ON public.device_certificates;
+DROP POLICY IF EXISTS "Users can insert certificates for their devices" ON public.device_certificates;
+
 CREATE POLICY "Users can view certificates for their devices" ON public.device_certificates FOR SELECT USING (
     EXISTS (SELECT 1 FROM public.devices WHERE id = device_id AND current_owner_id = auth.uid())
 );
@@ -258,19 +275,29 @@ CREATE POLICY "Users can insert certificates for their devices" ON public.device
     EXISTS (SELECT 1 FROM public.devices WHERE id = device_id AND current_owner_id = auth.uid())
 );
 
--- Create RLS policies for device_risk_assessment
+-- Create RLS policies for device_risk_assessment (drop if exists)
+DROP POLICY IF EXISTS "Users can view risk assessment for their devices" ON public.device_risk_assessment;
+DROP POLICY IF EXISTS "Anyone can view public risk assessments" ON public.device_risk_assessment;
+
 CREATE POLICY "Users can view risk assessment for their devices" ON public.device_risk_assessment FOR SELECT USING (
     EXISTS (SELECT 1 FROM public.devices WHERE id = device_id AND current_owner_id = auth.uid())
 );
 CREATE POLICY "Anyone can view public risk assessments" ON public.device_risk_assessment FOR SELECT USING (is_active = true);
 
--- Create RLS policies for price_history
+-- Create RLS policies for price_history (drop if exists)
+DROP POLICY IF EXISTS "Anyone can view price history" ON public.price_history;
+DROP POLICY IF EXISTS "Users can insert price history for their listings" ON public.price_history;
+
 CREATE POLICY "Anyone can view price history" ON public.price_history FOR SELECT USING (true);
 CREATE POLICY "Users can insert price history for their listings" ON public.price_history FOR INSERT WITH CHECK (
     EXISTS (SELECT 1 FROM public.marketplace_listings WHERE id = listing_id AND seller_id = auth.uid())
 );
 
--- Create RLS policies for device_reviews
+-- Create RLS policies for device_reviews (drop if exists)
+DROP POLICY IF EXISTS "Anyone can view approved reviews" ON public.device_reviews;
+DROP POLICY IF EXISTS "Users can view their own reviews" ON public.device_reviews;
+DROP POLICY IF EXISTS "Users can insert reviews" ON public.device_reviews;
+
 CREATE POLICY "Anyone can view approved reviews" ON public.device_reviews FOR SELECT USING (moderation_status = 'approved');
 CREATE POLICY "Users can view their own reviews" ON public.device_reviews FOR SELECT USING (reviewer_id = auth.uid());
 CREATE POLICY "Users can insert reviews" ON public.device_reviews FOR INSERT WITH CHECK (reviewer_id = auth.uid());
@@ -372,7 +399,7 @@ DECLARE
 BEGIN
     base_slug := LOWER(REGEXP_REPLACE(
         COALESCE(listing_title, device_brand || '-' || device_model), 
-        '[^a-zA-Z0-9]+', '-', 'g'
+        '[^a-zA-Z0-9]+', '-'
     ));
     base_slug := TRIM(base_slug, '-');
     base_slug := LEFT(base_slug, 50);
@@ -408,6 +435,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_auto_generate_listing_slug ON public.marketplace_listings;
 CREATE TRIGGER trigger_auto_generate_listing_slug
     BEFORE INSERT OR UPDATE ON public.marketplace_listings
     FOR EACH ROW

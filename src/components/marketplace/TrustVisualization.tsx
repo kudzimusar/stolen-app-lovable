@@ -82,105 +82,83 @@ interface Certification {
 
 interface TrustVisualizationProps {
   deviceId: string;
+  serialNumber?: string;
+  trustScore: number;
+  verificationLevel: 'basic' | 'standard' | 'premium' | 'enterprise';
+  serialStatus: 'clean' | 'reported_lost' | 'reported_stolen' | 'blacklisted';
+  blockchainHash?: string;
+  blockchainVerified: boolean;
+  lastVerified?: string;
+  verifications?: Array<{
+    method: string;
+    verifierName: string;
+    confidenceScore: number;
+    timestamp: string;
+    status: string;
+    details: any;
+    blockchainTxId?: string;
+  }>;
+  riskAssessment?: {
+    riskScore: number;
+    riskStatus: string;
+    riskFactors: any[];
+    assessmentDate: string;
+  } | null;
+  ownershipHistory?: Array<{
+    ownerId: string;
+    previousOwnerId?: string;
+    transferFrom: string;
+    transferDate: string;
+    transferMethod: string;
+    blockchainTxId?: string;
+    verificationStatus: string;
+  }>;
+  certificates?: Array<{
+    type: string;
+    issuer: string;
+    issueDate: string;
+    expiryDate?: string;
+    certificateUrl?: string;
+    verificationStatus: string;
+  }>;
+  repairs?: Array<{
+    type: string;
+    serviceProvider?: string;
+    date: string;
+    cost?: number;
+    description?: string;
+    verificationStatus: string;
+  }>;
   showFullDetails?: boolean;
   size?: 'compact' | 'full';
 }
 
 export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
   deviceId,
+  serialNumber,
+  trustScore,
+  verificationLevel,
+  serialStatus,
+  blockchainHash,
+  blockchainVerified,
+  lastVerified,
+  verifications = [],
+  riskAssessment,
+  ownershipHistory = [],
+  certificates = [],
+  repairs = [],
   showFullDetails = false,
   size = 'full'
 }) => {
-  const [verification, setVerification] = useState<DeviceVerification | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [showBlockchainDetails, setShowBlockchainDetails] = useState(false);
+  
+  // Data is now passed as props - no need to fetch
+  // Convert serialStatus to old status format for compatibility
+  const status = serialStatus === 'clean' ? 'clean' :
+                serialStatus === 'reported_stolen' ? 'stolen' :
+                serialStatus === 'reported_lost' ? 'lost' : 'flagged';
 
-  useEffect(() => {
-    loadVerificationData();
-  }, [deviceId]);
-
-  const loadVerificationData = async () => {
-    setIsLoading(true);
-    try {
-      // In real implementation, fetch from Supabase
-      // For now, using mock data
-      const mockData: DeviceVerification = {
-        deviceId,
-        serialNumber: `SN${deviceId.toUpperCase()}XYZ789`,
-        status: 'clean',
-        trustScore: 94,
-        verificationLevel: 'premium',
-        lastVerified: new Date(),
-        blockchainHash: '0x1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z',
-        ownershipChain: [
-          {
-            id: '1',
-            previousOwner: 'Apple Store Sandton',
-            currentOwner: 'John Doe',
-            transferDate: new Date('2024-01-15'),
-            transferMethod: 'purchase',
-            verified: true,
-            blockchainTxHash: '0xabc123...',
-            documentation: ['Receipt', 'Warranty Card']
-          },
-          {
-            id: '2',
-            previousOwner: 'John Doe',
-            currentOwner: 'TechDeals Pro',
-            transferDate: new Date('2024-11-20'),
-            transferMethod: 'purchase',
-            verified: true,
-            blockchainTxHash: '0xdef456...',
-            documentation: ['Sales Agreement', 'Device Report']
-          }
-        ],
-        verificationHistory: [
-          {
-            id: '1',
-            timestamp: new Date(),
-            method: 'qr_scan',
-            result: 'verified',
-            verifiedBy: 'STOLEN Platform',
-            confidence: 98,
-            evidence: ['QR Code', 'Serial Number Match', 'Blockchain Record']
-          },
-          {
-            id: '2',
-            timestamp: new Date('2024-11-20'),
-            method: 'serial_lookup',
-            result: 'verified',
-            verifiedBy: 'TechDeals Pro',
-            confidence: 95,
-            evidence: ['Serial Number', 'Purchase Receipt']
-          }
-        ],
-        riskFactors: [],
-        certifications: [
-          {
-            id: '1',
-            type: 'warranty',
-            issuer: 'Apple Inc.',
-            issueDate: new Date('2024-01-15'),
-            expiryDate: new Date('2025-01-15'),
-            verified: true
-          },
-          {
-            id: '2',
-            type: 'authenticity',
-            issuer: 'STOLEN Platform',
-            issueDate: new Date(),
-            verified: true
-          }
-        ]
-      };
-
-      setVerification(mockData);
-    } catch (error) {
-      console.error('Failed to load verification data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Mock data removed - all data is now passed as props from ProductDetail
 
   const getTrustScoreColor = (score: number) => {
     if (score >= 90) return 'text-green-600 bg-green-50 border-green-200';
@@ -202,7 +180,7 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
     }
   };
 
-  const getVerificationLevelBadge = (level: string) => {
+  const getVerificationLevelBadge = (level: string | undefined) => {
     const configs = {
       basic: { color: 'bg-gray-100 text-gray-800', icon: <Shield className="w-3 h-3" /> },
       standard: { color: 'bg-blue-100 text-blue-800', icon: <Shield className="w-3 h-3" /> },
@@ -210,54 +188,32 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
       enterprise: { color: 'bg-gold-100 text-gold-800', icon: <Award className="w-3 h-3" /> }
     };
     
-    const config = configs[level as keyof typeof configs] || configs.basic;
+    const safeLevel = level || 'basic';
+    const config = configs[safeLevel as keyof typeof configs] || configs.basic;
     
     return (
       <Badge className={`${config.color} flex items-center gap-1`}>
         {config.icon}
-        {level.charAt(0).toUpperCase() + level.slice(1)}
+        {safeLevel.charAt(0).toUpperCase() + safeLevel.slice(1)}
       </Badge>
     );
   };
 
-  if (isLoading) {
-    return (
-      <Card className="p-4">
-        <div className="animate-pulse space-y-3">
-          <div className="h-4 bg-muted rounded"></div>
-          <div className="h-8 bg-muted rounded"></div>
-          <div className="h-4 bg-muted rounded w-3/4"></div>
-        </div>
-      </Card>
-    );
-  }
-
-  if (!verification) {
-    return (
-      <Card className="p-4">
-        <Alert>
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            Unable to load verification data. Device may not be registered.
-          </AlertDescription>
-        </Alert>
-      </Card>
-    );
-  }
+  // No loading state needed - data is passed as props
 
   if (size === 'compact') {
     return (
       <Card className="p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {getStatusIcon(verification.status)}
-            <span className="font-medium capitalize">{verification.status}</span>
+            {getStatusIcon(status)}
+            <span className="font-medium capitalize">{status}</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className={`px-3 py-1 rounded-full border ${getTrustScoreColor(verification.trustScore)}`}>
-              <span className="text-sm font-semibold">{verification.trustScore}%</span>
+            <div className={`px-3 py-1 rounded-full border ${getTrustScoreColor(trustScore)}`}>
+              <span className="text-sm font-semibold">{trustScore}%</span>
             </div>
-            {getVerificationLevelBadge(verification.verificationLevel)}
+            {getVerificationLevelBadge(verificationLevel)}
           </div>
         </div>
       </Card>
@@ -276,11 +232,11 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
             <div>
               <h3 className="text-lg font-semibold">Device Trust Score</h3>
               <p className="text-sm text-muted-foreground">
-                Last verified {verification.lastVerified.toLocaleDateString()}
+                Last verified {lastVerified ? new Date(lastVerified).toLocaleDateString() : new Date().toLocaleDateString()}
               </p>
             </div>
           </div>
-          {getVerificationLevelBadge(verification.verificationLevel)}
+          {getVerificationLevelBadge(verificationLevel)}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -288,11 +244,11 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Trust Score</span>
-              <span className={`text-2xl font-bold ${verification.trustScore >= 90 ? 'text-green-600' : verification.trustScore >= 75 ? 'text-blue-600' : 'text-yellow-600'}`}>
-                {verification.trustScore}%
+              <span className={`text-2xl font-bold ${trustScore >= 90 ? 'text-green-600' : trustScore >= 75 ? 'text-blue-600' : 'text-yellow-600'}`}>
+                {trustScore}%
               </span>
             </div>
-            <Progress value={verification.trustScore} className="h-2" />
+            <Progress value={trustScore} className="h-2" />
             <p className="text-xs text-muted-foreground">
               Based on ownership history, verifications, and risk assessment
             </p>
@@ -301,13 +257,13 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
           {/* Status */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              {getStatusIcon(verification.status)}
-              <span className="font-medium capitalize">{verification.status}</span>
+              {getStatusIcon(status)}
+              <span className="font-medium capitalize">{status}</span>
             </div>
             <div className="text-sm text-muted-foreground">
-              {verification.status === 'clean' && 'No theft reports or suspicious activity'}
-              {verification.status === 'stolen' && 'Device reported as stolen'}
-              {verification.status === 'lost' && 'Device reported as lost'}
+              {status === 'clean' && 'No theft reports or suspicious activity'}
+              {status === 'stolen' && 'Device reported as stolen'}
+              {status === 'lost' && 'Device reported as lost'}
             </div>
           </div>
 
@@ -344,8 +300,8 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
             <Card className="p-4">
               <h4 className="font-semibold mb-4">Ownership History</h4>
               <div className="space-y-4">
-                {verification.ownershipChain.map((record, index) => (
-                  <div key={record.id} className="flex items-start gap-4 p-4 border rounded-lg">
+                {ownershipHistory.map((record, index) => (
+                  <div key={index} className="flex items-start gap-4 p-4 border rounded-lg">
                     <div className="flex-shrink-0">
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                         <span className="text-sm font-semibold">{index + 1}</span>
@@ -354,12 +310,12 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium">{record.currentOwner}</p>
+                          <p className="font-medium">{record.transferFrom}</p>
                           <p className="text-sm text-muted-foreground">
-                            From: {record.previousOwner}
+                            From: {record.previousOwnerId || "Unknown"}
                           </p>
                         </div>
-                        {record.verified ? (
+                        {record.verificationStatus === "verified" ? (
                           <Badge variant="secondary" className="bg-verified/10 text-verified">
                             <CheckCircle className="w-3 h-3 mr-1" />
                             Verified
@@ -372,14 +328,14 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
                         )}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        <p>Transfer Date: {record.transferDate.toLocaleDateString()}</p>
+                        <p>Transfer Date: {new Date(record.transferDate).toLocaleDateString()}</p>
                         <p>Method: {record.transferMethod.replace('_', ' ')}</p>
-                        {record.blockchainTxHash && (
-                          <p>Blockchain TX: {record.blockchainTxHash.slice(0, 16)}...</p>
+                        {record.blockchainTxId && (
+                          <p>Blockchain TX: {record.blockchainTxId.slice(0, 16)}...</p>
                         )}
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        {record.documentation.map((doc, idx) => (
+                        {["Transfer Record"].map((doc, idx) => (
                           <Badge key={idx} variant="outline" className="text-xs">
                             <FileText className="w-3 h-3 mr-1" />
                             {doc}
@@ -397,8 +353,8 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
             <Card className="p-4">
               <h4 className="font-semibold mb-4">Verification History</h4>
               <div className="space-y-4">
-                {verification.verificationHistory.map((record) => (
-                  <div key={record.id} className="p-4 border rounded-lg">
+                {verifications.map((record, index) => (
+                  <div key={index} className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         {record.method === 'qr_scan' && <QrCode className="w-4 h-4" />}
@@ -408,17 +364,17 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
                           {record.method.replace('_', ' ').toUpperCase()}
                         </span>
                       </div>
-                      <Badge variant={record.result === 'verified' ? 'default' : 'destructive'}>
-                        {record.result}
+                      <Badge variant={record.status === 'verified' ? 'default' : 'destructive'}>
+                        {record.status}
                       </Badge>
                     </div>
                     <div className="text-sm text-muted-foreground space-y-1">
-                      <p>Verified by: {record.verifiedBy}</p>
-                      <p>Confidence: {record.confidence}%</p>
-                      <p>Time: {record.timestamp.toLocaleString()}</p>
+                      <p>Verified by: {record.verifierName}</p>
+                      <p>Confidence: {record.confidenceScore}%</p>
+                      <p>Time: {new Date(record.timestamp).toLocaleString()}</p>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
-                      {record.evidence.map((evidence, idx) => (
+                      {record.details.map((evidence, idx) => (
                         <Badge key={idx} variant="outline" className="text-xs">
                           {evidence}
                         </Badge>
@@ -433,7 +389,7 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
           <TabsContent value="risks">
             <Card className="p-4">
               <h4 className="font-semibold mb-4">Risk Analysis</h4>
-              {verification.riskFactors.length === 0 ? (
+              {riskAssessment?.riskFactors || [].length === 0 ? (
                 <div className="text-center py-8">
                   <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-2" />
                   <p className="text-green-600 font-medium">No Risk Factors Detected</p>
@@ -443,7 +399,7 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {verification.riskFactors.map((risk) => (
+                  {riskAssessment?.riskFactors || [].map((risk) => (
                     <Alert key={risk.id}>
                       <AlertTriangle className="h-4 w-4" />
                       <AlertDescription>
@@ -469,14 +425,14 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
             <Card className="p-4">
               <h4 className="font-semibold mb-4">Certificates & Warranties</h4>
               <div className="grid gap-4">
-                {verification.certifications.map((cert) => (
-                  <div key={cert.id} className="p-4 border rounded-lg">
+                {certificates.map((cert, index) => (
+                  <div key={index} className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <Award className="w-4 h-4" />
                         <span className="font-medium capitalize">{cert.type}</span>
                       </div>
-                      {cert.verified ? (
+                      {cert.verificationStatus === "verified" ? (
                         <Badge variant="secondary" className="bg-verified/10 text-verified">
                           <CheckCircle className="w-3 h-3 mr-1" />
                           Verified
@@ -487,9 +443,9 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
                     </div>
                     <div className="text-sm text-muted-foreground space-y-1">
                       <p>Issuer: {cert.issuer}</p>
-                      <p>Issue Date: {cert.issueDate.toLocaleDateString()}</p>
+                      <p>Issue Date: {new Date(cert.issueDate).toLocaleDateString()}</p>
                       {cert.expiryDate && (
-                        <p>Expires: {cert.expiryDate.toLocaleDateString()}</p>
+                        <p>Expires: {new Date(cert.expiryDate).toLocaleDateString()}</p>
                       )}
                     </div>
                   </div>
@@ -520,16 +476,16 @@ export const TrustVisualization: React.FC<TrustVisualizationProps> = ({
                   <div>
                     <span className="font-medium">Blockchain Hash:</span>
                     <p className="font-mono text-xs break-all mt-1">
-                      {verification.blockchainHash}
+                      {blockchainHash}
                     </p>
                   </div>
                   <div>
                     <span className="font-medium">Device ID:</span>
-                    <p className="font-mono text-xs mt-1">{verification.deviceId}</p>
+                    <p className="font-mono text-xs mt-1">{deviceId}</p>
                   </div>
                   <div>
                     <span className="font-medium">Serial Number:</span>
-                    <p className="font-mono text-xs mt-1">{verification.serialNumber}</p>
+                    <p className="font-mono text-xs mt-1">{serialNumber || deviceId}</p>
                   </div>
                   <div>
                     <span className="font-medium">Network:</span>
