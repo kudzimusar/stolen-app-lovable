@@ -133,24 +133,16 @@ const MyDevices = () => {
       setRefreshing(true);
       console.log('📱 Fetching devices via edge function...');
 
-      const token = await getAuthToken();
-      if (!token) {
-        throw new Error('No auth token available');
-      }
-
-      const response = await fetch('/api/v1/devices/my-devices', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      const { data, error } = await supabase.functions.invoke('my-devices', {
+        method: 'GET'
       });
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+      if (error) {
+        throw error;
       }
 
-      const result = await response.json();
-      console.log('✅ Devices loaded:', result);
+      console.log('✅ Devices loaded:', data);
+      const result = data;
 
       if (result.success) {
         // Map device types to icons
