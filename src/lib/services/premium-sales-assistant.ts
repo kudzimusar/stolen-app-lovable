@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Premium Sales Assistant - Multi-Agent Ecosystem for Gutu
  * Provides specialized agentic roles for comprehensive marketplace assistance

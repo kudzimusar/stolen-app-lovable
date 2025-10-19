@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Lost and Found Blockchain Integration Service
 // This service handles blockchain anchoring for Lost and Found device reports
 

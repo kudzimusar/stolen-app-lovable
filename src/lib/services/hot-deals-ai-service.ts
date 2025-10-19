@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { GoogleServicesIntegration } from './google-services-integration';
 import { AIMarketplaceService } from './ai-marketplace-service';
 

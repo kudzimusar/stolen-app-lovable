@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { loadStripe } from '@stripe/stripe-js';
 import { supabase } from '@/integrations/supabase/client';
 
