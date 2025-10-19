@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { getAuthToken } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,52 +41,25 @@ export default function ProductDetail() {
       try {
         console.log('🔍 Fetching listing details for ID:', id);
         
-        // First try to get from marketplace-listings API
-        const token = await getAuthToken();
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json'
-        };
-        
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-        
-        const response = await fetch(`/api/v1/marketplace/listings?listingId=${id}`, {
-          headers
+        // Use Supabase edge function
+        const { data, error } = await supabase.functions.invoke('marketplace-listings', {
+          body: { listingId: id }
         });
 
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success && result.listings && result.listings.length > 0) {
-            setListing(result.listings[0]);
-            console.log('✅ Real listing data loaded:', result.listings[0]);
-            console.log('🔍 Trust Score:', result.listings[0].trustScore);
-            console.log('🔍 Seller Data:', result.listings[0].seller);
-            console.log('🔍 Ownership History:', result.listings[0].ownershipHistory);
-            console.log('🔍 Verifications:', result.listings[0].verifications);
-          } else {
-            // Fallback to mock data if no real listing found
-            console.log('⚠️ No real listing found, using mock data');
-            setListing({
-              id: id,
-              title: "iPhone 15 Pro Max 256GB",
-              price: 18999,
-              condition: "Like New",
-              warrantyMonths: 8,
-              brand: "Apple",
-              model: "iPhone 15 Pro Max",
-              images: [],
-              seller: "TechDeals Pro",
-              sellerType: "retailer",
-              rating: 4.8,
-              location: "Johannesburg",
-              province: "gauteng",
-              blockchainVerified: true,
-              blockchainHash: "0x1234567890abcdef"
-            });
-          }
+        if (error) {
+          console.error('❌ Error from marketplace-listings:', error);
+          throw error;
+        }
+
+        const result = data as any;
+        
+        if (result?.success && result?.listings && result.listings.length > 0) {
+          setListing(result.listings[0]);
+          console.log('✅ Real listing data loaded:', result.listings[0]);
         } else {
-          throw new Error(`API error: ${response.status}`);
+          console.log('⚠️ No listing found for ID:', id);
+          toast.error("Listing not found");
+          navigate('/marketplace');
         }
       } catch (error: any) {
         console.error('❌ Error fetching listing:', error);

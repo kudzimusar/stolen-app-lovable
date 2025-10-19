@@ -27,6 +27,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { PhotoUpload, DocumentUpload, InteractiveMap } from "@/components/shared";
 import type { UploadedFile, UploadedDocument, MapLocation } from "@/components/shared";
+import { supabase } from "@/integrations/supabase/client";
 import { getAuthToken } from "@/lib/auth";
 import { lostFoundBlockchainService } from "@/lib/services/lost-found-blockchain-service";
 import { BlockchainVerification } from "@/components/shared/blockchain/BlockchainVerification";
@@ -81,22 +82,19 @@ const LostFoundReport = () => {
     
     try {
       setLoadingDevices(true);
-      const token = await getAuthToken();
-      if (!token) return;
 
-      const response = await fetch('/api/v1/devices/my-devices', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      const { data, error } = await supabase.functions.invoke('my-devices', {
+        method: 'GET'
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.devices) {
-          setUserDevices(result.devices);
-          console.log('📱 Fetched user devices for Lost & Found:', result.devices);
-        }
+      if (error) {
+        throw error;
+      }
+
+      const result = data as any;
+      if (result.success && result.devices) {
+        setUserDevices(result.devices);
+        console.log('📱 Fetched user devices for Lost & Found:', result.devices);
       }
     } catch (error) {
       console.error('Error fetching user devices:', error);

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, memo, useCallback } from "react";
 import { useOptimizedApiCall, usePerformanceMonitoring, useDebouncedSearch } from "@/hooks/usePerformanceOptimization";
-import { getAuthToken } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -111,24 +111,13 @@ const Marketplace = () => {
         
         console.log('🔍 Fetching real marketplace listings...');
         
-        const token = await getAuthToken();
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json'
-        };
-        
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-        
-        const response = await fetch('/api/v1/marketplace/listings?limit=100', {
-          headers
+        const { data: result, error } = await supabase.functions.invoke('marketplace-listings', {
+          body: { limit: 100 }
         });
 
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
+        if (error) {
+          throw error;
         }
-
-        const result = await response.json();
         
         console.log('✅ Real listings fetched:', result);
         
