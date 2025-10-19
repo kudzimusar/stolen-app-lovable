@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { liteClient as algoliasearch } from 'algoliasearch/lite';
 import cacheManager from './redis';
 

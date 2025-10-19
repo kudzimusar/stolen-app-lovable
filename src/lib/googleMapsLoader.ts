@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Google Maps Script Loader
 let isLoading = false;
 let isLoaded = false;

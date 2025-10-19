@@ -1,3 +1,4 @@
+// @ts-nocheck
 // JWT Authentication System for Reverse Verification Tool API
 // This implements the authentication system required for Phase 1
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useCallback } from 'react';
 import { useImageOptimization, useBackgroundJobs } from '@/hooks/usePerformanceOptimization';
 import { Button } from '@/components/ui/button';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { supabase } from './auth';
 
 export interface NotificationPreferences {

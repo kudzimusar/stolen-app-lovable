@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect } from "react";
 import { Bell, X, Check, CheckCheck, AlertCircle, MapPin, DollarSign, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";

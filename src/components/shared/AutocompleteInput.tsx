@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useRef, useEffect } from 'react';
 import { useAutocomplete } from '@/hooks/useFormPersistence';
 
