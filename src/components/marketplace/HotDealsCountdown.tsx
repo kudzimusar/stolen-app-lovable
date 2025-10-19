@@ -184,7 +184,7 @@ const HotDealsCountdown = ({
             isPlaying={!isExpired}
             duration={totalDuration}
             initialRemainingTime={countdown?.timeLeft || 0}
-            colors={[urgencyConfig.color]}
+            colors={urgencyConfig.color as any}
             size={120}
             strokeWidth={8}
           >
