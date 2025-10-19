@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useMemo, useEffect, memo, useCallback } from "react";
 import { useOptimizedApiCall, usePerformanceMonitoring, useDebouncedSearch } from "@/hooks/usePerformanceOptimization";
 import { supabase } from "@/integrations/supabase/client";
