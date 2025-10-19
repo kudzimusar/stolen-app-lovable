@@ -103,6 +103,13 @@ const Marketplace = () => {
   const [dataSource, setDataSource] = useState<'real' | 'mock' | 'both'>('real'); // Use real data from database
   const [realDataError, setRealDataError] = useState<string | null>(null);
 
+  // Debug logging
+  useEffect(() => {
+    console.log('🛒 Marketplace loaded - Data Source:', dataSource);
+    console.log('📊 Real Listings Count:', realListings.length);
+    console.log('🔄 Loading State:', loadingRealData);
+  }, [dataSource, realListings, loadingRealData]);
+
   // Fetch real listings from API
   useEffect(() => {
     const fetchRealListings = async () => {
