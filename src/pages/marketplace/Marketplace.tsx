@@ -100,7 +100,7 @@ const Marketplace = () => {
   // Real data fetching
   const [realListings, setRealListings] = useState<any[]>([]);
   const [loadingRealData, setLoadingRealData] = useState(false);
-  const [dataSource, setDataSource] = useState<'real' | 'mock' | 'both'>('both'); // For comparison
+  const [dataSource, setDataSource] = useState<'real' | 'mock' | 'both'>('real'); // Use real data from database
   const [realDataError, setRealDataError] = useState<string | null>(null);
 
   // Fetch real listings from API
