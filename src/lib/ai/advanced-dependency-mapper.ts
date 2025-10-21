@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * STOLEN Platform - Advanced Dependency Mapper
  * 

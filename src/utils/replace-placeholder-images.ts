@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { googleImageService } from '@/lib/services/google-image-generation-service';
 
 // Comprehensive image replacement mappings

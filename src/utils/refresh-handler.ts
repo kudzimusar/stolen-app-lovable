@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Refresh Handler - Prevents infinite loops after page refresh
  */

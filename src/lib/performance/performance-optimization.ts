@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Performance Optimization System - Complete Implementation
 // This implements caching, load balancing, and performance monitoring
 

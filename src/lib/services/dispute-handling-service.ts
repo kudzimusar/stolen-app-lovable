@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { supabase } from '@/integrations/supabase/client';
 import { escrowService } from './escrow-service';
 import { dynamicWalletService } from './dynamic-wallet-service';

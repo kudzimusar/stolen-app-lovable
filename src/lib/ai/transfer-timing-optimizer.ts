@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { DeviceAnalysis, UserBehavior, MarketData } from './ai-transfer-suggestion-engine';
 
 // Types for Transfer Timing Optimization

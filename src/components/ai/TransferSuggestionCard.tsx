@@ -21,9 +21,9 @@ import {
   CheckCircle,
   AlertTriangle
 } from 'lucide-react';
-import { TransferSuggestion } from '@/lib/ai-transfer-suggestion-engine';
-import { TransferPrompt } from '@/lib/smart-transfer-prompt-engine';
-import { TransferTiming } from '@/lib/transfer-timing-optimizer';
+import { TransferSuggestion } from '@/lib/ai/ai-transfer-suggestion-engine';
+import { TransferPrompt } from '@/lib/ai/smart-transfer-prompt-engine';
+import { TransferTiming } from '@/lib/ai/transfer-timing-optimizer';
 
 interface TransferSuggestionCardProps {
   suggestion: TransferSuggestion;

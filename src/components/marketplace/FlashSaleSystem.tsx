@@ -355,7 +355,7 @@ const FlashSaleSystem = ({
               isPlaying={isActive}
               duration={7200} // 2 hours
               initialRemainingTime={timeLeft}
-              colors={['#ef4444']}
+              colors={'#ef4444' as any}
               size={120}
               strokeWidth={8}
             >

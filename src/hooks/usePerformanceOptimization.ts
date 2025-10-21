@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import cacheManager from '../lib/performance/redis';

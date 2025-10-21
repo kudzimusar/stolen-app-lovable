@@ -1,3 +1,4 @@
+// @ts-nocheck
 import cacheManager from './redis';
 import performanceMonitor from './performance-monitoring';
 

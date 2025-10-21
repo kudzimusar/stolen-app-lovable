@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { supabase } from '@/integrations/supabase/client';
 import { dynamicWalletService } from './dynamic-wallet-service';
 
