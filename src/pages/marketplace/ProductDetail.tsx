@@ -69,19 +69,110 @@ export default function ProductDetail() {
             setListing({
               id: id,
               title: "iPhone 15 Pro Max 256GB",
-              price: 18999,
+              price: 109696,
+              currency: "ZAR",
               condition: "Like New",
               warrantyMonths: 8,
+              warrantyRemainingMonths: 8,
               brand: "Apple",
               model: "iPhone 15 Pro Max",
+              serialStatus: "clean",
+              color: "Natural Titanium",
+              storage: "256GB",
+              ram: "8GB",
+              processor: "A17 Pro",
+              screenSize: "6.7",
+              batteryHealth: 95,
               images: [],
-              seller: "TechDeals Pro",
-              sellerType: "retailer",
-              rating: 4.8,
-              location: "Johannesburg",
+              seller: {
+                id: "seller-1",
+                name: "TechDeals Pro",
+                email: "techdeals@example.com",
+                rating: 4.8,
+                totalSales: 150,
+                totalReviews: 120,
+                verificationStatus: "verified",
+                isPremium: true
+              },
+              location: "Johannesburg, Gauteng",
+              registrationLocationAddress: "Johannesburg, Gauteng",
               province: "gauteng",
               blockchainVerified: true,
-              blockchainHash: "0x1234567890abcdef"
+              blockchainHash: "0x1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z",
+              blockchainVerifiedAt: new Date().toISOString(),
+              trustScore: 94,
+              verificationLevel: "premium",
+              lastVerifiedDate: new Date().toISOString(),
+              verifications: [
+                {
+                  method: "qr_scan",
+                  verifierName: "STOLEN Platform",
+                  confidenceScore: 98,
+                  timestamp: new Date().toISOString(),
+                  status: "verified",
+                  details: ["QR Code", "Serial Number Match", "Blockchain Record"],
+                  blockchainTxId: "0x1a2b3c4d..."
+                },
+                {
+                  method: "serial_lookup",
+                  verifierName: "TechDeals Pro",
+                  confidenceScore: 95,
+                  timestamp: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+                  status: "verified",
+                  details: ["Serial Number", "Purchase Receipt"],
+                  blockchainTxId: "0xdef456..."
+                }
+              ],
+              ownershipHistory: [
+                {
+                  ownerId: "Current User",
+                  transferFrom: "Device Registration",
+                  transferDate: new Date().toISOString(),
+                  transferMethod: "registration",
+                  blockchainTxId: "0x1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z",
+                  verificationStatus: "verified"
+                }
+              ],
+              certificates: [
+                {
+                  type: "warranty",
+                  issuer: "Apple Inc.",
+                  issueDate: new Date().toISOString().split('T')[0],
+                  expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                  certificateUrl: "#",
+                  verificationStatus: "verified"
+                },
+                {
+                  type: "authenticity",
+                  issuer: "STOLEN Platform",
+                  issueDate: new Date().toISOString().split('T')[0],
+                  certificateUrl: "#",
+                  verificationStatus: "verified"
+                }
+              ],
+              repairs: [
+                {
+                  type: "Screen replacement",
+                  serviceProvider: "FixIt Pro",
+                  date: "2024-05-20",
+                  cost: 1499,
+                  description: "Screen replacement due to crack",
+                  verificationStatus: "verified"
+                }
+              ],
+              riskAssessment: {
+                riskStatus: "clean",
+                riskScore: 0,
+                riskFactors: [],
+                assessmentDate: new Date().toISOString()
+              },
+              priceHistory: [
+                {
+                  price: 109696,
+                  currency: "ZAR",
+                  recordedAt: new Date().toISOString()
+                }
+              ]
             });
           }
         } else {

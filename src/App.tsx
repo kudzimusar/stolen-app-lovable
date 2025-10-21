@@ -74,6 +74,7 @@ const AdminOnboarding = lazy(() => import("./pages/admin/AdminOnboarding"));
 import Wallet from "./pages/payment/Wallet";
 import DeviceCheck from "./pages/user/DeviceCheck";
 import DeviceRegister from "./pages/user/DeviceRegister";
+import EditDevice from "./pages/user/EditDevice";
 import DeviceDetails from "./pages/user/DeviceDetails";
 import MyDevices from "./pages/user/MyDevices";
 import CommunityBoard from "./pages/user/CommunityBoard";
@@ -158,6 +159,7 @@ const App = () => {
           <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
           <Route path="/device/check" element={<ProtectedRoute><DeviceCheck /></ProtectedRoute>} />
           <Route path="/device/register" element={<ProtectedRoute><DeviceRegister /></ProtectedRoute>} />
+          <Route path="/device/:id/edit" element={<ProtectedRoute><EditDevice /></ProtectedRoute>} />
           <Route path="/device/:id" element={<ProtectedRoute><DeviceDetails /></ProtectedRoute>} />
           <Route path="/my-devices" element={<ProtectedRoute><MyDevices /></ProtectedRoute>} />
           <Route path="/community-board" element={<ProtectedRoute><CommunityBoard /></ProtectedRoute>} />

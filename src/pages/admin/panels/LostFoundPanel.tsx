@@ -34,7 +34,8 @@ import {
   Download,
   RefreshCw,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  XCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
@@ -42,11 +43,16 @@ import { useAuth } from "@/lib/auth";
 interface LostFoundReport {
   id: string;
   device_model: string;
+  device_category?: string;
   report_type: 'lost' | 'found';
   status: string;
   verification_status: string;
   reward_amount: number;
   created_at: string;
+  claim_status?: string;
+  claim_submitted_at?: string;
+  claimant_name?: string;
+  claim_verification_notes?: string;
   users: {
     display_name: string;
     email: string;
@@ -346,9 +352,10 @@ const LostFoundPanel = () => {
     const contacted = reports.filter(r => r.status === 'contacted').length;
     const pending = reports.filter(r => r.status === 'pending_verification').length;
     const reunited = reports.filter(r => r.status === 'reunited').length;
+    const claim_pending = reports.filter(r => r.claim_status === 'claim_pending').length;
     const totalRewards = reports.reduce((sum, r) => sum + (r.reward_amount || 0), 0);
     
-    return { total, active, contacted, pending, reunited, totalRewards };
+    return { total, active, contacted, pending, reunited, claim_pending, totalRewards };
   };
 
   const stats = getStats();
@@ -362,79 +369,79 @@ const LostFoundPanel = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+    <div className="space-y-3 sm:space-y-4">
+      {/* Overview Stats - Native Mobile First */}
+      <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+        <Card className="p-2 sm:p-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-[10px] sm:text-xs font-medium truncate">Total Reports</CardTitle>
+            <Package className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">All time</p>
+          <CardContent className="pt-0">
+            <div className="text-lg sm:text-xl font-bold">{stats.total}</div>
+            <p className="text-[8px] sm:text-[10px] text-muted-foreground hidden sm:block">All time</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Reports</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+        <Card className="p-2 sm:p-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-[10px] sm:text-xs font-medium truncate">Active Reports</CardTitle>
+            <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.active}</div>
-            <p className="text-xs text-muted-foreground">Currently lost</p>
+          <CardContent className="pt-0">
+            <div className="text-lg sm:text-xl font-bold">{stats.active}</div>
+            <p className="text-[8px] sm:text-[10px] text-muted-foreground hidden sm:block">Currently lost</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Approval</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+        <Card className="p-2 sm:p-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-[10px] sm:text-xs font-medium truncate">Pending Approval</CardTitle>
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.contacted + stats.pending}</div>
-            <p className="text-xs text-muted-foreground">Awaiting action</p>
+          <CardContent className="pt-0">
+            <div className="text-lg sm:text-xl font-bold">{stats.contacted + stats.pending}</div>
+            <p className="text-[8px] sm:text-[10px] text-muted-foreground hidden sm:block">Awaiting action</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Reunited</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+        <Card className="p-2 sm:p-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-[10px] sm:text-xs font-medium truncate">Reunited</CardTitle>
+            <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.reunited}</div>
-            <p className="text-xs text-muted-foreground">Successfully returned</p>
+          <CardContent className="pt-0">
+            <div className="text-lg sm:text-xl font-bold">{stats.reunited}</div>
+            <p className="text-[8px] sm:text-[10px] text-muted-foreground hidden sm:block">Successfully returned</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Search and Filter */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Lost & Found Management</CardTitle>
-          <CardDescription>Manage device reports, rewards, and verification</CardDescription>
+      {/* Search and Filter - Native Mobile */}
+      <Card className="p-2 sm:p-4">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm sm:text-base">Lost & Found Management</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Manage device reports, rewards, and verification</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <CardContent className="pt-0">
+          <div className="flex flex-col gap-2 sm:gap-3 mb-3 sm:mb-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search devices, users..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-full border rounded-lg"
+                  className="pl-7 sm:pl-10 pr-3 py-2 w-full border rounded-lg text-xs sm:text-sm h-8 sm:h-10"
                 />
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-2 border rounded-lg"
+                className="flex-1 min-w-[120px] px-2 py-2 border rounded-lg text-xs sm:text-sm h-8 sm:h-10"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -442,25 +449,37 @@ const LostFoundPanel = () => {
                 <option value="pending_verification">Pending Verification</option>
                 <option value="reunited">Reunited</option>
               </select>
-              <Button variant="outline" size="sm" onClick={fetchReports}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
+              <Button variant="outline" size="sm" onClick={fetchReports} className="flex-shrink-0 h-8 sm:h-10 text-xs sm:text-sm">
+                <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Refresh</span>
               </Button>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+              <Button variant="outline" size="sm" className="flex-shrink-0 hidden sm:flex h-8 sm:h-10 text-xs sm:text-sm">
+                <Download className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
                 Export
               </Button>
             </div>
           </div>
 
           <Tabs defaultValue="pending" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-4">
-      <TabsTrigger value="pending" className="text-xs">Contact Received ({stats.contacted})</TabsTrigger>
-      <TabsTrigger value="claims" className="text-xs">Claims Pending ({stats.claim_pending})</TabsTrigger>
-      <TabsTrigger value="verification" className="text-xs">Awaiting Verification ({stats.pending})</TabsTrigger>
-      <TabsTrigger value="completed" className="text-xs">Successfully Reunited ({stats.reunited})</TabsTrigger>
-      <TabsTrigger value="all" className="text-xs">All Reports ({stats.total})</TabsTrigger>
-            </TabsList>
+            <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
+              <TabsList className="inline-flex w-full min-w-max sm:grid sm:w-full sm:grid-cols-5 gap-1">
+                <TabsTrigger value="pending" className="text-[10px] sm:text-xs whitespace-nowrap px-2 sm:px-3">
+                  Contact ({stats.contacted})
+                </TabsTrigger>
+                <TabsTrigger value="claims" className="text-[10px] sm:text-xs whitespace-nowrap px-2 sm:px-3">
+                  Claims ({stats.claim_pending || 0})
+                </TabsTrigger>
+                <TabsTrigger value="verification" className="text-[10px] sm:text-xs whitespace-nowrap px-2 sm:px-3">
+                  Verify ({stats.pending})
+                </TabsTrigger>
+                <TabsTrigger value="completed" className="text-[10px] sm:text-xs whitespace-nowrap px-2 sm:px-3">
+                  Reunited ({stats.reunited})
+                </TabsTrigger>
+                <TabsTrigger value="all" className="text-[10px] sm:text-xs whitespace-nowrap px-2 sm:px-3">
+                  All ({stats.total})
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="pending" className="space-y-4">
               {filteredReports.filter(r => r.status === 'contacted').map((report) => (
@@ -737,10 +756,10 @@ const LostFoundPanel = () => {
         </CardContent>
       </Card>
 
-      {/* Report Details Modal */}
+      {/* Report Details Modal - Mobile Optimized */}
       {selectedReport && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-2 sm:p-4 z-50" onClick={() => setSelectedReport(null)}>
+          <Card className="w-full max-w-2xl max-h-[90vh] sm:max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Package className="w-5 h-5" />

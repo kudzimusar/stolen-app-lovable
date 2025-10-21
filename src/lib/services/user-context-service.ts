@@ -355,7 +355,15 @@ export class UserContextService {
             this.userLocation.accuracy = accuracy;
           }
         },
-        (error) => console.log('Location watch error:', error),
+        (error) => {
+          // Silently handle expected geolocation errors (permission denied, insecure context)
+          if (error.code === 1) {
+            // Permission denied or insecure origin - expected in non-HTTPS contexts
+            return;
+          }
+          // Only log unexpected errors
+          console.warn('Location watch error:', error.message);
+        },
         { enableHighAccuracy: false, maximumAge: 600000, timeout: 10000 }
       );
     }

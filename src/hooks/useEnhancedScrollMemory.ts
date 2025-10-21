@@ -1,6 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
-import { generateUUID } from '../lib/utils';
 
 interface ScrollPosition {
   x: number;
@@ -17,6 +16,19 @@ interface ScrollMemoryOptions {
   saveToCloud?: boolean;
   elementSelector?: string;
 }
+
+// Fallback UUID generator for non-secure contexts
+const generateUUID = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for non-secure contexts
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
 
 // Enhanced global store for scroll positions
 const scrollPositions = new Map<string, ScrollPosition>();
@@ -39,13 +51,9 @@ export const useEnhancedScrollMemory = (options: ScrollMemoryOptions = {}) => {
 
   const location = useLocation();
   const navigationType = useNavigationType();
-  const locationRef = useRef(location);
   const scrollElementRef = useRef<HTMLElement | null>(null);
   const isRestoringRef = useRef(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
-
-  // Keep location ref updated synchronously - no useEffect needed
-  locationRef.current = location;
 
   // Get scroll element
   const getScrollElement = useCallback(() => {
@@ -55,7 +63,7 @@ export const useEnhancedScrollMemory = (options: ScrollMemoryOptions = {}) => {
     return scrollElementRef.current || document.documentElement;
   }, [elementSelector]);
 
-  // Enhanced save with cloud sync capability - using ref to avoid dependency loop
+  // Enhanced save with cloud sync capability
   const saveScrollPosition = useCallback(async () => {
     if (!enabled) return;
     
@@ -70,17 +78,17 @@ export const useEnhancedScrollMemory = (options: ScrollMemoryOptions = {}) => {
       deviceId
     };
     
-    // Save to memory using current location from ref
-    scrollPositions.set(locationRef.current.pathname, position);
+    // Save to memory
+    scrollPositions.set(location.pathname, position);
     
     // Save to localStorage for session persistence
     if (persistAcrossSessions) {
       try {
-        const storageKey = `scroll-memory-${locationRef.current.pathname}`;
+        const storageKey = `scroll-memory-${location.pathname}`;
         localStorage.setItem(storageKey, JSON.stringify(position));
         
         // Also save to session history for back/forward navigation
-        sessionStorage.setItem(`scroll-session-${locationRef.current.pathname}`, JSON.stringify(position));
+        sessionStorage.setItem(`scroll-session-${location.pathname}`, JSON.stringify(position));
       } catch (error) {
         console.warn('Failed to save scroll position to storage:', error);
       }
@@ -90,12 +98,12 @@ export const useEnhancedScrollMemory = (options: ScrollMemoryOptions = {}) => {
     if (saveToCloud && syncAcrossDevices) {
       try {
         // TODO: Implement cloud sync with Supabase
-        await syncScrollPositionToCloud(locationRef.current.pathname, position);
+        await syncScrollPositionToCloud(location.pathname, position);
       } catch (error) {
         console.warn('Failed to sync scroll position to cloud:', error);
       }
     }
-  }, [enabled, persistAcrossSessions, saveToCloud, syncAcrossDevices, getScrollElement]);
+  }, [enabled, location.pathname, persistAcrossSessions, saveToCloud, syncAcrossDevices, getScrollElement]);
 
   // Enhanced restore with cloud sync
   const restoreScrollPosition = useCallback(async () => {

@@ -190,9 +190,9 @@ const MarketplacePanel = () => {
   );
 
   return (
-    <div className="space-y-6">
-      {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-3 sm:space-y-4">
+      {/* Overview Stats - Native Mobile First */}
+      <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Listings</CardTitle>
@@ -204,89 +204,171 @@ const MarketplacePanel = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Sales</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+        <Card className="p-2 sm:p-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-[10px] sm:text-xs font-medium truncate">Active Sales</CardTitle>
+            <Package className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.activeSales}</div>
-            <p className="text-xs text-muted-foreground">Approved and live</p>
+          <CardContent className="pt-0">
+            <div className="text-lg sm:text-xl font-bold">{stats.activeSales}</div>
+            <p className="text-[8px] sm:text-[10px] text-muted-foreground hidden sm:block">Approved and live</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+        <Card className="p-2 sm:p-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-[10px] sm:text-xs font-medium truncate">Total Revenue</CardTitle>
+            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">R{stats.totalRevenue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">From approved listings</p>
+          <CardContent className="pt-0">
+            <div className="text-lg sm:text-xl font-bold">R{stats.totalRevenue.toLocaleString()}</div>
+            <p className="text-[8px] sm:text-[10px] text-muted-foreground hidden sm:block">From approved listings</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+        <Card className="p-2 sm:p-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-[10px] sm:text-xs font-medium truncate">Pending Reviews</CardTitle>
+            <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.pendingReviews}</div>
-            <p className="text-xs text-muted-foreground">Awaiting approval</p>
+          <CardContent className="pt-0">
+            <div className="text-lg sm:text-xl font-bold">{stats.pendingReviews}</div>
+            <p className="text-[8px] sm:text-[10px] text-muted-foreground hidden sm:block">Awaiting approval</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Marketplace Management */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Marketplace Management</CardTitle>
-          <CardDescription>Review and manage marketplace listings</CardDescription>
+      {/* Marketplace Management - Native Mobile */}
+      <Card className="p-2 sm:p-4">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm sm:text-base">Marketplace Management</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Review and manage marketplace listings</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <Tabs value={selectedStatus} onValueChange={setSelectedStatus}>
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="pending">Pending</TabsTrigger>
-              <TabsTrigger value="approved">Approved</TabsTrigger>
-              <TabsTrigger value="rejected">Rejected</TabsTrigger>
-            </TabsList>
+            <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
+              <TabsList className="inline-flex w-full min-w-max sm:grid sm:w-full sm:grid-cols-4 gap-1">
+                <TabsTrigger value="all" className="text-[9px] sm:text-xs whitespace-nowrap px-2 sm:px-3 py-1">
+                  All
+                </TabsTrigger>
+                <TabsTrigger value="pending" className="text-[9px] sm:text-xs whitespace-nowrap px-2 sm:px-3 py-1">
+                  Pending
+                </TabsTrigger>
+                <TabsTrigger value="approved" className="text-[9px] sm:text-xs whitespace-nowrap px-2 sm:px-3 py-1">
+                  Approved
+                </TabsTrigger>
+                <TabsTrigger value="rejected" className="text-[9px] sm:text-xs whitespace-nowrap px-2 sm:px-3 py-1">
+                  Rejected
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-            <TabsContent value={selectedStatus} className="space-y-4">
-              {/* Search and Filter */}
-              <div className="flex gap-4">
+            <TabsContent value={selectedStatus} className="space-y-3">
+              {/* Search and Filter - Native Mobile */}
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3 sm:h-4 sm:w-4" />
                   <Input
                     placeholder="Search listings..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-7 sm:pl-10 h-8 sm:h-10 text-xs sm:text-sm"
                   />
                 </div>
                 <Button 
                   variant="outline" 
                   onClick={() => fetchListings(selectedStatus)}
                   disabled={loading}
+                  size="sm"
+                  className="h-8 sm:h-10 text-xs sm:text-sm"
                 >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh
+                  <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 ${loading ? 'animate-spin' : ''} sm:mr-2`} />
+                  <span className="hidden sm:inline">Refresh</span>
                 </Button>
               </div>
 
-              {/* Listings Table */}
-              <div className="border rounded-lg">
+              {/* Listings Table - Native Mobile Cards */}
+              <div className="space-y-2 sm:hidden">
+                {/* Mobile Card View */}
+                {loading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                    <span className="text-xs">Loading...</span>
+                  </div>
+                ) : filteredListings.length === 0 ? (
+                  <div className="text-center py-4 text-gray-500 text-xs">No listings found</div>
+                ) : (
+                  filteredListings.map((listing) => (
+                    <Card key={listing.id} className="p-3">
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-xs font-medium truncate">{listing.title}</h3>
+                            <p className="text-[10px] text-gray-500">{listing.brand} {listing.model}</p>
+                          </div>
+                          <Badge 
+                            variant={
+                              listing.status === 'approved' ? 'default' :
+                              listing.status === 'pending' ? 'secondary' :
+                              'destructive'
+                            }
+                            className="text-[9px]"
+                          >
+                            {listing.status}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between items-center text-[10px] text-gray-500">
+                          <span>{listing.seller.name}</span>
+                          <span className="font-medium">R{listing.price.toLocaleString()}</span>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(`/marketplace/product/${listing.id}`, '_blank')}
+                            className="h-6 text-[9px] flex-1"
+                          >
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                          {listing.status === 'pending' && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => approveListing(listing.id)}
+                                className="h-6 text-[9px] text-green-600 border-green-300 flex-1"
+                              >
+                                <CheckCircle className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => rejectListing(listing.id)}
+                                className="h-6 text-[9px] text-red-600 border-red-300 flex-1"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  ))
+                )}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden sm:block border rounded-lg">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Listing</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Seller</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Listing</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Seller</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -306,51 +388,53 @@ const MarketplacePanel = () => {
                       ) : (
                         filteredListings.map((listing) => (
                           <tr key={listing.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-3">
+                            <td className="px-3 py-2">
                               <div>
-                                <div className="font-medium">{listing.title}</div>
-                                <div className="text-sm text-gray-500">
+                                <div className="font-medium text-sm">{listing.title}</div>
+                                <div className="text-xs text-gray-500">
                                   {listing.brand} {listing.model}
                                 </div>
                               </div>
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-3 py-2">
                               <div className="flex items-center gap-2">
-                                <User className="h-4 w-4 text-gray-400" />
+                                <User className="h-3 w-3 text-gray-400" />
                                 <div>
-                                  <div className="font-medium">{listing.seller.name}</div>
-                                  <div className="text-sm text-gray-500">{listing.seller.email}</div>
+                                  <div className="font-medium text-sm">{listing.seller.name}</div>
+                                  <div className="text-xs text-gray-500">{listing.seller.email}</div>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-4 py-3">
-                              <div className="font-medium">R{listing.price.toLocaleString()}</div>
+                            <td className="px-3 py-2">
+                              <div className="font-medium text-sm">R{listing.price.toLocaleString()}</div>
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-3 py-2">
                               <Badge 
                                 variant={
                                   listing.status === 'approved' ? 'default' :
                                   listing.status === 'pending' ? 'secondary' :
                                   'destructive'
                                 }
+                                className="text-xs"
                               >
                                 {listing.status}
                               </Badge>
                             </td>
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-2 text-sm text-gray-500">
-                                <Clock className="h-4 w-4" />
+                            <td className="px-3 py-2">
+                              <div className="flex items-center gap-1 text-xs text-gray-500">
+                                <Clock className="h-3 w-3" />
                                 {new Date(listing.createdAt).toLocaleDateString()}
                               </div>
                             </td>
-                            <td className="px-4 py-3">
-                              <div className="flex gap-2">
+                            <td className="px-3 py-2">
+                              <div className="flex gap-1">
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => window.open(`/marketplace/product/${listing.id}`, '_blank')}
+                                  className="h-7 w-7 p-0"
                                 >
-                                  <Eye className="h-4 w-4" />
+                                  <Eye className="h-3 w-3" />
                                 </Button>
                                 {listing.status === 'pending' && (
                                   <>
@@ -358,17 +442,17 @@ const MarketplacePanel = () => {
                                       variant="outline"
                                       size="sm"
                                       onClick={() => approveListing(listing.id)}
-                                      className="text-green-600 hover:text-green-700"
+                                      className="h-7 w-7 p-0 text-green-600 hover:text-green-700"
                                     >
-                                      <CheckCircle className="h-4 w-4" />
+                                      <CheckCircle className="h-3 w-3" />
                                     </Button>
                                     <Button
                                       variant="outline"
                                       size="sm"
                                       onClick={() => rejectListing(listing.id)}
-                                      className="text-red-600 hover:text-red-700"
+                                      className="h-7 w-7 p-0 text-red-600 hover:text-red-700"
                                     >
-                                      <X className="h-4 w-4" />
+                                      <X className="h-3 w-3" />
                                     </Button>
                                   </>
                                 )}

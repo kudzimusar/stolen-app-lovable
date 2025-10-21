@@ -1,5 +1,18 @@
 import { TransferSuggestion, DeviceAnalysis, UserBehavior, MarketData } from './ai-transfer-suggestion-engine';
 
+// Fallback UUID generator for non-secure contexts
+const generateUUID = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for non-secure contexts
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 // Types for Smart Transfer Prompts
 export interface TransferPrompt {
   id: string;
@@ -78,7 +91,7 @@ export class SmartTransferPromptEngine {
       const personalization = this.applyPersonalizationRules(suggestion, context);
       
       return {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         title: this.personalizeTitle(suggestion, context),
         message: this.personalizeMessage(suggestion, context),
         suggestion: suggestion.recommendedAction,
@@ -154,7 +167,7 @@ export class SmartTransferPromptEngine {
     const template = this.getPromptTemplate(suggestion.suggestionType, context);
     
     return {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       title: this.interpolateTemplate(template.title, suggestion, context),
       message: this.interpolateTemplate(template.message, suggestion, context),
       suggestion: suggestion.recommendedAction,

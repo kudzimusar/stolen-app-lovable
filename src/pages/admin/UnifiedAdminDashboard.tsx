@@ -95,16 +95,17 @@ const UnifiedAdminDashboard = () => {
         const { supabase } = await import('@/integrations/supabase/client');
         
         // Call the comprehensive admin stats function
-        const { data: statsData, error: statsError } = await supabase
+        // @ts-ignore - function exists in database but may not be in type definitions
+        const { data: statsData, error: statsError } = await (supabase as any)
           .rpc('get_comprehensive_admin_stats');
 
         if (!statsError && statsData) {
           console.log('✅ Admin stats fetched from database:', statsData);
           
-          const userStats = statsData.user_stats || {};
-          const deviceStats = statsData.device_stats || {};
-          const lostFoundStats = statsData.lost_found_stats || {};
-          const financialStats = statsData.financial_stats || {};
+          const userStats = (statsData as any).user_stats || {};
+          const deviceStats = (statsData as any).device_stats || {};
+          const lostFoundStats = (statsData as any).lost_found_stats || {};
+          const financialStats = (statsData as any).financial_stats || {};
 
           setStats({
             totalUsers: userStats.total_users || 0,
@@ -285,135 +286,128 @@ const UnifiedAdminDashboard = () => {
   };
 
   const renderOverviewPanel = () => (
-    <div className="space-y-6">
-      {/* Super Admin Welcome */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-100 border border-blue-200 rounded-lg p-6">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-            <Shield className="h-6 w-6 text-white" />
+    <div className="space-y-4 sm:space-y-6">
+      {/* Super Admin Welcome - Mobile Optimized */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-100 border border-blue-200 rounded-lg p-4 sm:p-6">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+            <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
-          <div>
-            <h2 className="text-2xl font-bold text-blue-900">Super Admin Dashboard</h2>
-            <p className="text-blue-700">Complete system oversight and management</p>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-900">Super Admin Dashboard</h2>
+            <p className="text-xs sm:text-sm text-blue-700 hidden sm:block">Complete system oversight and management</p>
+            <p className="text-xs text-blue-700 sm:hidden">System management</p>
           </div>
         </div>
       </div>
 
-      {/* Key Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200">
-          <CardContent className="p-4">
+      {/* Key Metrics Grid - Native Mobile First */}
+      <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+        <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200 p-2 sm:p-3">
+          <CardContent className="pt-0">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-800">Total Users</p>
-                <p className="text-2xl font-bold text-blue-900">{stats?.totalUsers?.toLocaleString() || '0'}</p>
-                <p className="text-xs text-blue-600">+12% from last month</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-xs font-medium text-blue-800 truncate">Total Users</p>
+                <p className="text-lg sm:text-xl font-bold text-blue-900">{stats?.totalUsers?.toLocaleString() || '0'}</p>
+                <p className="text-[8px] sm:text-[10px] text-blue-600 hidden sm:block">+12% from last month</p>
               </div>
-              <Users className="h-8 w-8 text-blue-600" />
+              <Users className="h-4 w-4 sm:h-6 sm:w-6 text-blue-600 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-50 to-red-100 border-orange-200">
-          <CardContent className="p-4">
+        <Card className="bg-gradient-to-br from-orange-50 to-red-100 border-orange-200 p-2 sm:p-3">
+          <CardContent className="pt-0">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-800">Active Reports</p>
-                <p className="text-2xl font-bold text-orange-900">{stats?.activeReports || 0}</p>
-                <p className="text-xs text-orange-600">+8% from last week</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-xs font-medium text-orange-800 truncate">Active Reports</p>
+                <p className="text-lg sm:text-xl font-bold text-orange-900">{stats?.activeReports || 0}</p>
+                <p className="text-[8px] sm:text-[10px] text-orange-600 hidden sm:block">+8% from last week</p>
               </div>
-              <Package className="h-8 w-8 text-orange-600" />
+              <Package className="h-4 w-4 sm:h-6 sm:w-6 text-orange-600 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200">
-          <CardContent className="p-4">
+        <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200 p-2 sm:p-3">
+          <CardContent className="pt-0">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-800">Revenue</p>
-                <p className="text-2xl font-bold text-green-900">R{stats?.revenue?.toLocaleString() || '0'}</p>
-                <p className="text-xs text-green-600">+23% from last month</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-xs font-medium text-green-800 truncate">Revenue</p>
+                <p className="text-lg sm:text-xl font-bold text-green-900">R{stats?.revenue?.toLocaleString() || '0'}</p>
+                <p className="text-[8px] sm:text-[10px] text-green-600 hidden sm:block">+23% from last month</p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
+              <DollarSign className="h-4 w-4 sm:h-6 sm:w-6 text-green-600 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-violet-100 border-purple-200">
-          <CardContent className="p-4">
+        <Card className="bg-gradient-to-br from-purple-50 to-violet-100 border-purple-200 p-2 sm:p-3">
+          <CardContent className="pt-0">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-800">Recovery Rate</p>
-                <p className="text-2xl font-bold text-purple-900">{stats?.recoveryRate || 0}%</p>
-                <p className="text-xs text-purple-600">+5% from last month</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-xs font-medium text-purple-800 truncate">Recovery Rate</p>
+                <p className="text-lg sm:text-xl font-bold text-purple-900">{stats?.recoveryRate || 0}%</p>
+                <p className="text-[8px] sm:text-[10px] text-purple-600 hidden sm:block">+5% from last month</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-purple-600" />
+              <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-purple-600 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
         {/* Pending Claims Card */}
-        <Card className="bg-red-50 border-red-200">
-          <CardContent className="p-6">
+        <Card className="bg-red-50 border-red-200 p-2 sm:p-3">
+          <CardContent className="pt-0">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-red-800">Pending Claims</p>
-                <p className="text-2xl font-bold text-red-900">{stats?.pendingClaims || 0}</p>
-                <p className="text-xs text-red-600">Awaiting admin review</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-xs font-medium text-red-800 truncate">Pending Claims</p>
+                <p className="text-lg sm:text-xl font-bold text-red-900">{stats?.pendingClaims || 0}</p>
+                <p className="text-[8px] sm:text-[10px] text-red-600 hidden sm:block">Awaiting admin review</p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-red-600" />
+              <AlertTriangle className="h-4 w-4 sm:h-6 sm:w-6 text-red-600 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick Actions Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card className="cursor-pointer hover:shadow-md transition-all">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Package className="h-8 w-8 text-orange-600" />
-              <div>
-                <h3 className="font-semibold">Approve Pending Reports</h3>
-                <p className="text-sm text-muted-foreground">{stats?.pendingApprovals || 0} pending reports</p>
-              </div>
+      {/* Quick Actions Grid - Native Mobile First */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+        <Card className="cursor-pointer hover:shadow-md transition-all active:scale-95 touch-manipulation" onClick={() => setActivePanel('lost-found')}>
+          <CardContent className="p-2 sm:p-3">
+            <div className="flex flex-col items-center gap-1 sm:gap-2 text-center">
+              <Package className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600 flex-shrink-0" />
+              <h3 className="font-semibold text-[10px] sm:text-xs truncate">Approve Reports</h3>
+              <p className="text-[8px] sm:text-[10px] text-muted-foreground">{stats?.pendingApprovals || 0} pending</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-md transition-all">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="h-8 w-8 text-red-600" />
-              <div>
-                <h3 className="font-semibold">Review Device Claims</h3>
-                <p className="text-sm text-muted-foreground">{stats?.pendingClaims || 0} pending claims</p>
-              </div>
+        <Card className="cursor-pointer hover:shadow-md transition-all active:scale-95 touch-manipulation" onClick={() => setActivePanel('lost-found')}>
+          <CardContent className="p-2 sm:p-3">
+            <div className="flex flex-col items-center gap-1 sm:gap-2 text-center">
+              <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 flex-shrink-0" />
+              <h3 className="font-semibold text-[10px] sm:text-xs truncate">Review Claims</h3>
+              <p className="text-[8px] sm:text-[10px] text-muted-foreground">{stats?.pendingClaims || 0} pending</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-md transition-all">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <DollarSign className="h-8 w-8 text-green-600" />
-              <div>
-                <h3 className="font-semibold">Process Rewards</h3>
-                <p className="text-sm text-muted-foreground">Manage reward claims</p>
-              </div>
+        <Card className="cursor-pointer hover:shadow-md transition-all active:scale-95 touch-manipulation" onClick={() => setActivePanel('financial')}>
+          <CardContent className="p-2 sm:p-3">
+            <div className="flex flex-col items-center gap-1 sm:gap-2 text-center">
+              <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 flex-shrink-0" />
+              <h3 className="font-semibold text-[10px] sm:text-xs truncate">Process Rewards</h3>
+              <p className="text-[8px] sm:text-[10px] text-muted-foreground">Manage claims</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-md transition-all">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Shield className="h-8 w-8 text-red-600" />
-              <div>
-                <h3 className="font-semibold">Security Review</h3>
-                <p className="text-sm text-muted-foreground">Monitor security alerts</p>
-              </div>
+        <Card className="cursor-pointer hover:shadow-md transition-all active:scale-95 touch-manipulation" onClick={() => setActivePanel('security')}>
+          <CardContent className="p-2 sm:p-3">
+            <div className="flex flex-col items-center gap-1 sm:gap-2 text-center">
+              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 flex-shrink-0" />
+              <h3 className="font-semibold text-[10px] sm:text-xs truncate">Security Review</h3>
+              <p className="text-[8px] sm:text-[10px] text-muted-foreground">Monitor alerts</p>
             </div>
           </CardContent>
         </Card>
@@ -489,22 +483,22 @@ const UnifiedAdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-              <p className="text-muted-foreground">
-                Welcome back, {user?.user_metadata?.full_name || 'Super Admin'} ({userRole.name})
+      {/* Header - Mobile Optimized */}
+      <div className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold truncate">Admin Dashboard</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                Welcome, {user?.user_metadata?.full_name || 'Super Admin'}
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm" onClick={fetchDashboardData}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
+            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+              <Button variant="outline" size="sm" onClick={fetchDashboardData} className="w-auto">
+                <RefreshCw className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Refresh</span>
               </Button>
-              <Badge variant="secondary">
+              <Badge variant="secondary" className="whitespace-nowrap text-xs">
                 {stats?.pendingApprovals || 0} pending
               </Badge>
             </div>
@@ -512,28 +506,74 @@ const UnifiedAdminDashboard = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6">
-        <Tabs value={activePanel} onValueChange={setActivePanel} className="space-y-6">
-          {/* Navigation Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <Tabs value={activePanel} onValueChange={setActivePanel} className="space-y-4 sm:space-y-6">
+          {/* Navigation Grid - Mobile First */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-3">
             {getNavigationItems().map((item) => (
               <Card 
                 key={item.id}
-                className={`cursor-pointer transition-all hover:shadow-md ${item.color} ${
-                  activePanel === item.id ? 'ring-2 ring-primary' : ''
+                className={`cursor-pointer transition-all hover:shadow-md active:scale-95 touch-manipulation ${item.color} ${
+                  activePanel === item.id ? 'ring-2 ring-primary shadow-md' : ''
                 }`}
                 onClick={() => setActivePanel(item.id)}
               >
-                <CardContent className="p-3 text-center">
-                  <item.icon className="h-6 w-6 mx-auto mb-2" />
-                  <h3 className="font-semibold text-xs">{item.label}</h3>
+                <CardContent className="p-2 sm:p-3 text-center">
+                  <item.icon className="h-5 w-5 sm:h-6 sm:w-6 mx-auto mb-1 sm:mb-2" />
+                  <h3 className="font-semibold text-[10px] sm:text-xs leading-tight">{item.label}</h3>
                 </CardContent>
               </Card>
             ))}
           </div>
 
-          <TabsContent value={activePanel} className="space-y-6">
+          <TabsContent value={activePanel} className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
             {renderActivePanel()}
+
+            {/* Smart Alerts + Blockchain Logs + Geo Map + AI Assistant (UI placeholders) */}
+            {activePanel === "overview" && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+                {/* Smart Alerts */}
+                <Card className="p-2 sm:p-3">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm sm:text-base">Smart Alerts</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">AI-detected anomalies and risks</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0 space-y-2">
+                    <div className="text-[10px] sm:text-xs p-2 rounded border bg-yellow-50">Potential duplicate device entries detected in last hour</div>
+                    <div className="text-[10px] sm:text-xs p-2 rounded border bg-red-50">High-risk marketplace listing flagged by AI</div>
+                    <div className="text-[10px] sm:text-xs p-2 rounded border bg-blue-50">Unusual claim pattern from single account</div>
+                  </CardContent>
+                </Card>
+
+                {/* Blockchain Logs */}
+                <Card className="p-2 sm:p-3">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm sm:text-base">Blockchain Transaction Logs</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">Immutable record snapshots</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0 space-y-2">
+                    <div className="text-[10px] sm:text-xs font-mono truncate">0x5a...12f • Device transfer • 2 mins ago</div>
+                    <div className="text-[10px] sm:text-xs font-mono truncate">0x91...ae3 • Repair log update • 14 mins ago</div>
+                    <div className="text-[10px] sm:text-xs font-mono truncate">0xcc...89a • Donation certificate • 1 hr ago</div>
+                  </CardContent>
+                </Card>
+
+                {/* Geo Map + AI Assistant */}
+                <Card className="p-2 sm:p-3">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm sm:text-base">Geo Map & Gutu Admin</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">Lost/stolen hotspots & quick summaries</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0 space-y-2">
+                    <div className="h-28 sm:h-32 rounded border bg-muted flex items-center justify-center text-[10px] sm:text-xs">Map placeholder (hotspots)</div>
+                    <div className="flex gap-2">
+                      <input className="flex-1 border rounded px-2 h-8 text-xs sm:text-sm" placeholder="Ask Gutu: summarize last 24h" />
+                      <Button size="sm" variant="outline" className="h-8">Ask</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>

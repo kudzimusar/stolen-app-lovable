@@ -33,6 +33,35 @@ const STORAGE_OPTIONS = [
   { value: "Other", label: "Other" }
 ];
 
+// RAM options
+const RAM_OPTIONS = [
+  { value: "2", label: "2GB" },
+  { value: "3", label: "3GB" },
+  { value: "4", label: "4GB" },
+  { value: "6", label: "6GB" },
+  { value: "8", label: "8GB" },
+  { value: "12", label: "12GB" },
+  { value: "16", label: "16GB" },
+  { value: "32", label: "32GB" },
+  { value: "64", label: "64GB" },
+  { value: "Other", label: "Other" }
+];
+
+// Processor options (common ones)
+const PROCESSOR_OPTIONS = [
+  { value: "A17 Pro", label: "Apple A17 Pro" },
+  { value: "A16 Bionic", label: "Apple A16 Bionic" },
+  { value: "A15 Bionic", label: "Apple A15 Bionic" },
+  { value: "A14 Bionic", label: "Apple A14 Bionic" },
+  { value: "A13 Bionic", label: "Apple A13 Bionic" },
+  { value: "Snapdragon 8 Gen 3", label: "Snapdragon 8 Gen 3" },
+  { value: "Snapdragon 8 Gen 2", label: "Snapdragon 8 Gen 2" },
+  { value: "Snapdragon 8 Gen 1", label: "Snapdragon 8 Gen 1" },
+  { value: "Exynos 2400", label: "Exynos 2400" },
+  { value: "MediaTek Dimensity 9300", label: "MediaTek Dimensity 9300" },
+  { value: "Other", label: "Other" }
+];
+
 // Device condition options
 const CONDITION_OPTIONS = [
   { value: "Excellent", label: "Excellent - Like new, no visible wear" },
@@ -40,6 +69,14 @@ const CONDITION_OPTIONS = [
   { value: "Good", label: "Good - Some wear, fully functional" },
   { value: "Fair", label: "Fair - Noticeable wear, fully functional" },
   { value: "Poor", label: "Poor - Heavy wear or damage" }
+];
+
+// Acquisition method options
+const ACQUISITION_OPTIONS = [
+  { value: "purchase", label: "Purchase - Bought new or used" },
+  { value: "gift", label: "Gift - Received as a gift" },
+  { value: "inheritance", label: "Inheritance - Inherited from family" },
+  { value: "trade", label: "Trade/Exchange - Traded for another item" }
 ];
 
 const DeviceRegister = () => {
@@ -77,13 +114,22 @@ const DeviceRegister = () => {
     model: "",
     brand: "",
     deviceType: "",
+    color: "", // Device color
     storageCapacity: "", // e.g., "128GB", "256GB", "512GB", "1TB"
+    ramGb: "", // RAM in GB
+    processor: "", // Processor type
+    screenSizeInch: "", // Screen size in inches
+    batteryHealthPercentage: "", // Battery health percentage
     deviceCondition: "", // Excellent, Very Good, Good, Fair, Poor
     warrantyMonths: "", // Remaining warranty duration in months
     purchaseDate: "",
     purchasePrice: "",
     purchaseLocation: "",
     description: "",
+    // NEW FIELDS for ownership history
+    deviceOrigin: "", // Where you got the device (e.g., "Apple Store Sandton")
+    previousOwner: "", // Previous owner name (if applicable)
+    acquisitionMethod: "", // How you got it: purchase, gift, inheritance, trade
     enableLocation: false,
     // Document uploads with systematic categorization
     photos: [] as UploadedFile[], // Device photos
@@ -149,13 +195,21 @@ const DeviceRegister = () => {
         deviceName: formData.deviceName,
         brand: formData.brand,
         model: formData.model || formData.deviceName || formData.deviceType, // Ensure model is never empty
-        color: formData.description || undefined,
+        color: formData.color || formData.description || undefined,
         purchaseDate: formData.purchaseDate || undefined,
         purchasePrice: formData.purchasePrice ? parseFloat(formData.purchasePrice.toString().replace(/[^0-9.]/g, '')) : undefined,
-        // New marketplace-ready fields
+        // Complete device specifications
         storageCapacity: formData.storageCapacity || undefined,
+        ramGb: formData.ramGb ? parseInt(formData.ramGb) : undefined,
+        processor: formData.processor || undefined,
+        screenSizeInch: formData.screenSizeInch ? parseFloat(formData.screenSizeInch) : undefined,
+        batteryHealthPercentage: formData.batteryHealthPercentage ? parseInt(formData.batteryHealthPercentage) : undefined,
         deviceCondition: formData.deviceCondition || undefined,
         warrantyMonths: formData.warrantyMonths ? parseInt(formData.warrantyMonths) : undefined,
+        // NEW: Ownership history fields
+        deviceOrigin: formData.deviceOrigin || undefined,
+        previousOwner: formData.previousOwner || undefined,
+        acquisitionMethod: formData.acquisitionMethod || "purchase",
         // Systematic document categorization
         devicePhotos: formData.photos?.map(photo => photo.url).filter(url => url) || [],
         proofOfPurchaseUrl: formData.receipt?.url || undefined,
@@ -210,13 +264,21 @@ const DeviceRegister = () => {
         model: "",
         brand: "",
         deviceType: "",
+        color: "",
         storageCapacity: "",
+        ramGb: "",
+        processor: "",
+        screenSizeInch: "",
+        batteryHealthPercentage: "",
         deviceCondition: "",
         warrantyMonths: "",
         purchaseDate: "",
         purchasePrice: "",
         purchaseLocation: "",
         description: "",
+        deviceOrigin: "",
+        previousOwner: "",
+        acquisitionMethod: "",
         enableLocation: false,
         // Clear all document uploads
         photos: [] as UploadedFile[],
@@ -338,6 +400,16 @@ const DeviceRegister = () => {
               </div>
               
               <div className="space-y-2">
+                <Label htmlFor="color">Color</Label>
+                <Input
+                  id="color"
+                  placeholder="e.g., Space Gray, Midnight, Natural Titanium"
+                  value={formData.color}
+                  onChange={(e) => setFormData({...formData, color: e.target.value})}
+                />
+              </div>
+              
+              <div className="space-y-2">
                 <Label htmlFor="storageCapacity">Storage Capacity</Label>
                 <EnhancedSelect
                   placeholder="Select storage capacity"
@@ -345,6 +417,54 @@ const DeviceRegister = () => {
                   value={formData.storageCapacity}
                   onValueChange={(value) => setFormData({...formData, storageCapacity: value})}
                 />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="ramGb">RAM (Memory)</Label>
+                <EnhancedSelect
+                  placeholder="Select RAM capacity"
+                  options={RAM_OPTIONS}
+                  value={formData.ramGb}
+                  onValueChange={(value) => setFormData({...formData, ramGb: value})}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="processor">Processor</Label>
+                <EnhancedSelect
+                  placeholder="Select processor"
+                  options={PROCESSOR_OPTIONS}
+                  value={formData.processor}
+                  onValueChange={(value) => setFormData({...formData, processor: value})}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="screenSizeInch">Screen Size (inches)</Label>
+                <Input
+                  id="screenSizeInch"
+                  type="number"
+                  step="0.1"
+                  placeholder="e.g., 6.7"
+                  value={formData.screenSizeInch}
+                  onChange={(e) => setFormData({...formData, screenSizeInch: e.target.value})}
+                  min="3"
+                  max="20"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="batteryHealthPercentage">Battery Health (%)</Label>
+                <Input
+                  id="batteryHealthPercentage"
+                  type="number"
+                  placeholder="e.g., 95"
+                  value={formData.batteryHealthPercentage}
+                  onChange={(e) => setFormData({...formData, batteryHealthPercentage: e.target.value})}
+                  min="0"
+                  max="100"
+                />
+                <p className="text-xs text-muted-foreground">Check in Settings {'>'} Battery {'>'} Battery Health</p>
               </div>
               
               <div className="space-y-2">
@@ -370,6 +490,39 @@ const DeviceRegister = () => {
                   max="120"
                 />
                 <p className="text-xs text-muted-foreground">Enter 0 if warranty has expired or leave empty if unknown</p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="deviceOrigin">Where did you get this device?</Label>
+                <Input
+                  id="deviceOrigin"
+                  placeholder="e.g., Apple Store Sandton, Takealot Online, Private Seller"
+                  value={formData.deviceOrigin}
+                  onChange={(e) => setFormData({...formData, deviceOrigin: e.target.value})}
+                />
+                <p className="text-xs text-muted-foreground">This helps build ownership history and trust</p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="acquisitionMethod">How did you acquire it?</Label>
+                <EnhancedSelect
+                  placeholder="Select acquisition method"
+                  options={ACQUISITION_OPTIONS}
+                  value={formData.acquisitionMethod}
+                  onValueChange={(value) => setFormData({...formData, acquisitionMethod: value})}
+                />
+                <p className="text-xs text-muted-foreground">Helps verify ownership chain</p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="previousOwner">Previous Owner (if applicable)</Label>
+                <Input
+                  id="previousOwner"
+                  placeholder="e.g., John Doe, or leave empty for new device"
+                  value={formData.previousOwner}
+                  onChange={(e) => setFormData({...formData, previousOwner: e.target.value})}
+                />
+                <p className="text-xs text-muted-foreground">Leave empty if this is a brand new device</p>
               </div>
             </div>
           </div>

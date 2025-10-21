@@ -32,6 +32,10 @@ interface DeviceRegistrationRequest {
   registrationLocationAddress?: string;
   registrationLocationLat?: number;
   registrationLocationLng?: number;
+  // NEW: Ownership history fields
+  deviceOrigin?: string;
+  previousOwner?: string;
+  acquisitionMethod?: string;
 }
 
 serve(async (req) => {
@@ -184,14 +188,15 @@ serve(async (req) => {
         device_id: newDevice.id,
         owner_id: user.id,
         previous_owner_id: null,
-        transfer_from_entity: deviceData.brand + " Store",
+        transfer_from_entity: deviceData.deviceOrigin || (deviceData.brand + " Store") || "Initial Registration",
         transfer_date: deviceData.purchaseDate || new Date().toISOString(),
-        transfer_method: "purchase",
+        transfer_method: deviceData.acquisitionMethod || "purchase",
         blockchain_tx_id: blockchainHash,
         verification_status: blockchainVerified ? "verified" : "pending",
         receipt_url: deviceData.proofOfPurchaseUrl,
         warranty_card_url: deviceData.warrantyDocumentUrl,
-        certificate_url: deviceData.registrationCertificateUrl
+        certificate_url: deviceData.registrationCertificateUrl,
+        ownership_proof_url: deviceData.proofOfPurchaseUrl
       });
 
     if (ownershipError) {

@@ -22,7 +22,8 @@ import {
   Share2,
   Download,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  Edit
 } from "lucide-react";
 
 // Utility function to hash serial numbers for security (reused from Lost & Found feature)
@@ -311,6 +312,15 @@ const DeviceDetails = () => {
             <div className="flex-1 space-y-2">
               <div className="flex items-center justify-between">
                 <h1 className="text-xl font-bold">{device.device_name}</h1>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to={`/device/${id}/edit`}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Device
+                  </Link>
+                </Button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div></div>
                 {getStatusBadge(device.status)}
               </div>
               

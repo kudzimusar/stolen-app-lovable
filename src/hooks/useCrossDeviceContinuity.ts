@@ -1,6 +1,5 @@
-import { useEffect, useCallback, useState, useRef } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { generateUUID } from '../lib/utils';
 
 interface UserSession {
   deviceId: string;
@@ -21,6 +20,19 @@ interface DeviceContinuityOptions {
   autoSync?: boolean;
   onDeviceSwitch?: (previousDevice: UserSession) => void;
 }
+
+// Fallback UUID generator for non-secure contexts
+const generateUUID = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for non-secure contexts
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
 
 // Device fingerprinting for better continuity
 const generateDeviceFingerprint = (): string => {
@@ -63,21 +75,17 @@ export const useCrossDeviceContinuity = (options: DeviceContinuityOptions = {}) 
   } = options;
 
   const location = useLocation();
-  const locationRef = useRef(location);
   const [currentSession, setCurrentSession] = useState<UserSession | null>(null);
   const [connectedDevices, setConnectedDevices] = useState<UserSession[]>([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-  // Keep location ref updated synchronously - no useEffect needed
-  locationRef.current = location;
-
-  // Get current session data - using ref to avoid dependency issues
+  // Get current session data
   const getCurrentSession = useCallback((): UserSession => {
     return {
       deviceId,
       sessionId,
-      lastPage: locationRef.current.pathname,
-      lastAction: `viewed_${locationRef.current.pathname}`,
+      lastPage: location.pathname,
+      lastAction: `viewed_${location.pathname}`,
       scrollPosition: {
         x: window.scrollX,
         y: window.scrollY
@@ -90,7 +98,7 @@ export const useCrossDeviceContinuity = (options: DeviceContinuityOptions = {}) 
         height: window.innerHeight
       }
     };
-  }, []);
+  }, [location.pathname]);
 
   // Get form data from storage
   const getFormDataFromStorage = (): Record<string, any> => {
@@ -257,7 +265,7 @@ export const useCrossDeviceContinuity = (options: DeviceContinuityOptions = {}) 
     return `${Math.floor(hours / 24)}d ago`;
   };
 
-  // Auto-sync current session - now with stable getCurrentSession
+  // Auto-sync current session
   const autoSyncSession = useCallback(() => {
     if (!enabled || !autoSync) return;
 
@@ -295,7 +303,7 @@ export const useCrossDeviceContinuity = (options: DeviceContinuityOptions = {}) 
     checkOtherDevices();
   }, [enabled, loadOtherDeviceSessions, continueFromDevice]);
 
-  // Set up auto-sync interval - autoSyncSession is now stable
+  // Set up auto-sync interval
   useEffect(() => {
     if (!enabled || !autoSync) return;
 
@@ -303,7 +311,7 @@ export const useCrossDeviceContinuity = (options: DeviceContinuityOptions = {}) 
     return () => clearInterval(interval);
   }, [enabled, autoSync, syncInterval, autoSyncSession]);
 
-  // Sync on page change - autoSyncSession is now stable
+  // Sync on page change
   useEffect(() => {
     if (!enabled) return;
     
@@ -324,7 +332,7 @@ export const useCrossDeviceContinuity = (options: DeviceContinuityOptions = {}) 
     };
   }, []);
 
-  // Sync on before unload - autoSyncSession is now stable
+  // Sync on before unload
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (enabled) {

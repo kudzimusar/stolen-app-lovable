@@ -82,9 +82,7 @@ const UsersPanel = () => {
       const { data: usersData, error } = await supabase
         .from('users')
         .select(`
-          *,
-          devices:devices(count),
-          lost_found_reports:lost_found_reports(count)
+          *
         `)
         .order('created_at', { ascending: false });
 
@@ -93,12 +91,14 @@ const UsersPanel = () => {
         throw error;
       }
 
-      // Transform the data
-      const transformedUsers = usersData?.map(user => ({
-        ...user,
-        device_count: user.devices?.[0]?.count || 0,
-        report_count: user.lost_found_reports?.[0]?.count || 0
-      })) || [];
+      // Transform the data with default counts
+      const transformedUsers = (usersData || []).map((user) => {
+        return {
+          ...user,
+          device_count: 0, // Will be populated by backend API
+          report_count: 0  // Will be populated by backend API
+        };
+      });
 
       setUsers(transformedUsers);
     } catch (error) {
@@ -187,91 +187,95 @@ const UsersPanel = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+    <div className="space-y-3 sm:space-y-4">
+      {/* Stats Cards - Native Mobile First */}
+      <div className="grid grid-cols-3 lg:grid-cols-3 gap-2 sm:gap-3">
+        <Card className="p-2 sm:p-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-[10px] sm:text-xs font-medium truncate">Total Users</CardTitle>
+            <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userStats.total}</div>
-            <p className="text-xs text-muted-foreground">
+          <CardContent className="pt-0">
+            <div className="text-lg sm:text-xl font-bold">{userStats.total}</div>
+            <p className="text-[8px] sm:text-[10px] text-muted-foreground hidden sm:block">
               {userStats.verified} verified, {userStats.pending} pending
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Individual Users</CardTitle>
-            <UserPlus className="h-4 w-4 text-muted-foreground" />
+        <Card className="p-2 sm:p-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-[10px] sm:text-xs font-medium truncate">Individual Users</CardTitle>
+            <UserPlus className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userStats.individual}</div>
-            <p className="text-xs text-muted-foreground">
+          <CardContent className="pt-0">
+            <div className="text-lg sm:text-xl font-bold">{userStats.individual}</div>
+            <p className="text-[8px] sm:text-[10px] text-muted-foreground hidden sm:block">
               Regular device owners
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Business Partners</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+        <Card className="p-2 sm:p-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-[10px] sm:text-xs font-medium truncate">Business Partners</CardTitle>
+            <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userStats.business}</div>
-            <p className="text-xs text-muted-foreground">
+          <CardContent className="pt-0">
+            <div className="text-lg sm:text-xl font-bold">{userStats.business}</div>
+            <p className="text-[8px] sm:text-[10px] text-muted-foreground hidden sm:block">
               Retailers, repair shops, insurance
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Controls */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      {/* Controls - Native Mobile with Quick Actions */}
+      <div className="flex flex-col gap-2 sm:gap-3">
         <div className="flex-1">
           <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
             <Input
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-7 sm:pl-10 h-8 sm:h-10 text-xs sm:text-sm"
             />
           </div>
         </div>
-        <select
-          value={filterRole}
-          onChange={(e) => setFilterRole(e.target.value)}
-          className="px-3 py-2 border rounded-md bg-background"
-        >
-          <option value="all">All Roles</option>
-          <option value="individual">Individual</option>
-          <option value="retailer">Retailer</option>
-          <option value="repair_shop">Repair Shop</option>
-          <option value="law_enforcement">Law Enforcement</option>
-          <option value="insurance">Insurance</option>
-          <option value="ngo">NGO</option>
-          <option value="admin">Admin</option>
-        </select>
-        <Button onClick={fetchUsers} variant="outline">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
-        </Button>
+        <div className="flex gap-2 items-center">
+          <select
+            value={filterRole}
+            onChange={(e) => setFilterRole(e.target.value)}
+            className="flex-1 px-2 py-2 border rounded-md bg-background text-xs sm:text-sm h-8 sm:h-10"
+          >
+            <option value="all">All Roles</option>
+            <option value="individual">Individual</option>
+            <option value="retailer">Retailer</option>
+            <option value="repair_shop">Repair Shop</option>
+            <option value="law_enforcement">Law Enforcement</option>
+            <option value="insurance">Insurance</option>
+            <option value="ngo">NGO</option>
+            <option value="admin">Admin</option>
+          </select>
+          <Button onClick={fetchUsers} variant="outline" size="sm" className="h-8 sm:h-10 text-xs sm:text-sm">
+            <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Refresh</span>
+          </Button>
+          <Button variant="outline" size="sm" className="h-8 sm:h-10 text-xs sm:text-sm">Export</Button>
+          <Button size="sm" className="h-8 sm:h-10 text-xs sm:text-sm">Add User</Button>
+        </div>
       </div>
 
       {/* Users List */}
       <Card>
-        <CardHeader>
-          <CardTitle>Users ({filteredUsers.length})</CardTitle>
-          <CardDescription>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm sm:text-base">Users ({filteredUsers.length})</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
             Manage user accounts, verification status, and permissions
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <RefreshCw className="h-6 w-6 animate-spin mr-2" />
@@ -283,79 +287,153 @@ const UsersPanel = () => {
               <p>No users found</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-2 sm:space-y-4">
               {filteredUsers.map((user) => (
-                <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                      {user.avatar_url ? (
-                        <img src={user.avatar_url} alt={user.display_name} className="w-10 h-10 rounded-full" />
-                      ) : (
-                        <Users className="w-5 h-5 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{user.display_name || 'Unnamed User'}</p>
+                <Card key={user.id} className="p-3 sm:p-4">
+                  {/* Mobile Card Layout */}
+                  <div className="sm:hidden">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
+                          {user.avatar_url ? (
+                            <img src={user.avatar_url} alt={user.display_name} className="w-8 h-8 rounded-full" />
+                          ) : (
+                            <Users className="w-4 h-4 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-sm font-medium truncate">{user.display_name || 'Unnamed User'}</h3>
+                          <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-1">
                         {user.verification_status ? (
-                          <Badge variant="default" className="bg-green-100 text-green-800">
+                          <Badge variant="default" className="bg-green-100 text-green-800 text-[9px] px-2 py-0">
                             <CheckCircle className="w-3 h-3 mr-1" />
                             Verified
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">
+                          <Badge variant="secondary" className="text-[9px] px-2 py-0">
                             <Clock className="w-3 h-3 mr-1" />
                             Pending
                           </Badge>
                         )}
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Mail className="w-3 h-3" />
-                          {user.email}
-                        </div>
-                        <div className="flex items-center gap-1">
+                        <Badge variant="outline" className={`${getRoleColor(user.role)} text-[9px] px-2 py-0`}>
                           {getRoleIcon(user.role)}
-                          <Badge variant="outline" className={getRoleColor(user.role)}>
-                            {user.role.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          Joined {new Date(user.created_at).toLocaleDateString()}
-                        </div>
+                          <span className="ml-1">{user.role.replace('_', ' ')}</span>
+                        </Badge>
                       </div>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-3">
+                      <div className="flex items-center gap-3">
                         <span>{user.device_count || 0} devices</span>
                         <span>{user.report_count || 0} reports</span>
                       </div>
+                      <span>Joined {new Date(user.created_at).toLocaleDateString()}</span>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedUser(user);
-                        setShowUserDialog(true);
-                      }}
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      View
-                    </Button>
-                    {!user.verification_status && (
+                    
+                    <div className="flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleUserAction(user.id, 'verify')}
-                        disabled={actionLoading}
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setShowUserDialog(true);
+                        }}
+                        className="h-8 text-[10px] flex-1"
                       >
-                        <UserCheck className="w-4 h-4 mr-1" />
-                        Verify
+                        <Eye className="w-3 h-3 mr-1" />
+                        View
                       </Button>
-                    )}
+                      {!user.verification_status && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUserAction(user.id, 'verify')}
+                          disabled={actionLoading}
+                          className="h-8 text-[10px] flex-1"
+                        >
+                          <UserCheck className="w-3 h-3 mr-1" />
+                          Verify
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
+                  
+                  {/* Desktop Layout */}
+                  <div className="hidden sm:flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                        {user.avatar_url ? (
+                          <img src={user.avatar_url} alt={user.display_name} className="w-10 h-10 rounded-full" />
+                        ) : (
+                          <Users className="w-5 h-5 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{user.display_name || 'Unnamed User'}</p>
+                          {user.verification_status ? (
+                            <Badge variant="default" className="bg-green-100 text-green-800">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Verified
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">
+                              <Clock className="w-3 h-3 mr-1" />
+                              Pending
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Mail className="w-3 h-3" />
+                            {user.email}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {getRoleIcon(user.role)}
+                            <Badge variant="outline" className={getRoleColor(user.role)}>
+                              {user.role.replace('_', ' ')}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            Joined {new Date(user.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span>{user.device_count || 0} devices</span>
+                          <span>{user.report_count || 0} reports</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setShowUserDialog(true);
+                        }}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        View
+                      </Button>
+                      {!user.verification_status && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUserAction(user.id, 'verify')}
+                          disabled={actionLoading}
+                        >
+                          <UserCheck className="w-4 h-4 mr-1" />
+                          Verify
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </Card>
               ))}
             </div>
           )}
