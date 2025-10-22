@@ -60,7 +60,11 @@ interface User {
   report_count?: number;
 }
 
-const UsersPanel = () => {
+interface UsersPanelProps {
+  roleFilter?: string;
+}
+
+const UsersPanel = ({ roleFilter }: UsersPanelProps = {}) => {
   const { getAuthToken } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);

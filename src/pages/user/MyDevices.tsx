@@ -12,6 +12,7 @@ import { BackButton } from "@/components/navigation/BackButton";
 import { useToast } from "@/hooks/use-toast";
 import { getAuthToken } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import DataManagementToolbar from "@/components/admin/DataManagementToolbar";
 import { 
   Search, 
   Smartphone, 
@@ -335,6 +336,26 @@ const MyDevices = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Data Management Toolbar for Personal Devices */}
+        <div className="mb-4">
+          <DataManagementToolbar
+            dataType="devices"
+            data={devices}
+            onImportComplete={async (importedData) => {
+              toast({
+                title: "Success",
+                description: `${importedData.length} devices imported successfully`,
+              });
+              await fetchDevices();
+            }}
+            userRole="individual"
+            showTemplateDownload={true}
+            showImport={true}
+            showExport={true}
+            label="My Devices - Import/Export"
+          />
         </div>
 
         {/* Search and Filters */}

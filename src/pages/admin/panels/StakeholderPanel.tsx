@@ -15,20 +15,41 @@ import {
   CheckCircle,
   X,
   Ban,
+  RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/auth";
+import DataManagementToolbar from "@/components/admin/DataManagementToolbar";
 
 type StakeholderType = "all" | "retailer" | "repair" | "law" | "insurance" | "ngo";
 type StakeholderStatus = "all" | "pending" | "approved" | "rejected" | "suspended";
 
 interface Stakeholder {
-  id: string;
-  name: string;
-  type: Exclude<StakeholderType, "all">;
-  status: Exclude<StakeholderStatus, "all">;
-  contact: string;
-  region?: string;
+  user_id: string;
+  email: string;
+  display_name: string;
+  role: Exclude<StakeholderType, "all">;
+  verification_status: boolean;
+  phone?: string;
+  address?: any;
   created_at: string;
+  stakeholder_id?: string;
+  business_name?: string;
+  business_type?: string;
+  license_number?: string;
+  approval_status?: Exclude<StakeholderStatus, "all">;
+  approval_level?: string;
+  approval_date?: string;
+  approved_by?: string;
+  admin_notes?: string;
+  contact_person?: string;
+  contact_phone?: string;
+  contact_email?: string;
+  device_count: number;
+  report_count: number;
+  listing_count: number;
+  stakeholder_updated_at?: string;
 }
 
 const ICON_BY_TYPE: Record<Exclude<StakeholderType, "all">, any> = {
@@ -39,51 +60,168 @@ const ICON_BY_TYPE: Record<Exclude<StakeholderType, "all">, any> = {
   ngo: Heart,
 };
 
-const StakeholderPanel = () => {
+interface StakeholderPanelProps {
+  readOnly?: boolean;
+  roleFilter?: string;
+}
+
+const StakeholderPanel = ({ readOnly = false, roleFilter }: StakeholderPanelProps = {}) => {
+  const { getAuthToken } = useAuth();
   const [activeType, setActiveType] = useState<StakeholderType>("all");
   const [activeStatus, setActiveStatus] = useState<StakeholderStatus>("pending");
   const [search, setSearch] = useState("");
+  const [stakeholders, setStakeholders] = useState<Stakeholder[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState({
+    total_stakeholders: 0,
+    pending_approvals: 0,
+    approved_stakeholders: 0,
+    suspended_stakeholders: 0,
+    retailers: 0,
+    repair_shops: 0,
+    law_enforcement: 0,
+    insurance_partners: 0,
+    ngos: 0,
+  });
 
-  // Placeholder data (to be replaced by Supabase later)
-  const stakeholders: Stakeholder[] = useMemo(
-    () => [
-      { id: "1", name: "TechWorld Retail", type: "retailer", status: "approved", contact: "retail@techworld.co", region: "Gauteng", created_at: new Date().toISOString() },
-      { id: "2", name: "City Repairs", type: "repair", status: "pending", contact: "support@cityrepairs.io", region: "Western Cape", created_at: new Date().toISOString() },
-      { id: "3", name: "Metro Police Unit", type: "law", status: "approved", contact: "le@metro.gov", region: "KZN", created_at: new Date().toISOString() },
-      { id: "4", name: "SecureCover Insurance", type: "insurance", status: "pending", contact: "api@securecover.com", region: "National", created_at: new Date().toISOString() },
-      { id: "5", name: "Hope Devices NGO", type: "ngo", status: "rejected", contact: "hello@hopedv.org", region: "Eastern Cape", created_at: new Date().toISOString() },
-      { id: "6", name: "MegaMobile Retail", type: "retailer", status: "suspended", contact: "ops@megamobile.africa", region: "Gauteng", created_at: new Date().toISOString() },
-    ],
-    []
-  );
+  // Fetch stakeholders from database
+  const fetchStakeholders = async () => {
+    try {
+      setLoading(true);
+      const token = await getAuthToken();
+      
+      const response = await fetch('/api/v1/admin/stakeholders', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'list_stakeholders',
+          stakeholder_type: activeType,
+          status: activeStatus,
+          search: search,
+          limit: 100,
+          offset: 0
+        }),
+      });
 
-  const filtered = useMemo(() => {
-    return stakeholders.filter((s) => {
-      const byType = activeType === "all" ? true : s.type === activeType;
-      const byStatus = activeStatus === "all" ? true : s.status === activeStatus;
-      const bySearch = search.trim()
-        ? `${s.name} ${s.contact} ${s.region}`.toLowerCase().includes(search.toLowerCase())
-        : true;
-      return byType && byStatus && bySearch;
-    });
-  }, [stakeholders, activeType, activeStatus, search]);
+      const data = await response.json();
+      
+      if (data.success) {
+        setStakeholders(data.stakeholders || []);
+      } else {
+        toast.error('Failed to fetch stakeholders: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching stakeholders:', error);
+      toast.error('Failed to fetch stakeholders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch stakeholder statistics
+  const fetchStats = async () => {
+    try {
+      const token = await getAuthToken();
+      
+      const response = await fetch('/api/v1/admin/stakeholders', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'get_stats'
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setStats(data.stats || {});
+      }
+    } catch (error) {
+      console.error('Error fetching stakeholder stats:', error);
+    }
+  };
+
+  // Load data on mount and when filters change
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  useEffect(() => {
+    fetchStakeholders();
+  }, [activeType, activeStatus, search]);
+
+  const filtered = stakeholders;
 
   const kpis = useMemo(() => {
-    const total = stakeholders.length;
-    const approved = stakeholders.filter((s) => s.status === "approved").length;
-    const pending = stakeholders.filter((s) => s.status === "pending").length;
-    return { total, approved, pending };
-  }, [stakeholders]);
+    return { 
+      total: stats.total_stakeholders, 
+      approved: stats.approved_stakeholders, 
+      pending: stats.pending_approvals 
+    };
+  }, [stats]);
 
-  const handleAction = (id: string, action: "approve" | "reject" | "suspend" | "activate") => {
-    // Placeholder action. Will be wired to Supabase edge functions later.
-    toast.success(`${action.toUpperCase()} queued`, {
-      description: "This action will be connected to the backend in the next step.",
-    });
+  // Stakeholder action functions
+  const handleAction = async (stakeholder: Stakeholder, action: "approve" | "reject" | "suspend" | "activate") => {
+    try {
+      const token = await getAuthToken();
+      
+      const response = await fetch('/api/v1/admin/stakeholders/update', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: action,
+          user_id: stakeholder.user_id,
+          admin_notes: `${action} by admin`
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success(data.message || `${action} successful`);
+        // Refresh the data
+        fetchStakeholders();
+        fetchStats();
+      } else {
+        toast.error('Failed to ' + action + ': ' + data.error);
+      }
+    } catch (error) {
+      console.error(`Error ${action} stakeholder:`, error);
+      toast.error(`Failed to ${action} stakeholder`);
+    }
   };
 
   return (
     <div className="space-y-3 sm:space-y-4">
+      {/* Header with Refresh Button */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-sm sm:text-base font-semibold">Stakeholder Management</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground">Review and manage stakeholder registrations and approvals</p>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => {
+            fetchStakeholders();
+            fetchStats();
+          }}
+          disabled={loading}
+          className="h-8 w-8 p-0"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+        </Button>
+      </div>
+
       {/* KPI Header - Native Mobile First */}
       <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
         <Card className="p-2 sm:p-3">
@@ -119,6 +257,21 @@ const StakeholderPanel = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Data Management Toolbar */}
+      <DataManagementToolbar
+        dataType="stakeholder_registrations"
+        data={filtered}
+        onImportComplete={async (importedData) => {
+          console.log('Imported stakeholders:', importedData);
+          toast.success(`${importedData.length} stakeholders imported successfully`);
+          await fetchStakeholders();
+        }}
+        showTemplateDownload={true}
+        showImport={true}
+        showExport={true}
+        label="Stakeholder Data Management"
+      />
 
       {/* Tabs: Stakeholder Types */}
       <Tabs value={activeType} onValueChange={(v) => setActiveType(v as StakeholderType)}>
@@ -160,42 +313,54 @@ const StakeholderPanel = () => {
             </div>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin mr-2" />
+              <span className="text-sm text-muted-foreground">Loading stakeholders...</span>
+            </div>
+          )}
+
           {/* Mobile Card List */}
           <div className="space-y-2 sm:hidden">
-            {filtered.length === 0 ? (
+            {!loading && filtered.length === 0 ? (
               <div className="text-center text-xs text-muted-foreground py-6">No stakeholders found</div>
-            ) : (
+            ) : !loading ? (
               filtered.map((s) => {
-                const Icon = ICON_BY_TYPE[s.type];
+                const Icon = ICON_BY_TYPE[s.role];
+                const displayName = s.business_name || s.display_name || s.email;
+                const contact = s.contact_email || s.contact_phone || s.email;
+                const region = s.address?.region || s.address?.province || 'N/A';
+                
                 return (
-                  <Card key={s.id} className="p-3">
+                  <Card key={s.user_id} className="p-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
                         <Icon className="h-4 w-4 text-muted-foreground" />
                         <div className="min-w-0">
-                          <div className="text-xs font-medium truncate">{s.name}</div>
-                          <div className="text-[10px] text-muted-foreground truncate">{s.contact} • {s.region}</div>
+                          <div className="text-xs font-medium truncate">{displayName}</div>
+                          <div className="text-[10px] text-muted-foreground truncate">{contact} • {region}</div>
                         </div>
                       </div>
-                      <Badge variant={s.status === "approved" ? "default" : s.status === "pending" ? "secondary" : "outline"} className="text-[9px]">
-                        {s.status}
+                      <Badge variant={s.approval_status === "approved" ? "default" : s.approval_status === "pending" ? "secondary" : "outline"} className="text-[9px]">
+                        {s.approval_status}
                       </Badge>
                     </div>
                     <div className="mt-2 grid grid-cols-3 gap-1">
-                      <Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={() => handleAction(s.id, "approve")}>
+                      <Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={() => handleAction(s, "approve")}>
                         <CheckCircle className="h-3 w-3 mr-1" />Approve
                       </Button>
-                      <Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={() => handleAction(s.id, "reject")}>
+                      <Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={() => handleAction(s, "reject")}>
                         <X className="h-3 w-3 mr-1" />Reject
                       </Button>
-                      <Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={() => handleAction(s.id, s.status === "suspended" ? "activate" : "suspend")}>
-                        <Ban className="h-3 w-3 mr-1" />{s.status === "suspended" ? "Activate" : "Suspend"}
+                      <Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={() => handleAction(s, s.approval_status === "suspended" ? "activate" : "suspend")}>
+                        <Ban className="h-3 w-3 mr-1" />{s.approval_status === "suspended" ? "Activate" : "Suspend"}
                       </Button>
                     </div>
                   </Card>
                 );
               })
-            )}
+            ) : null}
           </div>
 
           {/* Desktop Table */}
@@ -214,35 +379,39 @@ const StakeholderPanel = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {filtered.map((s) => {
-                    const Icon = ICON_BY_TYPE[s.type];
+                    const Icon = ICON_BY_TYPE[s.role];
+                    const displayName = s.business_name || s.display_name || s.email;
+                    const contact = s.contact_email || s.contact_phone || s.email;
+                    const region = s.address?.region || s.address?.province || 'N/A';
+                    
                     return (
-                      <tr key={s.id} className="hover:bg-gray-50">
+                      <tr key={s.user_id} className="hover:bg-gray-50">
                         <td className="px-3 py-2">
                           <div className="flex items-center gap-2">
                             <Icon className="h-4 w-4 text-muted-foreground" />
                             <div>
-                              <div className="text-sm font-medium">{s.name}</div>
+                              <div className="text-sm font-medium">{displayName}</div>
                               <div className="text-xs text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-3 py-2 text-sm capitalize">{s.type}</td>
-                        <td className="px-3 py-2 text-sm">{s.contact}</td>
-                        <td className="px-3 py-2 text-sm">{s.region}</td>
+                        <td className="px-3 py-2 text-sm capitalize">{s.role}</td>
+                        <td className="px-3 py-2 text-sm">{contact}</td>
+                        <td className="px-3 py-2 text-sm">{region}</td>
                         <td className="px-3 py-2">
-                          <Badge variant={s.status === "approved" ? "default" : s.status === "pending" ? "secondary" : "outline"}>
-                            {s.status}
+                          <Badge variant={s.approval_status === "approved" ? "default" : s.approval_status === "pending" ? "secondary" : "outline"}>
+                            {s.approval_status}
                           </Badge>
                         </td>
                         <td className="px-3 py-2">
                           <div className="flex gap-2">
-                            <Button size="sm" variant="outline" onClick={() => handleAction(s.id, "approve")}>
+                            <Button size="sm" variant="outline" onClick={() => handleAction(s, "approve")}>
                               <CheckCircle className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="outline" onClick={() => handleAction(s.id, "reject")}>
+                            <Button size="sm" variant="outline" onClick={() => handleAction(s, "reject")}>
                               <X className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="outline" onClick={() => handleAction(s.id, s.status === "suspended" ? "activate" : "suspend")}>
+                            <Button size="sm" variant="outline" onClick={() => handleAction(s, s.approval_status === "suspended" ? "activate" : "suspend")}>
                               <Ban className="h-4 w-4" />
                             </Button>
                           </div>

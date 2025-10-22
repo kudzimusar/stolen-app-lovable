@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import DataManagementToolbar from "@/components/admin/DataManagementToolbar";
 
 interface LostFoundReport {
   id: string;
@@ -74,7 +75,11 @@ interface CommunityTip {
   };
 }
 
-const LostFoundPanel = () => {
+interface LostFoundPanelProps {
+  roleFilter?: string;
+}
+
+const LostFoundPanel = ({ roleFilter }: LostFoundPanelProps = {}) => {
   const { getAuthToken } = useAuth();
   const [reports, setReports] = useState<LostFoundReport[]>([]);
   const [selectedReport, setSelectedReport] = useState<LostFoundReport | null>(null);
@@ -417,6 +422,21 @@ const LostFoundPanel = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Data Management Toolbar */}
+      <DataManagementToolbar
+        dataType="lost_reports"
+        data={filteredReports}
+        onImportComplete={async (importedData) => {
+          // Handle imported reports
+          console.log('Imported reports:', importedData);
+          toast.success(`${importedData.length} reports imported successfully`);
+          await fetchReports(); // Refresh the list
+        }}
+        showTemplateDownload={true}
+        showImport={true}
+        showExport={true}
+      />
 
       {/* Search and Filter - Native Mobile */}
       <Card className="p-2 sm:p-4">

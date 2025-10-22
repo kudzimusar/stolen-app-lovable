@@ -47,19 +47,46 @@ const RAM_OPTIONS = [
   { value: "Other", label: "Other" }
 ];
 
-// Processor options (common ones)
+// Processor options (Latest 2025-2026 to Older)
 const PROCESSOR_OPTIONS = [
-  { value: "A17 Pro", label: "Apple A17 Pro" },
-  { value: "A16 Bionic", label: "Apple A16 Bionic" },
-  { value: "A15 Bionic", label: "Apple A15 Bionic" },
-  { value: "A14 Bionic", label: "Apple A14 Bionic" },
-  { value: "A13 Bionic", label: "Apple A13 Bionic" },
-  { value: "Snapdragon 8 Gen 3", label: "Snapdragon 8 Gen 3" },
-  { value: "Snapdragon 8 Gen 2", label: "Snapdragon 8 Gen 2" },
-  { value: "Snapdragon 8 Gen 1", label: "Snapdragon 8 Gen 1" },
-  { value: "Exynos 2400", label: "Exynos 2400" },
-  { value: "MediaTek Dimensity 9300", label: "MediaTek Dimensity 9300" },
-  { value: "Other", label: "Other" }
+  // Apple (Latest)
+  { value: "A18 Pro", label: "Apple A18 Pro (iPhone 16 Pro, 2024)" },
+  { value: "A18", label: "Apple A18 (iPhone 16, 2024)" },
+  { value: "A17 Pro", label: "Apple A17 Pro (iPhone 15 Pro, 2023)" },
+  { value: "A16 Bionic", label: "Apple A16 Bionic (iPhone 15/14 Pro, 2022-23)" },
+  { value: "A15 Bionic", label: "Apple A15 Bionic (iPhone 14/13, 2021-22)" },
+  { value: "A14 Bionic", label: "Apple A14 Bionic (iPhone 12, 2020)" },
+  { value: "A13 Bionic", label: "Apple A13 Bionic (iPhone 11, 2019)" },
+  { value: "A12 Bionic", label: "Apple A12 Bionic (iPhone XS, 2018)" },
+  { value: "A11 Bionic", label: "Apple A11 Bionic (iPhone 8/X, 2017)" },
+  { value: "A10 Fusion", label: "Apple A10 Fusion (iPhone 7, 2016)" },
+  // Apple M-series (MacBooks)
+  { value: "M4", label: "Apple M4 (MacBook 2024)" },
+  { value: "M3", label: "Apple M3 (MacBook 2023)" },
+  { value: "M2", label: "Apple M2 (MacBook 2022-23)" },
+  { value: "M1", label: "Apple M1 (MacBook 2020-21)" },
+  // Qualcomm Snapdragon (Latest)
+  { value: "Snapdragon 8 Elite", label: "Snapdragon 8 Elite (S25, 2025)" },
+  { value: "Snapdragon 8 Gen 3", label: "Snapdragon 8 Gen 3 (S24 Ultra, 2024)" },
+  { value: "Snapdragon 8 Gen 2", label: "Snapdragon 8 Gen 2 (S23, 2023)" },
+  { value: "Snapdragon 8 Gen 1", label: "Snapdragon 8 Gen 1 (S22, 2022)" },
+  { value: "Snapdragon 888", label: "Snapdragon 888 (S21, 2021)" },
+  { value: "Snapdragon 865", label: "Snapdragon 865 (S20, 2020)" },
+  // Samsung Exynos (Latest)
+  { value: "Exynos 2500", label: "Samsung Exynos 2500 (S26, 2026)" },
+  { value: "Exynos 2400", label: "Samsung Exynos 2400 (S24, 2024)" },
+  { value: "Exynos 2200", label: "Samsung Exynos 2200 (S22, 2022)" },
+  { value: "Exynos 2100", label: "Samsung Exynos 2100 (S21, 2021)" },
+  // MediaTek (Latest)
+  { value: "Dimensity 9400", label: "MediaTek Dimensity 9400 (2025)" },
+  { value: "Dimensity 9300", label: "MediaTek Dimensity 9300 (2024)" },
+  { value: "Dimensity 9200", label: "MediaTek Dimensity 9200 (2023)" },
+  { value: "Dimensity 9000", label: "MediaTek Dimensity 9000 (2022)" },
+  // Google Tensor
+  { value: "Tensor G4", label: "Google Tensor G4 (Pixel 9, 2024)" },
+  { value: "Tensor G3", label: "Google Tensor G3 (Pixel 8, 2023)" },
+  { value: "Tensor G2", label: "Google Tensor G2 (Pixel 7, 2022)" },
+  { value: "Other", label: "Other / Don't Know" }
 ];
 
 // Device condition options
@@ -314,45 +341,66 @@ const DeviceRegister = () => {
               <p className="text-sm sm:text-base text-muted-foreground">Enter your device details to get started</p>
             </div>
             
+            {/* RESPONSIVE GRID LAYOUT */}
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="deviceName">Device Name</Label>
-                <Input
-                  id="deviceName"
-                  placeholder="e.g., iPhone 15 Pro"
-                  value={formData.deviceName}
-                  onChange={(e) => setFormData({...formData, deviceName: e.target.value})}
-                />
+              {/* Basic Info - 2 columns on tablet+ */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="brand">Brand *</Label>
+                  <EnhancedSelect
+                    placeholder="Select device brand"
+                    options={DEVICE_BRANDS}
+                    value={formData.brand}
+                    onValueChange={(value) => {
+                      setFormData({...formData, brand: value});
+                      // Auto-fill device name if empty
+                      if (!formData.deviceName || formData.deviceName === '') {
+                        setFormData(prev => ({...prev, brand: value, deviceName: `${value} Device`}));
+                      }
+                    }}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="model">Model *</Label>
+                  <Input
+                    id="model"
+                    placeholder="e.g., iPhone 8 Plus, Galaxy S24 Ultra"
+                    value={formData.model}
+                    onChange={(e) => {
+                      setFormData({...formData, model: e.target.value});
+                      // Auto-update device name when model is entered
+                      if (formData.brand && e.target.value) {
+                        setFormData(prev => ({...prev, model: e.target.value, deviceName: `${formData.brand} ${e.target.value}`}));
+                      }
+                    }}
+                  />
+                  <p className="text-xs text-muted-foreground">Exact model name (check Settings → About or device box)</p>
+                </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="deviceType">Device Type</Label>
-                <EnhancedSelect
-                  placeholder="Select device type"
-                  options={DEVICE_TYPES}
-                  value={formData.deviceType}
-                  onValueChange={(value) => setFormData({...formData, deviceType: value})}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="brand">Brand</Label>
-                <EnhancedSelect
-                  placeholder="Select device brand"
-                  options={DEVICE_BRANDS}
-                  value={formData.brand}
-                  onValueChange={(value) => setFormData({...formData, brand: value})}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="model">Model</Label>
-                <Input
-                  id="model"
-                  placeholder="e.g., A2848"
-                  value={formData.model}
-                  onChange={(e) => setFormData({...formData, model: e.target.value})}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="deviceName">Device Nickname (Optional)</Label>
+                  <Input
+                    id="deviceName"
+                    placeholder="Auto-filled or customize (e.g., 'My iPhone', 'Work Phone')"
+                    value={formData.deviceName}
+                    onChange={(e) => setFormData({...formData, deviceName: e.target.value})}
+                  />
+                  <p className="text-xs text-muted-foreground">Auto-filled from brand + model, customize if you like</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="deviceType">Device Type</Label>
+                  <EnhancedSelect
+                    placeholder="Select device type"
+                    options={DEVICE_TYPES}
+                    value={formData.deviceType}
+                    onValueChange={(value) => setFormData({...formData, deviceType: value})}
+                  />
+                  <p className="text-xs text-muted-foreground">Smartphone, Tablet, Laptop, etc.</p>
+                </div>
               </div>
               
               <div className="space-y-2">
@@ -397,121 +445,175 @@ const DeviceRegister = () => {
                   value={formData.imeiNumber || ""}
                   onChange={(e) => setFormData({...formData, imeiNumber: e.target.value})}
                 />
+                <p className="text-xs text-muted-foreground">Dial *#06# to find IMEI</p>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="color">Color</Label>
-                <Input
-                  id="color"
-                  placeholder="e.g., Space Gray, Midnight, Natural Titanium"
-                  value={formData.color}
-                  onChange={(e) => setFormData({...formData, color: e.target.value})}
-                />
+              {/* Physical Specs - 2-3 columns on larger screens */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="color">Color</Label>
+                  <EnhancedSelect
+                    placeholder="Select color"
+                    options={[
+                      { value: "Space Gray", label: "Space Gray" },
+                      { value: "Silver", label: "Silver" },
+                      { value: "Gold", label: "Gold" },
+                      { value: "Midnight", label: "Midnight" },
+                      { value: "Natural Titanium", label: "Natural Titanium" },
+                      { value: "Blue Titanium", label: "Blue Titanium" },
+                      { value: "Phantom Black", label: "Phantom Black" },
+                      { value: "Green", label: "Green" },
+                      { value: "Black", label: "Black" },
+                      { value: "White", label: "White" },
+                      { value: "Red", label: "Red" },
+                      { value: "Blue", label: "Blue" },
+                      { value: "Other", label: "Other" }
+                    ]}
+                    value={formData.color}
+                    onValueChange={(value) => setFormData({...formData, color: value})}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="storageCapacity">Storage Capacity</Label>
+                  <EnhancedSelect
+                    placeholder="Select storage"
+                    options={STORAGE_OPTIONS}
+                    value={formData.storageCapacity}
+                    onValueChange={(value) => setFormData({...formData, storageCapacity: value})}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="ramGb">RAM (Memory)</Label>
+                  <EnhancedSelect
+                    placeholder="Select RAM"
+                    options={RAM_OPTIONS}
+                    value={formData.ramGb}
+                    onValueChange={(value) => setFormData({...formData, ramGb: value})}
+                  />
+                  <p className="text-xs text-muted-foreground">Check Settings → About</p>
+                </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="storageCapacity">Storage Capacity</Label>
-                <EnhancedSelect
-                  placeholder="Select storage capacity"
-                  options={STORAGE_OPTIONS}
-                  value={formData.storageCapacity}
-                  onValueChange={(value) => setFormData({...formData, storageCapacity: value})}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="processor">Processor</Label>
+                  <EnhancedSelect
+                    placeholder="Select processor"
+                    options={PROCESSOR_OPTIONS}
+                    value={formData.processor}
+                    onValueChange={(value) => setFormData({...formData, processor: value})}
+                  />
+                  <p className="text-xs text-muted-foreground">iPhone 8 Plus: A11 Bionic</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="screenSizeInch">Screen Size</Label>
+                  <EnhancedSelect
+                    placeholder="Select screen size"
+                    options={[
+                      // Latest iPhones (2024-2025)
+                      { value: "6.9", label: "6.9\" - iPhone 16 Pro Max (2024)" },
+                      { value: "6.7", label: "6.7\" - iPhone 12-16 Pro Max" },
+                      { value: "6.3", label: "6.3\" - iPhone 16 Pro (2024)" },
+                      { value: "6.1", label: "6.1\" - iPhone 11-16, 12-15 Pro" },
+                      { value: "5.8", label: "5.8\" - iPhone X, XS, 11 Pro" },
+                      { value: "5.5", label: "5.5\" - iPhone 8 Plus, 7 Plus" },
+                      { value: "5.4", label: "5.4\" - iPhone 12/13 Mini" },
+                      { value: "4.7", label: "4.7\" - iPhone 8, SE (2nd/3rd)" },
+                      { value: "4.0", label: "4.0\" - iPhone SE (1st gen)" },
+                      // Samsung (Latest)
+                      { value: "6.9", label: "6.9\" - Samsung S26 Ultra (2026)" },
+                      { value: "6.8", label: "6.8\" - Samsung S24/S25 Ultra" },
+                      { value: "6.6", label: "6.6\" - Samsung S24+ (2024)" },
+                      { value: "6.2", label: "6.2\" - Samsung S24/S25" },
+                      // Other sizes
+                      { value: "10.9", label: "10.9\" - iPad Air" },
+                      { value: "11.0", label: "11\" - iPad Pro" },
+                      { value: "12.9", label: "12.9\" - iPad Pro" },
+                      { value: "13.0", label: "13\" - MacBook Air" },
+                      { value: "14.0", label: "14\" - MacBook Pro" },
+                      { value: "16.0", label: "16\" - MacBook Pro" },
+                      { value: "Other", label: "Other / Don't Know" }
+                    ]}
+                    value={formData.screenSizeInch}
+                    onValueChange={(value) => setFormData({...formData, screenSizeInch: value})}
+                  />
+                  <p className="text-xs text-muted-foreground">Check device box or Apple/Samsung website</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="batteryHealthPercentage">Battery Health</Label>
+                  <EnhancedSelect
+                    placeholder="Select battery health"
+                    options={[
+                      { value: "100", label: "100% - Brand New" },
+                      { value: "95", label: "95-99% - Excellent" },
+                      { value: "90", label: "90-94% - Very Good" },
+                      { value: "85", label: "85-89% - Good" },
+                      { value: "80", label: "80-84% - Fair" },
+                      { value: "75", label: "75-79% - Consider Replacement" },
+                      { value: "70", label: "70-74% - Replace Soon" },
+                      { value: "60", label: "< 70% - Poor" }
+                    ]}
+                    value={formData.batteryHealthPercentage}
+                    onValueChange={(value) => setFormData({...formData, batteryHealthPercentage: value})}
+                  />
+                  <p className="text-xs text-muted-foreground">iPhone: Settings → Battery → Battery Health</p>
+                </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="ramGb">RAM (Memory)</Label>
-                <EnhancedSelect
-                  placeholder="Select RAM capacity"
-                  options={RAM_OPTIONS}
-                  value={formData.ramGb}
-                  onValueChange={(value) => setFormData({...formData, ramGb: value})}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="deviceCondition">Device Condition *</Label>
+                  <EnhancedSelect
+                    placeholder="Select device condition"
+                    options={CONDITION_OPTIONS}
+                    value={formData.deviceCondition}
+                    onValueChange={(value) => setFormData({...formData, deviceCondition: value})}
+                  />
+                  <p className="text-xs text-muted-foreground">Honest assessment helps build trust with buyers</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="warrantyMonths">Warranty Remaining (months)</Label>
+                  <Input
+                    id="warrantyMonths"
+                    type="number"
+                    placeholder="e.g., 12"
+                    value={formData.warrantyMonths}
+                    onChange={(e) => setFormData({...formData, warrantyMonths: e.target.value})}
+                    min="0"
+                    max="120"
+                  />
+                  <p className="text-xs text-muted-foreground">Enter 0 if expired, leave empty if unknown</p>
+                </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="processor">Processor</Label>
-                <EnhancedSelect
-                  placeholder="Select processor"
-                  options={PROCESSOR_OPTIONS}
-                  value={formData.processor}
-                  onValueChange={(value) => setFormData({...formData, processor: value})}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="screenSizeInch">Screen Size (inches)</Label>
-                <Input
-                  id="screenSizeInch"
-                  type="number"
-                  step="0.1"
-                  placeholder="e.g., 6.7"
-                  value={formData.screenSizeInch}
-                  onChange={(e) => setFormData({...formData, screenSizeInch: e.target.value})}
-                  min="3"
-                  max="20"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="batteryHealthPercentage">Battery Health (%)</Label>
-                <Input
-                  id="batteryHealthPercentage"
-                  type="number"
-                  placeholder="e.g., 95"
-                  value={formData.batteryHealthPercentage}
-                  onChange={(e) => setFormData({...formData, batteryHealthPercentage: e.target.value})}
-                  min="0"
-                  max="100"
-                />
-                <p className="text-xs text-muted-foreground">Check in Settings {'>'} Battery {'>'} Battery Health</p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="deviceCondition">Device Condition *</Label>
-                <EnhancedSelect
-                  placeholder="Select device condition"
-                  options={CONDITION_OPTIONS}
-                  value={formData.deviceCondition}
-                  onValueChange={(value) => setFormData({...formData, deviceCondition: value})}
-                />
-                <p className="text-xs text-muted-foreground">Honest assessment helps build trust with buyers</p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="warrantyMonths">Warranty Remaining (months)</Label>
-                <Input
-                  id="warrantyMonths"
-                  type="number"
-                  placeholder="e.g., 12 (leave empty if no warranty)"
-                  value={formData.warrantyMonths}
-                  onChange={(e) => setFormData({...formData, warrantyMonths: e.target.value})}
-                  min="0"
-                  max="120"
-                />
-                <p className="text-xs text-muted-foreground">Enter 0 if warranty has expired or leave empty if unknown</p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="deviceOrigin">Where did you get this device?</Label>
-                <Input
-                  id="deviceOrigin"
-                  placeholder="e.g., Apple Store Sandton, Takealot Online, Private Seller"
-                  value={formData.deviceOrigin}
-                  onChange={(e) => setFormData({...formData, deviceOrigin: e.target.value})}
-                />
-                <p className="text-xs text-muted-foreground">This helps build ownership history and trust</p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="acquisitionMethod">How did you acquire it?</Label>
-                <EnhancedSelect
-                  placeholder="Select acquisition method"
-                  options={ACQUISITION_OPTIONS}
-                  value={formData.acquisitionMethod}
-                  onValueChange={(value) => setFormData({...formData, acquisitionMethod: value})}
-                />
-                <p className="text-xs text-muted-foreground">Helps verify ownership chain</p>
+              {/* Ownership Info - 2 columns on tablet+ */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="deviceOrigin">Where did you get this device?</Label>
+                  <Input
+                    id="deviceOrigin"
+                    placeholder="e.g., Apple Store Sandton"
+                    value={formData.deviceOrigin}
+                    onChange={(e) => setFormData({...formData, deviceOrigin: e.target.value})}
+                  />
+                  <p className="text-xs text-muted-foreground">Builds ownership history</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="acquisitionMethod">How did you acquire it?</Label>
+                  <EnhancedSelect
+                    placeholder="Select method"
+                    options={ACQUISITION_OPTIONS}
+                    value={formData.acquisitionMethod}
+                    onValueChange={(value) => setFormData({...formData, acquisitionMethod: value})}
+                  />
+                  <p className="text-xs text-muted-foreground">Verifies ownership chain</p>
+                </div>
               </div>
               
               <div className="space-y-2">
@@ -522,7 +624,7 @@ const DeviceRegister = () => {
                   value={formData.previousOwner}
                   onChange={(e) => setFormData({...formData, previousOwner: e.target.value})}
                 />
-                <p className="text-xs text-muted-foreground">Leave empty if this is a brand new device</p>
+                <p className="text-xs text-muted-foreground">Leave empty if brand new</p>
               </div>
             </div>
           </div>

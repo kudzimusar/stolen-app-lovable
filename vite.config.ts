@@ -99,6 +99,37 @@ export default defineConfig({
         target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/admin-approve-listing',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/v1\/admin\/approve-listing/, '')
+      },
+      // Admin Dashboard APIs
+      '/api/v1/admin/dashboard-stats': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/admin-dashboard-stats',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/admin\/dashboard-stats/, '')
+      },
+      '/api/v1/admin/approve-claim': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/admin-approve-claim',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/admin\/approve-claim/, '')
+      },
+      '/api/v1/admin/approve-report': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/admin-approve-report',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/admin\/approve-report/, '')
+      },
+      '/api/v1/admin/users': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/admin-users',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/admin\/users/, '')
+      },
+      '/api/v1/admin/stakeholders/update': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/admin-stakeholders-update',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/admin\/stakeholders\/update/, '')
+      },
+      '/api/v1/admin/stakeholders': {
+        target: 'https://lerjhxchglztvhbsdjjn.supabase.co/functions/v1/admin-stakeholders-list',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1\/admin\/stakeholders/, '')
       }
     }
   },

@@ -95,10 +95,10 @@ const UnifiedAdminDashboard = () => {
       try {
         const { supabase } = await import('@/integrations/supabase/client');
         
-        // Call the comprehensive admin stats function
+        // Call the admin dashboard stats function
         // @ts-ignore - function exists in database but may not be in type definitions
         const { data: statsData, error: statsError } = await (supabase as any)
-          .rpc('get_comprehensive_admin_stats');
+          .rpc('get_admin_dashboard_stats');
 
         if (!statsError && statsData) {
           console.log('✅ Admin stats fetched from database:', statsData);
@@ -413,6 +413,43 @@ const UnifiedAdminDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Super Admin: View Stakeholder Dashboards */}
+      <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-purple-900">
+            <Eye className="h-5 w-5" />
+            View As Stakeholder Admin
+          </CardTitle>
+          <CardDescription className="text-purple-700">
+            Access any stakeholder dashboard to see their perspective
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+            <Button variant="outline" size="sm" onClick={() => window.location.href = '/retailer-admin'} className="flex items-center gap-2">
+              <ShoppingCart className="h-4 w-4" />
+              Retailer
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.location.href = '/repair-shop-admin'} className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              Repair Shop
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.location.href = '/insurance-admin'} className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Insurance
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.location.href = '/law-enforcement-admin'} className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Law Enforcement
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.location.href = '/ngo-admin'} className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              NGO
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Recent Activity */}
       <Card>

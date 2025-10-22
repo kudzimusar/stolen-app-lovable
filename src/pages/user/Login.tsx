@@ -105,11 +105,13 @@ const Login = () => {
         // Navigate based on role
         const roleRoutes = {
           "individual": "/dashboard",
-          "retailer": "/retailer-dashboard", 
-          "repair_shop": "/repair-shop-dashboard",
-          "insurance": "/insurance-dashboard",
-          "law_enforcement": "/law-enforcement-dashboard",
-          "ngo": "/ngo-dashboard",
+          "admin": "/admin",
+          "super_admin": "/admin",
+          "retailer": "/retailer-admin",  // New admin panel
+          "repair_shop": "/repair-shop-admin",  // New admin panel
+          "insurance": "/insurance-admin",  // New admin panel
+          "law_enforcement": "/law-enforcement-admin",  // New admin panel
+          "ngo": "/ngo-admin",  // New admin panel
           "other": "/dashboard"
         };
         

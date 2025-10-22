@@ -81,6 +81,14 @@ import MyDevices from "./pages/user/MyDevices";
 import CommunityBoard from "./pages/user/CommunityBoard";
 const CommunityRewards = lazy(() => import("./pages/user/CommunityRewards"));
 const UnifiedAdminDashboard = lazy(() => import("./pages/admin/UnifiedAdminDashboard"));
+
+// Stakeholder Admin Dashboards
+const RetailerAdminDashboard = lazy(() => import("./pages/admin/RetailerAdminDashboard"));
+const RepairShopAdminDashboard = lazy(() => import("./pages/admin/RepairShopAdminDashboard"));
+const InsuranceAdminDashboard = lazy(() => import("./pages/admin/InsuranceAdminDashboard"));
+const LawEnforcementAdminDashboard = lazy(() => import("./pages/admin/LawEnforcementAdminDashboard"));
+const NGOAdminDashboard = lazy(() => import("./pages/admin/NGOAdminDashboard"));
+
 import Profile from "./pages/user/Profile";
 import DeviceWarrantyStatus from "./pages/user/DeviceWarrantyStatus";
 import Support from "./pages/user/Support";
@@ -179,6 +187,14 @@ const App = () => {
           <Route path="/admin/login" element={<Suspense fallback={<div>Loading...</div>}><AdminLogin /></Suspense>} />
           <Route path="/admin/onboarding" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><AdminOnboarding /></Suspense></ProtectedRoute>} />
           <Route path="/admin/dashboard" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><UnifiedAdminDashboard /></Suspense></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><UnifiedAdminDashboard /></Suspense></ProtectedRoute>} />
+          
+          {/* Stakeholder Admin Routes */}
+          <Route path="/retailer-admin" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><RetailerAdminDashboard /></Suspense></ProtectedRoute>} />
+          <Route path="/repair-shop-admin" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><RepairShopAdminDashboard /></Suspense></ProtectedRoute>} />
+          <Route path="/insurance-admin" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><InsuranceAdminDashboard /></Suspense></ProtectedRoute>} />
+          <Route path="/law-enforcement-admin" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><LawEnforcementAdminDashboard /></Suspense></ProtectedRoute>} />
+          <Route path="/ngo-admin" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><NGOAdminDashboard /></Suspense></ProtectedRoute>} />
           <Route 
             path="/law-enforcement-dashboard" 
             element={

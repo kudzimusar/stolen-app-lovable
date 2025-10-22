@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, TrendingUp, CreditCard, AlertTriangle, CheckCircle } from "lucide-react";
 
-const FinancialPanel = () => {
+interface FinancialPanelProps {
+  roleFilter?: string;
+}
+
+const FinancialPanel = ({ roleFilter }: FinancialPanelProps = {}) => {
   return (
     <div className="space-y-6">
       {/* Overview Stats */}

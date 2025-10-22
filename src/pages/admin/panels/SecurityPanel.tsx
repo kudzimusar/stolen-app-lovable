@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Shield, AlertTriangle, Users, Eye, Lock, CheckCircle } from "lucide-react";
 
-const SecurityPanel = () => {
+interface SecurityPanelProps {
+  roleFilter?: string;
+}
+
+const SecurityPanel = ({ roleFilter }: SecurityPanelProps = {}) => {
   return (
     <div className="space-y-6">
       {/* Overview Stats */}

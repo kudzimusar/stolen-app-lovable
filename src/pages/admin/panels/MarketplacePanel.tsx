@@ -24,6 +24,7 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthToken } from "@/lib/auth";
+import DataManagementToolbar from "@/components/admin/DataManagementToolbar";
 
 interface Listing {
   id: string;
@@ -47,7 +48,11 @@ interface MarketplaceStats {
   pendingReviews: number;
 }
 
-const MarketplacePanel = () => {
+interface MarketplacePanelProps {
+  roleFilter?: string;
+}
+
+const MarketplacePanel = ({ roleFilter }: MarketplacePanelProps = {}) => {
   const { user } = useAuth();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -230,6 +235,21 @@ const MarketplacePanel = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Data Management Toolbar */}
+      <DataManagementToolbar
+        dataType="marketplace_listings"
+        data={filteredListings}
+        onImportComplete={async (importedData) => {
+          console.log('Imported listings:', importedData);
+          toast.success(`${importedData.length} listings imported successfully`);
+          await fetchListings();
+        }}
+        showTemplateDownload={true}
+        showImport={true}
+        showExport={true}
+        label="Marketplace Listings Management"
+      />
 
       {/* Marketplace Management - Native Mobile */}
       <Card className="p-2 sm:p-4">

@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Settings, Users, Mail, Database, Shield, Bell } from "lucide-react";
 
-const SystemSettingsPanel = () => {
+interface SystemSettingsPanelProps {
+  roleFilter?: string;
+}
+
+const SystemSettingsPanel = ({ roleFilter }: SystemSettingsPanelProps = {}) => {
   return (
     <div className="space-y-6">
       {/* System Settings */}
