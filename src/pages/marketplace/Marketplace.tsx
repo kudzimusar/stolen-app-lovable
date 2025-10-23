@@ -26,6 +26,7 @@ import BreadcrumbBar from "@/components/marketplace/BreadcrumbBar";
 import EmptyState from "@/components/marketplace/EmptyState";
 import { AIRecommendations } from "@/components/marketplace/AIRecommendations";
 import { MarketplaceAIAssistant } from "@/components/marketplace/MarketplaceAIAssistant";
+import { SmartNotificationCenter } from "@/components/notifications/SmartNotificationCenter";
 import { useTaxonomy, TaxonomyNode } from "@/hooks/useTaxonomy";
 import {
   Search,
@@ -598,6 +599,9 @@ const allListings = [
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <SmartNotificationCenter />
+            </div>
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="icon" asChild>
                 <Link to="/dashboard">

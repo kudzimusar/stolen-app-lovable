@@ -8,7 +8,7 @@ import { BackButton } from "@/components/navigation/BackButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { User as SupabaseUser } from "@supabase/supabase-js";
-import { LostFoundNotificationCenter } from "@/components/user/LostFoundNotificationCenter";
+import { SmartNotificationCenter } from "@/components/notifications/SmartNotificationCenter";
 
 interface AppHeaderProps {
   title?: string;
@@ -116,9 +116,9 @@ export const AppHeader = ({
             {/* Custom right actions */}
             {rightActions}
             
-            {/* Lost & Found Notification Center (shows on all authenticated pages) */}
+            {/* Smart Notification Center (shows appropriate notifications based on current page) */}
             {isLoggedIn && (
-              <LostFoundNotificationCenter />
+              <SmartNotificationCenter />
             )}
             
             {/* Dashboard specific actions for all dashboard pages and profile pages */}

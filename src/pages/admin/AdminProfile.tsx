@@ -28,6 +28,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SmartNotificationCenter } from "@/components/notifications/SmartNotificationCenter";
 
 const AdminProfile = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -157,6 +158,9 @@ const AdminProfile = () => {
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <SmartNotificationCenter />
+            </div>
             <div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-2">
                 Admin Profile

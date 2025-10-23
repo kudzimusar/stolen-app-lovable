@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthToken } from "@/lib/auth";
+import { notificationService } from "@/lib/services/notification-service";
 import { 
   MapPin, 
   Star, 
@@ -149,7 +150,7 @@ const RepairBooking = () => {
     }
   };
 
-  const handleBookRepair = () => {
+  const handleBookRepair = async () => {
     if (!selectedShop || !deviceInfo.brand || !deviceInfo.model || !deviceInfo.issue) {
       toast({
         title: "Missing Information",
@@ -159,11 +160,40 @@ const RepairBooking = () => {
       return;
     }
 
-    toast({
-      title: "Repair Booked Successfully!",
-      description: `Your repair request has been sent to ${selectedShop.name}. They will contact you within 2 hours.`,
-      variant: "default"
-    });
+    try {
+      // Send repair booking notification
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const appointmentDate = `${appointmentDate} ${appointmentTime}`;
+        await notificationService.notifyRepairBooked(
+          user.id,
+          `${deviceInfo.brand} ${deviceInfo.model}`,
+          appointmentDate,
+          selectedShop.name,
+          {
+            repair_shop_id: selectedShop.id,
+            device_issue: deviceInfo.issue,
+            urgency: deviceInfo.urgency,
+            estimated_cost: selectedShop.pricing,
+            estimated_time: selectedShop.estimatedTime,
+            booking_date: new Date().toISOString()
+          }
+        );
+      }
+
+      toast({
+        title: "Repair Booked Successfully!",
+        description: `Your repair request has been sent to ${selectedShop.name}. They will contact you within 2 hours.`,
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Error booking repair:', error);
+      toast({
+        title: "Error",
+        description: "Failed to book repair. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {

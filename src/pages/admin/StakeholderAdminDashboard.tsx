@@ -35,6 +35,7 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { getDepartmentConfig } from "@/lib/constants/departmentConfigs";
 import { DepartmentConfig } from "@/lib/types/departmentConfig";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 // Import department-specific panels
 import LostFoundPanel from "./panels/LostFoundPanel";
@@ -152,31 +153,33 @@ const StakeholderAdminDashboard = ({
       }
 
       if (viewName) {
+        // Fetch aggregated department stats (no user filtering - department-wide)
         const { data: roleStats, error } = await supabase
           .from(viewName)
           .select('*')
-          .eq(`${roleType}_id`, user.id)
           .single();
 
         if (!error && roleStats) {
-          setStats({
-            totalUsers: roleStats.total_customers || roleStats.total_donors || 0,
-            activeReports: roleStats.total_reports_accessed || 0,
-            totalTransactions: roleStats.total_transactions || roleStats.total_repairs || roleStats.total_claims || roleStats.total_cases || roleStats.total_donations || 0,
-            revenue: roleStats.total_revenue || roleStats.total_payouts || 0,
-            recoveryRate: roleStats.resolution_rate || 0,
-            pendingApprovals: roleStats.pending_repairs || roleStats.pending_claims || roleStats.pending_donations || 0,
-            pendingClaims: roleStats.pending_claims || 0,
-            totalListings: roleStats.total_listings,
-            activeListings: roleStats.active_listings,
-            totalRepairs: roleStats.total_repairs,
-            pendingRepairs: roleStats.pending_repairs,
-            totalPolicies: roleStats.total_policies,
-            totalClaims: roleStats.total_claims,
-            totalCases: roleStats.total_cases,
-            activeCases: roleStats.active_cases,
-            totalDonations: roleStats.total_donations
-          });
+          console.log(`✅ ${roleType} stats loaded:`, roleStats);
+          
+          // Map the stats with proper formatting
+          const mappedStats: any = {
+            // Common metrics for all departments
+            totalUsers: roleStats.total_sellers || roleStats.total_customers || roleStats.total_donors || roleStats.total_beneficiaries || 0,
+            activeReports: roleStats.active_cases || roleStats.pending_repairs || roleStats.pending_claims || roleStats.pending_donations || 0,
+            totalTransactions: roleStats.total_listings || roleStats.total_repairs || roleStats.total_policies || roleStats.total_cases || roleStats.total_donations || 0,
+            revenue: roleStats.total_revenue || roleStats.total_payouts || roleStats.total_donation_value || 0,
+            recoveryRate: roleStats.resolution_rate || roleStats.completion_rate || roleStats.claim_approval_rate || 0,
+            pendingApprovals: roleStats.pending_verification || roleStats.pending_repairs || roleStats.pending_claims || roleStats.pending_donations || 0,
+            
+            // Department-specific metrics
+            ...roleStats
+          };
+          
+          setStats(mappedStats);
+        } else {
+          console.error(`❌ Error fetching ${roleType} stats:`, error);
+          setStats({});
         }
       }
     } catch (error) {
@@ -571,6 +574,7 @@ const StakeholderAdminDashboard = ({
               </p>
             </div>
             <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+              <NotificationBell />
               <Button variant="outline" size="sm" onClick={fetchDashboardData} className="w-auto">
                 <RefreshCw className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Refresh</span>

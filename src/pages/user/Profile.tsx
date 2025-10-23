@@ -13,6 +13,8 @@ import { BackButton } from "@/components/navigation/BackButton";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { SmartNotificationCenter } from "@/components/notifications/SmartNotificationCenter";
+import { EnhancedNotificationPreferences } from "@/components/notifications/EnhancedNotificationPreferences";
 import {
   ArrowLeft,
   User,
@@ -250,6 +252,9 @@ const Profile = () => {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <SmartNotificationCenter />
+            </div>
             <Button variant="ghost" size="icon" asChild>
               <Link to={getDashboardLink()}>
                 <ArrowLeft className="w-5 h-5" />
@@ -469,73 +474,8 @@ const Profile = () => {
           </Button>
         </Card>
 
-        {/* Notification Settings */}
-        <Card className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Bell className="w-5 h-5" />
-            Notifications
-          </h2>
-          
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Device Alerts</p>
-                <p className="text-sm text-muted-foreground">Stolen device matches and recovery updates</p>
-              </div>
-              <Switch
-                checked={notifications.deviceAlerts}
-                onCheckedChange={(checked) => 
-                  setNotifications({...notifications, deviceAlerts: checked})
-                }
-              />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Community Updates</p>
-                <p className="text-sm text-muted-foreground">Lost and found posts in your area</p>
-              </div>
-              <Switch
-                checked={notifications.communityUpdates}
-                onCheckedChange={(checked) => 
-                  setNotifications({...notifications, communityUpdates: checked})
-                }
-              />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Marketplace Offers</p>
-                <p className="text-sm text-muted-foreground">New listings and price alerts</p>
-              </div>
-              <Switch
-                checked={notifications.marketplaceOffers}
-                onCheckedChange={(checked) => 
-                  setNotifications({...notifications, marketplaceOffers: checked})
-                }
-              />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Security Alerts</p>
-                <p className="text-sm text-muted-foreground">Account security and fraud warnings</p>
-              </div>
-              <Switch
-                checked={notifications.securityAlerts}
-                onCheckedChange={(checked) => 
-                  setNotifications({...notifications, securityAlerts: checked})
-                }
-              />
-            </div>
-          </div>
-        </Card>
+        {/* Enhanced Notification Settings */}
+        <EnhancedNotificationPreferences />
 
         {/* Privacy Settings */}
         <Card className="p-6 space-y-4">

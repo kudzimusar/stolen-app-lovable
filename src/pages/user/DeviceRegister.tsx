@@ -18,6 +18,7 @@ import { ArrowLeft, Camera, Upload, Scan, MapPin, Shield, CheckCircle } from "lu
 import { useToast } from "@/hooks/use-toast";
 import { useFormPersistence } from "@/components/providers/EnhancedUXProvider";
 import { supabase } from "@/integrations/supabase/client";
+import { notificationService } from "@/lib/services/notification-service";
 
 // Storage capacity options
 const STORAGE_OPTIONS = [
@@ -275,6 +276,24 @@ const DeviceRegister = () => {
       }
 
       console.log('✅ Registration response:', data);
+
+      // Send device registration notification
+      try {
+        await notificationService.notifyDeviceRegistered(
+          user.id,
+          formData.deviceName,
+          {
+            serial_number: formData.serialNumber,
+            brand: formData.brand,
+            model: formData.model,
+            registration_date: new Date().toISOString(),
+            device_id: data?.device_id
+          }
+        );
+      } catch (notificationError) {
+        console.error('Notification error:', notificationError);
+        // Don't fail registration if notification fails
+      }
 
       // Success!
     toast({

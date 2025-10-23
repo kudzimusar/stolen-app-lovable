@@ -6,15 +6,69 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { BackButton } from "@/components/navigation/BackButton";
+import { notificationService } from "@/lib/services/notification-service";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const NewInsuranceClaim = () => {
   const [deviceType, setDeviceType] = useState("");
   const [incidentDate, setIncidentDate] = useState("");
   const [incidentType, setIncidentType] = useState("");
   const [description, setDescription] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = () => {
-    console.log("Submitting insurance claim:", { deviceType, incidentDate, incidentType, description });
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to submit a claim.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Generate claim ID
+      const claimId = `INS-${Date.now()}`;
+      
+      // Send insurance claim notification
+      await notificationService.notifyClaimSubmitted(
+        user.id,
+        claimId,
+        incidentType || 'device_claim',
+        {
+          device_type: deviceType,
+          incident_date: incidentDate,
+          incident_type: incidentType,
+          description: description,
+          submission_date: new Date().toISOString()
+        }
+      );
+
+      toast({
+        title: "Claim Submitted Successfully!",
+        description: `Your insurance claim ${claimId} has been submitted and is under review.`,
+      });
+
+      // Reset form
+      setDeviceType("");
+      setIncidentDate("");
+      setIncidentType("");
+      setDescription("");
+    } catch (error) {
+      console.error('Error submitting claim:', error);
+      toast({
+        title: "Error Submitting Claim",
+        description: "Please try again or contact support.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -83,8 +137,12 @@ const NewInsuranceClaim = () => {
               />
             </div>
 
-            <Button onClick={handleSubmit} className="w-full bg-blue-600 hover:bg-blue-700">
-              Submit Insurance Claim
+            <Button 
+              onClick={handleSubmit} 
+              className="w-full bg-blue-600 hover:bg-blue-700"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Submit Insurance Claim"}
             </Button>
           </CardContent>
         </Card>

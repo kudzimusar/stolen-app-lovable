@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { deviceLocationService, DeviceLocationData } from "@/services/device-location-service";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthToken } from "@/lib/auth";
+import { notificationService } from "@/lib/services/notification-service";
 import {
   ArrowLeft,
   Shield,

@@ -13,6 +13,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthToken } from "@/lib/auth";
+import { notificationService } from "@/lib/services/notification-service";
 import { Loader2, Download } from "lucide-react";
 import { 
   Smartphone, 
@@ -239,6 +240,28 @@ const ListMyDevice = () => {
 
       if (response.ok) {
         const result = await response.json();
+        
+        // Send marketplace listing notification
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await notificationService.notifyListingCreated(
+              user.id,
+              selectedDevice.name,
+              parseFloat(price),
+              {
+                listing_id: result.listing_id,
+                device_id: selectedDevice.id,
+                is_hot_deal: isHotDeal,
+                listing_date: new Date().toISOString()
+              }
+            );
+          }
+        } catch (notificationError) {
+          console.error('Notification error:', notificationError);
+          // Don't fail listing if notification fails
+        }
+
         toast({
           title: "Listing Created!",
           description: `Your ${selectedDevice.name} is now listed on the marketplace.`,

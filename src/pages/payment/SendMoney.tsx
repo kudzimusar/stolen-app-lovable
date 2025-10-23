@@ -21,6 +21,8 @@ import {
   Star
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { notificationService } from "@/lib/services/notification-service";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Contact {
   id: string;
@@ -272,6 +274,29 @@ const SendMoney = () => {
       
       // Use dynamic wallet service for real transaction processing
       const result = await dynamicWalletService.simulateTransaction('user_123', 'purchase', totalAmount);
+      
+      // Send payment sent notification
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await notificationService.notifyPaymentSent(
+            user.id,
+            transferAmount,
+            recipient?.name || recipientInput,
+            {
+              transaction_id: result.transactionId || `TXN-${Date.now()}`,
+              recipient_email: recipient?.email,
+              recipient_phone: recipient?.phone,
+              payment_method: selectedPaymentMethod?.type,
+              fees: fees.total,
+              description: description
+            }
+          );
+        }
+      } catch (notificationError) {
+        console.error('Notification error:', notificationError);
+        // Don't fail payment if notification fails
+      }
       
       toast({
         title: "Transfer Successful",

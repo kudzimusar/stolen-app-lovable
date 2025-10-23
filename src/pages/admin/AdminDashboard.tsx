@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthToken } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { SmartNotificationCenter } from "@/components/notifications/SmartNotificationCenter";
 
 const AdminDashboard = () => {
   const [timeRange, setTimeRange] = useState("24h");
@@ -152,12 +153,22 @@ const AdminDashboard = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-2">
-            Platform Administration
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
-            Monitor and manage the STOLEN platform ecosystem
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <SmartNotificationCenter />
+            </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-2">
+                Platform Administration
+              </h1>
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
+                Monitor and manage the STOLEN platform ecosystem
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <NotificationBell />
+            </div>
+          </div>
         </div>
 
         {/* Time Range Selector */}
