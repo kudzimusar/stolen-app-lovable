@@ -42,10 +42,6 @@ const InsuranceDashboardEnhanced = lazy(() => import("./pages/insurance/Insuranc
 const InsuranceClaims = lazy(() => import("./pages/insurance/InsuranceClaims"));
 const InsurancePolicies = lazy(() => import("./pages/insurance/InsurancePolicies"));
 
-// Notification pages
-const NotificationCenter = lazy(() => import("./pages/notifications/NotificationCenter"));
-const UniversalNotificationPreferences = lazy(() => import("./components/user/UniversalNotificationPreferences"));
-
 // Marketplace pages (excluding main Marketplace which is already loaded)
 const ProductDetail = lazy(() => import("./pages/marketplace/ProductDetail"));
 const ListMyDevice = lazy(() => import("./pages/marketplace/ListMyDevice"));
@@ -485,28 +481,6 @@ const App = () => {
               <ProtectedRoute>
                 <Suspense fallback={<div style={{ padding: '20px' }}>Loading Report Listing...</div>}>
                   <ReportListing />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Notification Routes */}
-          <Route 
-            path="/notifications" 
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<div style={{ padding: '20px' }}>Loading Notifications...</div>}>
-                  <NotificationCenter />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="/notifications/preferences" 
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<div style={{ padding: '20px' }}>Loading Preferences...</div>}>
-                  <UniversalNotificationPreferences />
                 </Suspense>
               </ProtectedRoute>
             }

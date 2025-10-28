@@ -339,3 +339,5 @@ The `register-device` edge function is already deployed and creates:
 
 **All improvements are now applied and ready on Supabase!** 🎊
 
+
+

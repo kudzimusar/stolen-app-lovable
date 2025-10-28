@@ -226,3 +226,5 @@ SELECT 'SETUP COMPLETE!' as status,
        (SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'user_notifications' AND column_name IN ('feature_category', 'feature_data', 'priority_level', 'action_link', 'expires_at')) as columns_added,
        (SELECT COUNT(*) FROM information_schema.tables WHERE table_name IN ('notification_preferences', 'email_templates', 'notification_delivery_logs')) as tables_created,
        (SELECT COUNT(*) FROM email_templates) as templates_created;
+
+

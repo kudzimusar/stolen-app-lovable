@@ -62,3 +62,5 @@ FROM information_schema.tables
 WHERE table_schema = 'public' 
 AND table_name IN ('notification_preferences', 'email_templates', 'notification_delivery_logs')
 ORDER BY table_name;
+
+

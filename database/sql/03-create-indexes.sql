@@ -16,3 +16,5 @@ FROM pg_indexes
 WHERE tablename = 'user_notifications' 
 AND indexname LIKE 'idx_user_notifications_%'
 ORDER BY indexname;
+
+

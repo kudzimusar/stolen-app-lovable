@@ -25,7 +25,8 @@ import {
   RefreshCw,
   Activity,
   Bell,
-  Zap
+  Zap,
+  FileText
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
@@ -36,6 +37,10 @@ import FinancialPanel from "./panels/FinancialPanel";
 import SecurityPanel from "./panels/SecurityPanel";
 import SystemSettingsPanel from "./panels/SystemSettingsPanel";
 import UsersPanel from "./panels/UsersPanel";
+import AdminUserManagement from "./AdminUserManagement";
+import { ApprovalQueue } from "@/components/admin/ApprovalQueue";
+import { TaskManagement } from "@/components/admin/TaskManagement";
+import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
 
 interface AdminStats {
   totalUsers: number;
@@ -282,6 +287,27 @@ const UnifiedAdminDashboard = () => {
         icon: Settings, 
         description: "System configuration",
         color: "bg-gray-50 border-gray-200 text-gray-800"
+      },
+      { 
+        id: "approvals", 
+        label: "⏳ Approvals", 
+        icon: Clock, 
+        description: "Pending approvals and reviews",
+        color: "bg-yellow-50 border-yellow-200 text-yellow-800"
+      },
+      { 
+        id: "tasks", 
+        label: "📋 Tasks", 
+        icon: CheckCircle, 
+        description: "Task management and assignments",
+        color: "bg-cyan-50 border-cyan-200 text-cyan-800"
+      },
+      { 
+        id: "audit", 
+        label: "📜 Audit Log", 
+        icon: FileText, 
+        description: "System audit trail",
+        color: "bg-slate-50 border-slate-200 text-slate-800"
       }
     ];
   };
@@ -493,7 +519,12 @@ const UnifiedAdminDashboard = () => {
       case "overview":
         return renderOverviewPanel();
       case "users":
-        return <UsersPanel />;
+        return (
+          <div className="space-y-6">
+            <UsersPanel />
+            <AdminUserManagement />
+          </div>
+        );
       case "lost-found":
         return <LostFoundPanel />;
       case "marketplace":
@@ -506,6 +537,12 @@ const UnifiedAdminDashboard = () => {
         return <SecurityPanel />;
       case "settings":
         return <SystemSettingsPanel />;
+      case "approvals":
+        return <ApprovalQueue />;
+      case "tasks":
+        return <TaskManagement />;
+      case "audit":
+        return <AuditLogViewer />;
       default:
         return renderOverviewPanel();
     }

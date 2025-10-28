@@ -15,3 +15,5 @@ FROM information_schema.columns
 WHERE table_name = 'user_notifications' 
 AND column_name IN ('feature_category', 'feature_data', 'priority_level', 'action_link', 'expires_at')
 ORDER BY column_name;
+
+

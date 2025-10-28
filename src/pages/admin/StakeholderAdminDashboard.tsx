@@ -35,7 +35,6 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { getDepartmentConfig } from "@/lib/constants/departmentConfigs";
 import { DepartmentConfig } from "@/lib/types/departmentConfig";
-import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 // Import department-specific panels
 import LostFoundPanel from "./panels/LostFoundPanel";
@@ -574,7 +573,6 @@ const StakeholderAdminDashboard = ({
               </p>
             </div>
             <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-              <NotificationBell />
               <Button variant="outline" size="sm" onClick={fetchDashboardData} className="w-auto">
                 <RefreshCw className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Refresh</span>

@@ -52,3 +52,5 @@ SELECT
 FROM pg_policies 
 WHERE tablename IN ('notification_preferences', 'email_templates', 'notification_delivery_logs')
 ORDER BY tablename, policyname;
+
+

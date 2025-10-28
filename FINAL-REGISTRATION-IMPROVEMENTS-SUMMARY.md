@@ -322,3 +322,5 @@ The `register-device` edge function (deployed) creates:
 
 **No more confusion! No more outdated devices! Everything modern and easy to use!** 🎉
 
+
+

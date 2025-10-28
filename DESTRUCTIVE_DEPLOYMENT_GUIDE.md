@@ -137,3 +137,5 @@ notification_delivery_logs | (no feature_category - correct)
 - Check if `feature_category` column exists: `SELECT column_name FROM information_schema.columns WHERE table_name = 'email_templates' AND column_name = 'feature_category';`
 
 This destructive approach **guarantees 100% success** by eliminating all schema conflicts and ensuring a clean starting point for the notification system.
+
+

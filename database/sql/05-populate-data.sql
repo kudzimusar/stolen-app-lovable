@@ -107,3 +107,5 @@ SELECT
 FROM email_templates 
 GROUP BY feature_category 
 ORDER BY feature_category;
+
+
