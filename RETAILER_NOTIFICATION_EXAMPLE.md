@@ -263,3 +263,4 @@ const template = {
 This system ensures retailers stay informed and can respond quickly to business opportunities and customer needs!
 
 
+

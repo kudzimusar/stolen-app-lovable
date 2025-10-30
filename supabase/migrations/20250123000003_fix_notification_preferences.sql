@@ -81,3 +81,4 @@ ON CONFLICT (type) DO UPDATE SET
   is_active = EXCLUDED.is_active;
 
 
+

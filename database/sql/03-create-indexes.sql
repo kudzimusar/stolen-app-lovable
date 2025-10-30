@@ -18,3 +18,4 @@ AND indexname LIKE 'idx_user_notifications_%'
 ORDER BY indexname;
 
 
+
