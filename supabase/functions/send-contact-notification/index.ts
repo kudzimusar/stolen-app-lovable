@@ -6,9 +6,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// SendGrid Configuration
-const SENDGRID_API_KEY = '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';
-const SENDGRID_FROM_EMAIL = 'kudzimusar@gmail.com'; // Will be updated with verified sender
+// SendGrid Configuration (from environment variables)
+const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY') || '';
+const SENDGRID_FROM_EMAIL = Deno.env.get('SENDGRID_FROM_EMAIL') || '';
 const SENDGRID_FROM_NAME = 'STOLEN App';
 
 interface ContactNotification {

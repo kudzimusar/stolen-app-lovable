@@ -1,3 +1,118 @@
+-- STEP 1: ADD COLUMNS ONLY
+-- Run this first to add columns to user_notifications table
+
+-- Add feature categorization columns to existing user_notifications table
+ALTER TABLE user_notifications 
+ADD COLUMN IF NOT EXISTS feature_category VARCHAR(30) DEFAULT 'lost_found',
+ADD COLUMN IF NOT EXISTS feature_data JSONB DEFAULT '{}',
+ADD COLUMN IF NOT EXISTS priority_level INTEGER DEFAULT 5 CHECK (priority_level >= 1 AND priority_level <= 10),
+ADD COLUMN IF NOT EXISTS action_link VARCHAR(500),
+ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP WITH TIME ZONE;
+
+-- Verify columns were created
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns 
+WHERE table_name = 'user_notifications' 
+AND column_name IN ('feature_category', 'feature_data', 'priority_level', 'action_link', 'expires_at')
+ORDER BY column_name;
+
+
+
+
+
+-- STEP 3: CREATE INDEXES
+-- Run this AFTER columns exist to create performance indexes
+
+-- Create indexes for user_notifications table
+CREATE INDEX IF NOT EXISTS idx_user_notifications_feature ON user_notifications(feature_category);
+CREATE INDEX IF NOT EXISTS idx_user_notifications_user_feature ON user_notifications(user_id, feature_category);
+CREATE INDEX IF NOT EXISTS idx_user_notifications_priority ON user_notifications(priority_level);
+CREATE INDEX IF NOT EXISTS idx_user_notifications_expires ON user_notifications(expires_at);
+
+-- Verify indexes were created
+SELECT 
+    indexname, 
+    indexdef,
+    '✅ Created' as status
+FROM pg_indexes 
+WHERE tablename = 'user_notifications' 
+AND indexname LIKE 'idx_user_notifications_%'
+ORDER BY indexname;
+
+
+
+
+
+-- STEP 3: DESTRUCTIVE RECREATION (BULLETPROOF VERSION)
+-- This script DROPS and recreates tables to ensure clean schema
+
+-- DROP existing tables (if they exist) to ensure clean recreation
+DROP TABLE IF EXISTS notification_delivery_logs CASCADE;
+DROP TABLE IF EXISTS email_templates CASCADE;
+DROP TABLE IF EXISTS notification_preferences CASCADE;
+
+-- Create notification preferences table (fresh start)
+CREATE TABLE notification_preferences (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    feature_category VARCHAR(30) NOT NULL,
+    email_enabled BOOLEAN DEFAULT TRUE,
+    sms_enabled BOOLEAN DEFAULT FALSE,
+    push_enabled BOOLEAN DEFAULT TRUE,
+    in_app_enabled BOOLEAN DEFAULT TRUE,
+    frequency VARCHAR(20) DEFAULT 'immediate' CHECK (frequency IN ('immediate', 'hourly', 'daily', 'weekly')),
+    quiet_hours_start TIME,
+    quiet_hours_end TIME,
+    filters JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, feature_category)
+);
+
+-- Create email templates table (fresh start)
+CREATE TABLE email_templates (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    feature_category VARCHAR(30) NOT NULL,
+    notification_type VARCHAR(50) NOT NULL,
+    template_name VARCHAR(100) NOT NULL,
+    subject_template TEXT NOT NULL,
+    html_template TEXT NOT NULL,
+    text_template TEXT,
+    variables JSONB DEFAULT '{}',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(feature_category, notification_type)
+);
+
+-- Create notification delivery logs table (fresh start)
+CREATE TABLE notification_delivery_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    notification_id UUID REFERENCES user_notifications(id) ON DELETE CASCADE,
+    channel VARCHAR(20) NOT NULL CHECK (channel IN ('email', 'sms', 'push', 'in_app')),
+    status VARCHAR(20) NOT NULL CHECK (status IN ('pending', 'sent', 'delivered', 'failed', 'bounced')),
+    provider_response JSONB,
+    error_message TEXT,
+    delivered_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create indexes for new tables
+CREATE INDEX idx_notification_preferences_user ON notification_preferences(user_id);
+CREATE INDEX idx_notification_preferences_category ON notification_preferences(feature_category);
+CREATE INDEX idx_delivery_logs_notification ON notification_delivery_logs(notification_id);
+CREATE INDEX idx_delivery_logs_channel ON notification_delivery_logs(channel);
+CREATE INDEX idx_delivery_logs_status ON notification_delivery_logs(status);
+
+-- Verify tables were created with correct schema
+SELECT 'Tables recreated successfully' as status,
+       table_name,
+       column_name,
+       data_type
+FROM information_schema.columns 
+WHERE table_name IN ('notification_preferences', 'email_templates', 'notification_delivery_logs')
+AND column_name = 'feature_category'
+ORDER BY table_name;
 -- STEP 5: POPULATE INITIAL DATA
 -- Run this to populate email templates for all 18 features
 
@@ -109,6 +224,63 @@ GROUP BY feature_category
 ORDER BY feature_category;
 
 
+
+
+
+-- STEP 6: SET UP SECURITY POLICIES
+-- Run this to enable RLS and create security policies
+
+-- Enable Row Level Security on all new tables
+ALTER TABLE notification_preferences ENABLE ROW LEVEL SECURITY;
+ALTER TABLE email_templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notification_delivery_logs ENABLE ROW LEVEL SECURITY;
+
+-- Create RLS policies for notification_preferences
+CREATE POLICY "Users manage own preferences" ON notification_preferences
+    FOR ALL USING (auth.uid() = user_id);
+
+-- Create RLS policies for email_templates
+CREATE POLICY "Users view templates" ON email_templates
+    FOR SELECT USING (auth.role() = 'authenticated');
+
+-- Create RLS policies for notification_delivery_logs
+CREATE POLICY "Users view own delivery logs" ON notification_delivery_logs
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM user_notifications 
+            WHERE user_notifications.id = notification_delivery_logs.notification_id 
+            AND user_notifications.user_id = auth.uid()
+        )
+    );
+
+-- Grant permissions to authenticated users
+GRANT SELECT, INSERT, UPDATE ON notification_preferences TO authenticated;
+GRANT SELECT ON email_templates TO authenticated;
+GRANT SELECT ON notification_delivery_logs TO authenticated;
+
+-- Verify RLS is enabled and policies exist
+SELECT 
+    schemaname,
+    tablename,
+    rowsecurity as rls_enabled,
+    '✅ RLS Enabled' as status
+FROM pg_tables 
+WHERE tablename IN ('notification_preferences', 'email_templates', 'notification_delivery_logs')
+AND schemaname = 'public';
+
+-- Verify policies were created
+SELECT 
+    schemaname,
+    tablename,
+    policyname,
+    permissive,
+    roles,
+    cmd,
+    qual,
+    '✅ Policy Created' as status
+FROM pg_policies 
+WHERE tablename IN ('notification_preferences', 'email_templates', 'notification_delivery_logs')
+ORDER BY tablename, policyname;
 
 
 
