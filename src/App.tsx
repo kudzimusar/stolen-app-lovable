@@ -121,6 +121,26 @@ const App = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Register service worker for PWA support
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      // Register service worker - public files are served at root
+      const swPath = import.meta.env.PROD ? '/stolen-app-lovable/sw.js' : '/sw.js';
+      navigator.serviceWorker.register(swPath)
+        .then((registration) => {
+          console.log('✅ Service Worker registered:', registration);
+          
+          // Check for updates periodically
+          setInterval(() => {
+            registration.update();
+          }, 60000); // Check every minute
+        })
+        .catch((error) => {
+          console.error('❌ Service Worker registration failed:', error);
+        });
+    }
+  }, []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>

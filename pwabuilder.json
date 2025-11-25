@@ -1,0 +1,225 @@
+{
+  "$schema": "https://raw.githubusercontent.com/pwa-builder/PWABuilder/main/pwabuilder-schema.json",
+  "name": "STOLEN - Device Registry & Ownership Management",
+  "short_name": "STOLEN",
+  "description": "Comprehensive device registry and ownership management platform connecting device owners, buyers, sellers, repair shops, law enforcement, insurance companies, NGOs, and financial institutions in a unified ecosystem for device lifecycle management, ownership tracking, and marketplace transactions.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a1a1a",
+  "orientation": "portrait-primary",
+  "categories": [
+    "business",
+    "finance",
+    "productivity",
+    "shopping",
+    "utilities"
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile-1.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Device Registration Dashboard"
+    },
+    {
+      "src": "/screenshot-mobile-2.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Marketplace & Device Verification"
+    },
+    {
+      "src": "/screenshot-desktop-1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Admin Dashboard Overview"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Register Device",
+      "url": "/register-device",
+      "description": "Quick access to device registration"
+    },
+    {
+      "name": "Check Device",
+      "url": "/check-device",
+      "description": "Verify device authenticity"
+    },
+    {
+      "name": "Marketplace",
+      "url": "/marketplace",
+      "description": "Browse and buy devices"
+    },
+    {
+      "name": "Lost & Found",
+      "url": "/lost-found-report",
+      "description": "Report lost or found devices"
+    },
+    {
+      "name": "My Devices",
+      "url": "/my-devices",
+      "description": "Manage your registered devices"
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "device_image",
+          "accept": ["image/*"]
+        }
+      ]
+    }
+  },
+  "manifestUrl": "https://kudzimusar.github.io/stolen-app-lovable/manifest.json",
+  "manifest": {
+    "name": "STOLEN - Device Registry & Ownership Management",
+    "short_name": "STOLEN",
+    "description": "Comprehensive device registry and ownership management platform connecting device owners, buyers, sellers, repair shops, law enforcement, insurance companies, NGOs, and financial institutions in a unified ecosystem for device lifecycle management, ownership tracking, and marketplace transactions.",
+    "start_url": "/dashboard",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#1a1a1a",
+    "orientation": "portrait-primary"
+  },
+  "features": {
+    "serviceWorker": {
+      "src": "/sw.js",
+      "useCacheFirst": true,
+      "updateViaCache": "none"
+    },
+    "webManifest": {
+      "name": "STOLEN - Device Registry & Ownership Management",
+      "short_name": "STOLEN",
+      "start_url": "/dashboard",
+      "scope": "/",
+      "display": "standalone",
+      "background_color": "#ffffff",
+      "theme_color": "#1a1a1a"
+    }
+  },
+  "windows": {
+    "packageIdentityName": "com.stolenapp.device",
+    "publisher": "CN=STOLEN App",
+    "publisherDisplayName": "STOLEN Platform",
+    "version": "1.0.0.0",
+    "allowExecution": true,
+    "startPage": "https://kudzimusar.github.io/stolen-app-lovable/dashboard",
+    "displayName": "STOLEN",
+    "description": "Device Registry & Ownership Management Platform",
+    "backgroundColor": "#ffffff",
+    "appUserModelId": "com.stolenapp.device",
+    "publisher": "CN=STOLEN App"
+  },
+  "android": {
+    "package": "com.stolenapp.device",
+    "versionCode": 1,
+    "versionName": "1.0.0",
+    "minSdkVersion": 21,
+    "targetSdkVersion": 33,
+    "permissions": [
+      "android.permission.INTERNET",
+      "android.permission.CAMERA",
+      "android.permission.ACCESS_FINE_LOCATION",
+      "android.permission.ACCESS_COARSE_LOCATION",
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+      "android.permission.NOTIFICATIONS",
+      "android.permission.POST_NOTIFICATIONS",
+      "android.permission.VIBRATE",
+      "android.permission.RECORD_AUDIO"
+    ],
+    "features": [
+      "android.hardware.camera",
+      "android.hardware.camera.autofocus",
+      "android.hardware.location",
+      "android.hardware.location.gps"
+    ],
+    "signingConfig": {
+      "storeFile": "keystore.jks",
+      "storePassword": "",
+      "keyAlias": "stolen-app",
+      "keyPassword": ""
+    }
+  },
+  "ios": {
+    "bundleId": "com.stolenapp.device",
+    "version": "1.0.0",
+    "buildNumber": "1",
+    "displayName": "STOLEN",
+    "deploymentTarget": "13.0",
+    "permissions": [
+      "NSCameraUsageDescription",
+      "NSPhotoLibraryUsageDescription",
+      "NSLocationWhenInUseUsageDescription",
+      "NSLocationAlwaysUsageDescription",
+      "NSMicrophoneUsageDescription"
+    ],
+    "info": {
+      "CFBundleDisplayName": "STOLEN",
+      "CFBundleShortVersionString": "1.0.0",
+      "CFBundleVersion": "1",
+      "UIRequiresFullScreen": false,
+      "UIStatusBarStyle": "UIStatusBarStyleDefault",
+      "UISupportedInterfaceOrientations": [
+        "UIInterfaceOrientationPortrait",
+        "UIInterfaceOrientationPortraitUpsideDown"
+      ],
+      "UISupportedInterfaceOrientations~ipad": [
+        "UIInterfaceOrientationPortrait",
+        "UIInterfaceOrientationPortraitUpsideDown",
+        "UIInterfaceOrientationLandscapeLeft",
+        "UIInterfaceOrientationLandscapeRight"
+      ]
+    }
+  },
+  "edge": {
+    "packageIdentityName": "com.stolenapp.device",
+    "publisher": "CN=STOLEN App",
+    "publisherDisplayName": "STOLEN Platform",
+    "version": "1.0.0.0",
+    "allowExecution": true,
+    "startPage": "https://kudzimusar.github.io/stolen-app-lovable/dashboard",
+    "displayName": "STOLEN",
+    "description": "Device Registry & Ownership Management Platform",
+    "backgroundColor": "#ffffff",
+    "appUserModelId": "com.stolenapp.device"
+  },
+  "safari": {
+    "display": "standalone",
+    "orientation": "portrait"
+  },
+  "chromeos": {
+    "package": "com.stolenapp.device",
+    "version": "1.0.0",
+    "name": "STOLEN",
+    "description": "Device Registry & Ownership Management Platform"
+  }
+}
+

@@ -1,31 +1,117 @@
-// Service Worker for Lost and Found Push Notifications
-const CACHE_NAME = 'stolen-app-v1';
+// Service Worker for STOLEN App - PWA Support
+const CACHE_NAME = 'stolen-app-v2';
+const STATIC_CACHE_NAME = 'stolen-app-static-v2';
+const DYNAMIC_CACHE_NAME = 'stolen-app-dynamic-v2';
+
+// Core app routes and assets to cache
 const urlsToCache = [
   '/',
-  '/community-board',
+  '/dashboard',
+  '/register',
+  '/login',
+  '/my-devices',
+  '/register-device',
+  '/check-device',
+  '/marketplace',
   '/lost-found-report',
+  '/community-board',
   '/icon-192x192.png',
-  '/badge-72x72.png'
+  '/icon-512x512.png',
+  '/badge-72x72.png',
+  '/manifest.json'
 ];
 
-// Install event
+// Install event - Cache static assets
 self.addEventListener('install', (event) => {
+  console.log('[Service Worker] Installing...');
   event.waitUntil(
-    caches.open(CACHE_NAME)
+    caches.open(STATIC_CACHE_NAME)
       .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
+        console.log('[Service Worker] Caching static assets');
+        return cache.addAll(urlsToCache).catch((error) => {
+          console.error('[Service Worker] Cache failed:', error);
+          // Continue even if some files fail to cache
+        });
+      })
+      .then(() => {
+        // Force activation of new service worker
+        return self.skipWaiting();
       })
   );
 });
 
-// Fetch event
+// Activate event - Clean up old caches
+self.addEventListener('activate', (event) => {
+  console.log('[Service Worker] Activating...');
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== STATIC_CACHE_NAME && cacheName !== DYNAMIC_CACHE_NAME && cacheName !== CACHE_NAME) {
+            console.log('[Service Worker] Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+    .then(() => {
+      // Take control of all pages immediately
+      return self.clients.claim();
+    })
+  );
+});
+
+// Fetch event - Network first with cache fallback
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Skip non-GET requests
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  // Skip cross-origin requests (except for API calls we want to cache)
+  if (url.origin !== location.origin && !url.pathname.startsWith('/api/')) {
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
+    caches.match(request)
+      .then((cachedResponse) => {
+        // Return cached version if available
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        // Fetch from network
+        return fetch(request)
+          .then((response) => {
+            // Don't cache non-successful responses
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+
+            // Clone the response
+            const responseToCache = response.clone();
+
+            // Cache dynamic content
+            caches.open(DYNAMIC_CACHE_NAME)
+              .then((cache) => {
+                // Only cache GET requests and same-origin requests
+                if (request.method === 'GET' && url.origin === location.origin) {
+                  cache.put(request, responseToCache);
+                }
+              });
+
+            return response;
+          })
+          .catch(() => {
+            // Network failed, return offline page if available
+            if (request.headers.get('accept').includes('text/html')) {
+              return caches.match('/');
+            }
+          });
       })
   );
 });
@@ -44,15 +130,19 @@ self.addEventListener('push', (event) => {
   }
 
   const options = {
-    body: data.body || 'New lost or found device report',
+    body: data.body || 'New update from STOLEN',
     icon: '/icon-192x192.png',
     badge: '/badge-72x72.png',
-    tag: data.tag || 'lost-found-update',
+    tag: data.tag || 'stolen-app-update',
     data: data.data || {},
+    requireInteraction: data.requireInteraction || false,
+    silent: data.silent || false,
+    vibrate: data.vibrate || [200, 100, 200],
+    timestamp: Date.now(),
     actions: [
       {
         action: 'view',
-        title: 'View Report',
+        title: 'View',
         icon: '/icon-192x192.png'
       },
       {
@@ -78,10 +168,20 @@ self.addEventListener('notificationclick', (event) => {
     return;
   }
 
-  // Default action or 'view' action
-  const urlToOpen = event.notification.data?.reportId 
-    ? `/community-board#report-${event.notification.data.reportId}`
-    : '/community-board';
+  // Determine URL to open based on notification data
+  let urlToOpen = '/dashboard';
+  
+  if (event.notification.data) {
+    if (event.notification.data.url) {
+      urlToOpen = event.notification.data.url;
+    } else if (event.notification.data.reportId) {
+      urlToOpen = `/community-board#report-${event.notification.data.reportId}`;
+    } else if (event.notification.data.deviceId) {
+      urlToOpen = `/device/${event.notification.data.deviceId}`;
+    } else if (event.notification.data.listingId) {
+      urlToOpen = `/marketplace/${event.notification.data.listingId}`;
+    }
+  }
 
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then((clientList) => {
