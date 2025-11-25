@@ -10,12 +10,14 @@ permissions:
   pages: write
   id-token: write
 
+# Only cancel if a new deployment starts - wait for current one to finish if it's close to completion
 concurrency:
-  cancel-in-progress: true
+  cancel-in-progress: false
   group: "pages"
 
 jobs:
   deploy:
+    timeout-minutes: 15
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -31,10 +33,12 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit
+        continue-on-error: false
 
       - name: Build project
         run: npm run build
+        continue-on-error: false
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -47,3 +51,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        continue-on-error: false
