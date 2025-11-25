@@ -2,9 +2,15 @@
   "name": "STOLEN - Device Registry & Ownership Management",
   "short_name": "STOLEN",
   "description": "Comprehensive device registry and ownership management platform connecting device owners, buyers, sellers, repair shops, law enforcement, insurance companies, NGOs, and financial institutions in a unified ecosystem for device lifecycle management, ownership tracking, and marketplace transactions.",
+  "id": "/stolen-app-lovable/",
   "start_url": "/stolen-app-lovable/",
   "scope": "/stolen-app-lovable/",
   "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait-primary",
   "theme_color": "#1a1a1a",
   "background_color": "#ffffff",
@@ -82,14 +88,14 @@
       "label": "Device Registration Dashboard"
     },
     {
-      "src": "/screenshot-mobile-2.png",
+      "src": "/stolen-app-lovable/screenshot-mobile-2.png",
       "sizes": "540x720",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Marketplace & Device Verification"
     },
     {
-      "src": "/screenshot-desktop-1.png",
+      "src": "/stolen-app-lovable/screenshot-desktop-1.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
@@ -176,7 +182,29 @@
   },
   "related_applications": [],
   "prefer_related_applications": false,
-  "iarc_rating_id": "",
+  "widgets": [
+    {
+      "name": "Device Status",
+      "short_name": "Status",
+      "description": "Quick view of your registered devices",
+      "tag": "device-status",
+      "template": "{{device_count}} devices registered",
+      "ms_ac_template": "{{device_count}} devices",
+      "data": {
+        "device_count": 0
+      },
+      "type": "text",
+      "screenshots": [
+        {
+          "src": "/stolen-app-lovable/widget-screenshot.png",
+          "sizes": "400x200",
+          "type": "image/png",
+          "label": "Device Status Widget"
+        }
+      ]
+    }
+  ],
+  "scope_extensions": [],
   "edge_side_panel": {
     "preferred_width": 400
   },

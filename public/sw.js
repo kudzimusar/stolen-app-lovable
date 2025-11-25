@@ -213,6 +213,102 @@ self.addEventListener('sync', (event) => {
   }
 });
 
+// Periodic Background Sync - Sync data at regular intervals
+self.addEventListener('periodicsync', (event) => {
+  console.log('[Service Worker] Periodic sync event:', event.tag);
+  
+  if (event.tag === 'device-status-sync') {
+    event.waitUntil(
+      syncDeviceStatus()
+    );
+  } else if (event.tag === 'notifications-sync') {
+    event.waitUntil(
+      syncNotifications()
+    );
+  } else if (event.tag === 'marketplace-updates') {
+    event.waitUntil(
+      syncMarketplaceUpdates()
+    );
+  }
+});
+
+// Periodic sync functions
+async function syncDeviceStatus() {
+  try {
+    console.log('[Service Worker] Syncing device status...');
+    // Sync device status updates
+    const response = await fetch(`${BASE_PATH}/api/v1/devices/status`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      // Update cache with latest device status
+      const cache = await caches.open(DYNAMIC_CACHE_NAME);
+      await cache.put(`${BASE_PATH}/api/v1/devices/status`, response.clone());
+      console.log('[Service Worker] Device status synced successfully');
+    }
+  } catch (error) {
+    console.error('[Service Worker] Failed to sync device status:', error);
+  }
+}
+
+async function syncNotifications() {
+  try {
+    console.log('[Service Worker] Syncing notifications...');
+    // Sync pending notifications
+    const response = await fetch(`${BASE_PATH}/api/v1/notifications/pending`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const notifications = await response.json();
+      // Process and display notifications
+      for (const notification of notifications) {
+        self.registration.showNotification(notification.title, {
+          body: notification.body,
+          icon: `${BASE_PATH}/icon-192x192.png`,
+          badge: `${BASE_PATH}/badge-72x72.png`,
+          tag: notification.id,
+          data: notification.data
+        });
+      }
+      console.log('[Service Worker] Notifications synced successfully');
+    }
+  } catch (error) {
+    console.error('[Service Worker] Failed to sync notifications:', error);
+  }
+}
+
+async function syncMarketplaceUpdates() {
+  try {
+    console.log('[Service Worker] Syncing marketplace updates...');
+    // Sync marketplace listings and updates
+    const response = await fetch(`${BASE_PATH}/api/v1/marketplace/updates`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const updates = await response.json();
+      // Update cache with latest marketplace data
+      const cache = await caches.open(DYNAMIC_CACHE_NAME);
+      await cache.put(`${BASE_PATH}/api/v1/marketplace/updates`, response.clone());
+      console.log('[Service Worker] Marketplace updates synced successfully');
+    }
+  } catch (error) {
+    console.error('[Service Worker] Failed to sync marketplace updates:', error);
+  }
+}
+
 async function syncLostFoundReports() {
   try {
     // Get pending reports from IndexedDB
