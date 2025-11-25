@@ -127,8 +127,34 @@ const App = () => {
       // Register service worker - public files are served at root
       const swPath = import.meta.env.PROD ? '/stolen-app-lovable/sw.js' : '/sw.js';
       navigator.serviceWorker.register(swPath)
-        .then((registration) => {
+        .then(async (registration) => {
           console.log('✅ Service Worker registered:', registration);
+          
+          // Register periodic background sync (if supported)
+          if ('periodicSync' in registration) {
+            try {
+              // Request permission for periodic sync
+              const status = await navigator.permissions.query({ name: 'periodic-background-sync' as PermissionName });
+              
+              if (status.state === 'granted') {
+                // Register periodic sync tags
+                await (registration as any).periodicSync.register('device-status-sync', {
+                  minInterval: 24 * 60 * 60 * 1000 // 24 hours
+                });
+                await (registration as any).periodicSync.register('notifications-sync', {
+                  minInterval: 60 * 60 * 1000 // 1 hour
+                });
+                await (registration as any).periodicSync.register('marketplace-updates', {
+                  minInterval: 6 * 60 * 60 * 1000 // 6 hours
+                });
+                console.log('✅ Periodic sync registered');
+              } else {
+                console.log('⚠️ Periodic sync permission not granted');
+              }
+            } catch (error) {
+              console.warn('⚠️ Periodic sync not supported or permission denied:', error);
+            }
+          }
           
           // Check for updates periodically
           setInterval(() => {
