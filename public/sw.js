@@ -170,17 +170,19 @@ self.addEventListener('notificationclick', (event) => {
   }
 
   // Determine URL to open based on notification data
-  let urlToOpen = '/dashboard';
+  let urlToOpen = `${BASE_PATH}/dashboard`;
   
   if (event.notification.data) {
     if (event.notification.data.url) {
-      urlToOpen = event.notification.data.url;
+      urlToOpen = event.notification.data.url.startsWith('/') 
+        ? `${BASE_PATH}${event.notification.data.url}`
+        : event.notification.data.url;
     } else if (event.notification.data.reportId) {
-      urlToOpen = `/community-board#report-${event.notification.data.reportId}`;
+      urlToOpen = `${BASE_PATH}/community-board#report-${event.notification.data.reportId}`;
     } else if (event.notification.data.deviceId) {
-      urlToOpen = `/device/${event.notification.data.deviceId}`;
+      urlToOpen = `${BASE_PATH}/device/${event.notification.data.deviceId}`;
     } else if (event.notification.data.listingId) {
-      urlToOpen = `/marketplace/${event.notification.data.listingId}`;
+      urlToOpen = `${BASE_PATH}/marketplace/${event.notification.data.listingId}`;
     }
   }
 
