@@ -2,7 +2,7 @@
   "name": "STOLEN - Device Registry & Ownership Management",
   "short_name": "STOLEN",
   "description": "Comprehensive device registry and ownership management platform connecting device owners, buyers, sellers, repair shops, law enforcement, insurance companies, NGOs, and financial institutions in a unified ecosystem for device lifecycle management, ownership tracking, and marketplace transactions.",
-  "start_url": "/stolen-app-lovable/dashboard",
+  "start_url": "/stolen-app-lovable/",
   "scope": "/stolen-app-lovable/",
   "display": "standalone",
   "orientation": "portrait-primary",
