@@ -3,22 +3,23 @@ const CACHE_NAME = 'stolen-app-v2';
 const STATIC_CACHE_NAME = 'stolen-app-static-v2';
 const DYNAMIC_CACHE_NAME = 'stolen-app-dynamic-v2';
 
-// Core app routes and assets to cache
+// Core app routes and assets to cache (with base path)
+const BASE_PATH = '/stolen-app-lovable';
 const urlsToCache = [
-  '/',
-  '/dashboard',
-  '/register',
-  '/login',
-  '/my-devices',
-  '/register-device',
-  '/check-device',
-  '/marketplace',
-  '/lost-found-report',
-  '/community-board',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
-  '/badge-72x72.png',
-  '/manifest.json'
+  `${BASE_PATH}/`,
+  `${BASE_PATH}/dashboard`,
+  `${BASE_PATH}/register`,
+  `${BASE_PATH}/login`,
+  `${BASE_PATH}/my-devices`,
+  `${BASE_PATH}/register-device`,
+  `${BASE_PATH}/check-device`,
+  `${BASE_PATH}/marketplace`,
+  `${BASE_PATH}/lost-found-report`,
+  `${BASE_PATH}/community-board`,
+  `${BASE_PATH}/icon-192x192.png`,
+  `${BASE_PATH}/icon-512x512.png`,
+  `${BASE_PATH}/badge-72x72.png`,
+  `${BASE_PATH}/manifest.json`
 ];
 
 // Install event - Cache static assets
@@ -109,7 +110,7 @@ self.addEventListener('fetch', (event) => {
           .catch(() => {
             // Network failed, return offline page if available
             if (request.headers.get('accept').includes('text/html')) {
-              return caches.match('/');
+              return caches.match(`${BASE_PATH}/`);
             }
           });
       })
@@ -131,8 +132,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: data.body || 'New update from STOLEN',
-    icon: '/icon-192x192.png',
-    badge: '/badge-72x72.png',
+    icon: '/stolen-app-lovable/icon-192x192.png',
+    badge: '/stolen-app-lovable/badge-72x72.png',
     tag: data.tag || 'stolen-app-update',
     data: data.data || {},
     requireInteraction: data.requireInteraction || false,
