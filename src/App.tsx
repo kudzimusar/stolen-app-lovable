@@ -127,7 +127,7 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <BrowserRouter basename="/stolen-app-lovable">
           <EnhancedUXProvider
             enableScrollMemory={false}
             enableCrossDeviceSync={false}
