@@ -6,15 +6,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// SendGrid Configuration
-const SENDGRID_API_KEY = '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';
-const SENDGRID_FROM_EMAIL = 'kudzimusar@gmail.com';
+// SendGrid Configuration (from environment variables)
+const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY') || '';
+const SENDGRID_FROM_EMAIL = Deno.env.get('SENDGRID_FROM_EMAIL') || '';
 const SENDGRID_FROM_NAME = 'STOLEN App';
 
-// Twilio Configuration
-const TWILIO_ACCOUNT_SID = 'AC1234567890abcdef1234567890abcdef';
-const TWILIO_AUTH_TOKEN = '1234567890abcdef1234567890abcdef';
-const TWILIO_PHONE_NUMBER = '+1234567890';
+// Twilio Configuration (from environment variables)
+const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID') || '';
+const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN') || '';
+const TWILIO_PHONE_NUMBER = Deno.env.get('TWILIO_PHONE_NUMBER') || '';
 
 interface NotificationRequest {
   user_id: string;

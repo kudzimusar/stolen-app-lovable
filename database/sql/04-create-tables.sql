@@ -64,3 +64,8 @@ AND table_name IN ('notification_preferences', 'email_templates', 'notification_
 ORDER BY table_name;
 
 
+
+
+
+
+

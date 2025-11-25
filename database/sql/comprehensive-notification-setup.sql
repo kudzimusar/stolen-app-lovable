@@ -228,3 +228,8 @@ SELECT 'SETUP COMPLETE!' as status,
        (SELECT COUNT(*) FROM email_templates) as templates_created;
 
 
+
+
+
+
+
