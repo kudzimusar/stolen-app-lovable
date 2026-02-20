@@ -10,8 +10,11 @@ import {
   User,
   MapPin,
   Calendar,
-  Eye
+  Eye,
+  RefreshCw
 } from "lucide-react";
+import { apiClient } from "@/lib/api-client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Case {
   id: string;
@@ -29,53 +32,43 @@ interface Case {
 
 const LawEnforcementCases = () => {
   const [cases, setCases] = useState<Case[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const { toast } = useToast();
+
+  const fetchCases = async () => {
+    setLoading(true);
+    try {
+      console.log('👮 Fetching law enforcement cases...');
+      const { data, error } = await apiClient.invoke('law-enforcement-access', { action: 'list_cases' });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data && data.cases) {
+        setCases(data.cases);
+      } else {
+        // Fallback or empty state if API returns unexpected structure
+        console.warn('⚠️ No cases returned from API, using empty list');
+        setCases([]);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching cases:', error);
+      toast({
+        title: "Error fetching cases",
+        description: "Could not load case data. Please try again.",
+        variant: "destructive"
+      });
+      // Fallback to empty list to prevent crash
+      setCases([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Mock data
-    const mockCases: Case[] = [
-      {
-        id: '1',
-        caseNumber: 'CAS-2024-001',
-        deviceName: 'iPhone 15 Pro',
-        owner: 'John Doe',
-        incidentType: 'theft',
-        status: 'investigating',
-        priority: 'high',
-        assignedOfficer: 'Det. Sarah Johnson',
-        createdDate: '2024-01-20',
-        lastUpdated: '2024-01-22',
-        location: 'Johannesburg CBD'
-      },
-      {
-        id: '2',
-        caseNumber: 'CAS-2024-002',
-        deviceName: 'Samsung Galaxy S24',
-        owner: 'Jane Smith',
-        incidentType: 'robbery',
-        status: 'open',
-        priority: 'urgent',
-        assignedOfficer: 'Det. Mike Wilson',
-        createdDate: '2024-01-21',
-        lastUpdated: '2024-01-21',
-        location: 'Cape Town Central'
-      },
-      {
-        id: '3',
-        caseNumber: 'CAS-2024-003',
-        deviceName: 'MacBook Pro M3',
-        owner: 'Bob Johnson',
-        incidentType: 'fraud',
-        status: 'closed',
-        priority: 'medium',
-        assignedOfficer: 'Det. Lisa Brown',
-        createdDate: '2024-01-15',
-        lastUpdated: '2024-01-20',
-        location: 'Durban Central'
-      }
-    ];
-
-    setCases(mockCases);
+    fetchCases();
   }, []);
 
   const filteredCases = cases.filter(caseItem => {
@@ -186,57 +179,66 @@ const LawEnforcementCases = () => {
                 <CardDescription>Overview of all law enforcement cases</CardDescription>
               </div>
               <div className="flex space-x-2">
-                <Button variant="outline">Filter</Button>
+                <Button variant="outline" onClick={fetchCases} disabled={loading}>
+                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
                 <Button>New Case</Button>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {filteredCases.map((caseItem) => (
-                <div key={caseItem.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h3 className="font-semibold text-lg">{caseItem.caseNumber}</h3>
-                          <p className="text-sm text-muted-foreground">{caseItem.deviceName}</p>
-                          <p className="text-sm text-muted-foreground">Owner: {caseItem.owner}</p>
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading cases...</div>
+            ) : filteredCases.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No cases found.</div>
+            ) : (
+              <div className="space-y-4">
+                {filteredCases.map((caseItem) => (
+                  <div key={caseItem.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h3 className="font-semibold text-lg">{caseItem.caseNumber}</h3>
+                            <p className="text-sm text-muted-foreground">{caseItem.deviceName}</p>
+                            <p className="text-sm text-muted-foreground">Owner: {caseItem.owner}</p>
+                          </div>
+                          <div className="flex flex-col items-end space-y-1">
+                            {getStatusBadge(caseItem.status)}
+                            {getPriorityBadge(caseItem.priority)}
+                          </div>
                         </div>
-                        <div className="flex flex-col items-end space-y-1">
-                          {getStatusBadge(caseItem.status)}
-                          {getPriorityBadge(caseItem.priority)}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                          <div className="flex items-center space-x-2">
+                            <User className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">Officer:</span>
+                            <span className="font-medium">{caseItem.assignedOfficer}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <MapPin className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">Location:</span>
+                            <span className="font-medium">{caseItem.location}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Calendar className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">Updated:</span>
+                            <span className="font-medium">{new Date(caseItem.lastUpdated).toLocaleDateString()}</span>
+                          </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div className="flex items-center space-x-2">
-                          <User className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Officer:</span>
-                          <span className="font-medium">{caseItem.assignedOfficer}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <MapPin className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Location:</span>
-                          <span className="font-medium">{caseItem.location}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Updated:</span>
-                          <span className="font-medium">{new Date(caseItem.lastUpdated).toLocaleDateString()}</span>
-                        </div>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm" className="flex items-center">
+                          <Eye className="w-4 h-4 mr-1" />
+                          View
+                        </Button>
+                        <Button variant="outline" size="sm">Update</Button>
                       </div>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button variant="outline" size="sm" className="flex items-center">
-                        <Eye className="w-4 h-4 mr-1" />
-                        View
-                      </Button>
-                      <Button variant="outline" size="sm">Update</Button>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
