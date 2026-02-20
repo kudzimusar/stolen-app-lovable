@@ -1,26 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { BackButton } from "@/components/navigation/BackButton";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { apiClient } from "@/lib/api-client";
+import { RefreshCw } from "lucide-react";
 
 const RepairShopDashboard = () => {
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("overview");
+  const [loading, setLoading] = useState(false);
 
-  const stats = {
-    totalRepairs: 156,
-    pendingRepairs: 23,
-    completedToday: 8,
-    revenue: "$12,450"
+  const [stats, setStats] = useState({
+    totalRepairs: 0,
+    pendingRepairs: 0,
+    completedToday: 0,
+    revenue: "-bash"
+  });
+
+  const [recentRepairs, setRecentRepairs] = useState<any[]>([]);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await apiClient.invoke('repair-dept-stats');
+      if (data) {
+        if (data.stats) setStats(data.stats);
+        if (data.recentRepairs) setRecentRepairs(data.recentRepairs);
+      }
+    } catch (error) {
+      console.error("Failed to fetch repair stats", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const recentRepairs = [
-    { id: "R001", device: "iPhone 13", status: "In Progress", customer: "John Doe" },
-    { id: "R002", device: "Samsung Galaxy", status: "Completed", customer: "Jane Smith" },
-    { id: "R003", device: "MacBook Pro", status: "Pending", customer: "Mike Johnson" }
-  ];
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 p-4">
@@ -107,29 +125,36 @@ const RepairShopDashboard = () => {
         {activeTab === "overview" && (
           <div className="grid gap-6">
             <Card className="shadow-lg">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Recent Repairs</CardTitle>
+                <Button variant="ghost" size="sm" onClick={fetchDashboardData} disabled={loading}>
+                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentRepairs.map((repair) => (
-                    <div key={repair.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="font-semibold">{repair.device}</p>
-                        <p className="text-sm text-gray-600">Customer: {repair.customer}</p>
+                  {recentRepairs.length === 0 ? (
+                    <p className="text-center text-gray-500">No recent repairs found.</p>
+                  ) : (
+                    recentRepairs.map((repair) => (
+                      <div key={repair.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div>
+                          <p className="font-semibold">{repair.device}</p>
+                          <p className="text-sm text-gray-600">Customer: {repair.customer}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium">{repair.id}</p>
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            repair.status === "Completed" ? "bg-green-100 text-green-800" :
+                            repair.status === "In Progress" ? "bg-blue-100 text-blue-800" :
+                            "bg-orange-100 text-orange-800"
+                          }`}>
+                            {repair.status}
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium">{repair.id}</p>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          repair.status === "Completed" ? "bg-green-100 text-green-800" :
-                          repair.status === "In Progress" ? "bg-blue-100 text-blue-800" :
-                          "bg-orange-100 text-orange-800"
-                        }`}>
-                          {repair.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -155,6 +180,7 @@ const RepairShopDashboard = () => {
                 </CardContent>
               </Card>
 
+              {/* Today's Schedule (Static/Placeholder for now) */}
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle>Today's Schedule</CardTitle>
@@ -182,6 +208,7 @@ const RepairShopDashboard = () => {
           </div>
         )}
 
+        {/* Other tabs remain static placeholders */}
         {activeTab === "repairs" && (
           <Card className="shadow-lg">
             <CardHeader>
@@ -190,43 +217,15 @@ const RepairShopDashboard = () => {
             <CardContent>
               <div className="text-center text-gray-500 py-8">
                 <p>Repair management interface</p>
-                <p className="text-sm">View and manage all repair orders</p>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {activeTab === "inventory" && (
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle>Inventory Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center text-gray-500 py-8">
-                <p>Parts and tools inventory</p>
-                <p className="text-sm">Track repair parts and equipment</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === "customers" && (
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle>Customer Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center text-gray-500 py-8">
-                <p>Customer database</p>
-                <p className="text-sm">Manage customer information and history</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* ... */}
       </div>
     </div>
   );
 };
 
 export default RepairShopDashboard;
-

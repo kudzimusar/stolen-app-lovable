@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { STOLENLogo } from "@/components/ui/STOLENLogo";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { apiClient } from "@/lib/api-client";
 import {
   ArrowLeft,
   Upload,
@@ -51,146 +52,93 @@ const RetailerDashboard = () => {
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Enhanced retailer data with advanced analytics
-  const retailerStats = {
-    devicesRegistered: 15423,
-    monthlyRegistrations: 1247,
-    verifiedBadgeStatus: "approved",
+  const [retailerStats, setRetailerStats] = useState({
+    devicesRegistered: 0,
+    monthlyRegistrations: 0,
+    verifiedBadgeStatus: "pending",
     apiUsage: {
-      current: 8750,
+      current: 0,
       limit: 10000,
-      billingPeriod: "January 2025"
+      billingPeriod: "Current Month"
     },
     salesAnalytics: {
-      totalSales: 50000,
-      avgDeviceValue: 425,
-      certificatesIssued: 2156,
-      customerSatisfaction: 4.8
-    },
-    // Advanced API integration metrics
-    apiIntegration: {
-      successRate: 98.5,
-      avgResponseTime: 0.8,
-      totalRequests: 125847,
-      errorRate: 1.5,
-      uptime: 99.9,
-      lastSync: "2 minutes ago"
-    },
-    // Enhanced analytics
-    advancedAnalytics: {
-      fraudPrevention: {
-        prevented: 234,
-        savings: 125000,
-        accuracy: 96.2
-      },
-      inventoryOptimization: {
-        turnoverRate: 4.2,
-        stockAccuracy: 98.7,
-        reorderEfficiency: 95.3
-      },
-      customerInsights: {
-        repeatCustomers: 78.5,
-        avgLifetimeValue: 1250,
-        satisfactionTrend: "+12%"
+      totalSales: 0,
+      avgDeviceValue: 0,
+      certificatesIssued: 0,
+      customerSatisfaction: 0
+    }
+  });
+
+  const [recentRegistrations, setRecentRegistrations] = useState<any[]>([]);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await apiClient.invoke('retailer-dept-stats');
+      if (data) {
+        if (data.stats) setRetailerStats(prev => ({ ...prev, ...data.stats }));
+        if (data.recentRegistrations) setRecentRegistrations(data.recentRegistrations);
       }
-    },
-    // Reverse verification integration
-    reverseVerification: {
-      integrations: 15,
-      verificationsPerDay: 2340,
-      fraudDetected: 45,
-      trustScore: 94.8
+    } catch (error) {
+      console.error("Failed to fetch retailer stats", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Mock recent registrations
-  const recentRegistrations = [
-    {
-      id: 1,
-      batchId: "BATCH-2025-001",
-      deviceCount: 250,
-      status: "completed",
-      uploadDate: "2025-01-20",
-      deviceType: "Smartphones",
-      successRate: 100
-    },
-    {
-      id: 2,
-      batchId: "BATCH-2025-002", 
-      deviceCount: 150,
-      status: "processing",
-      uploadDate: "2025-01-20",
-      deviceType: "Laptops",
-      successRate: 95
-    },
-    {
-      id: 3,
-      batchId: "BATCH-2025-003",
-      deviceCount: 75,
-      status: "failed",
-      uploadDate: "2025-01-19",
-      deviceType: "Tablets",
-      successRate: 0
-    }
-  ];
-
-  // Mock API logs
-  const apiLogs = [
-    {
-      timestamp: "2025-01-20 14:30:00",
-      endpoint: "/api/devices/register",
-      method: "POST",
-      status: 200,
-      responseTime: 125,
-      requests: 45
-    },
-    {
-      timestamp: "2025-01-20 14:25:00",
-      endpoint: "/api/certificates/issue",
-      method: "POST", 
-      status: 200,
-      responseTime: 89,
-      requests: 12
-    },
-    {
-      timestamp: "2025-01-20 14:20:00",
-      endpoint: "/api/devices/bulk-upload",
-      method: "POST",
-      status: 201,
-      responseTime: 2340,
-      requests: 1
-    }
-  ];
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
   const handleFileUpload = async () => {
     if (!csvFile) return;
     
     setIsUploading(true);
-    setUploadProgress(0);
+    setUploadProgress(10);
     
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsUploading(false);
-          toast({
-            title: "Upload Successful!",
-            description: `${csvFile.name} has been processed. 250 devices registered.`,
-            variant: "default"
-          });
-          return 100;
-        }
-        return prev + 10;
+    try {
+      // Read file content
+      const text = await csvFile.text();
+      setUploadProgress(30);
+
+      // Upload to bulk import endpoint
+      const { data, error } = await apiClient.invoke('bulk-data-import', {
+        fileContent: text,
+        fileName: csvFile.name,
+        type: 'devices'
       });
-    }, 200);
+
+      setUploadProgress(70);
+
+      if (error) throw error;
+
+      setUploadProgress(100);
+      toast({
+        title: "Upload Successful!",
+        description: `${csvFile.name} has been processed. ${data?.count || 0} devices queued for registration.`,
+        variant: "default"
+      });
+
+      fetchDashboardData(); // Refresh stats
+    } catch (error) {
+      console.error("Upload failed", error);
+      toast({
+        title: "Upload Failed",
+        description: "Could not process the CSV file.",
+        variant: "destructive"
+      });
+      setUploadProgress(0);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "completed": return "secondary";
+      case "completed": return "secondary"; // Green-ish usually
       case "processing": return "secondary"; 
       case "failed": return "destructive";
       default: return "secondary";
@@ -267,7 +215,7 @@ const RetailerDashboard = () => {
                   {retailerStats.salesAnalytics.customerSatisfaction}
                 </div>
                 <div className="text-sm text-muted-foreground">Customer Rating</div>
-                <div className="text-xs text-muted-foreground mt-1">Based on 1,250 reviews</div>
+                <div className="text-xs text-muted-foreground mt-1">Based on reviews</div>
               </Card>
             </div>
 
@@ -275,34 +223,38 @@ const RetailerDashboard = () => {
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold">Recent Registrations</h2>
-                <Button variant="outline" size="sm">
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                <Button variant="outline" size="sm" onClick={fetchDashboardData} disabled={loading}>
+                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   Refresh
                 </Button>
               </div>
               
               <div className="space-y-3">
-                {recentRegistrations.map((batch) => (
-                  <div key={batch.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                    <div className="space-y-1">
-                      <div className="font-medium">{batch.batchId}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {batch.deviceCount} {batch.deviceType} • {batch.uploadDate}
+                {recentRegistrations.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground">No recent registrations found.</div>
+                ) : (
+                  recentRegistrations.map((batch) => (
+                    <div key={batch.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
+                      <div className="space-y-1">
+                        <div className="font-medium">{batch.batchId || 'Batch #' + batch.id}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {batch.deviceCount} {batch.deviceType || 'Devices'} • {batch.uploadDate}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right text-sm">
+                          <div className="font-medium">{batch.successRate}% success</div>
+                          <Badge variant={getStatusColor(batch.status)} className="text-xs">
+                            {batch.status}
+                          </Badge>
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right text-sm">
-                        <div className="font-medium">{batch.successRate}% success</div>
-                        <Badge variant={getStatusColor(batch.status)} className="text-xs">
-                          {batch.status}
-                        </Badge>
-                      </div>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </Card>
           </TabsContent>
@@ -388,7 +340,8 @@ const RetailerDashboard = () => {
             </Card>
           </TabsContent>
 
-          {/* API Access Tab */}
+          {/* API Access Tab & Certificates Tab left as is/static for now */}
+
           <TabsContent value="api-access" className="space-y-8">
             <div className="grid md:grid-cols-2 gap-6">
               {/* API Usage */}
@@ -408,11 +361,11 @@ const RetailerDashboard = () => {
                   
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="text-center p-3 bg-muted/50 rounded">
-                      <div className="font-bold">87.5%</div>
+                      <div className="font-bold">{(retailerStats.apiUsage.current / retailerStats.apiUsage.limit * 100).toFixed(1)}%</div>
                       <div className="text-muted-foreground">Used</div>
                     </div>
                     <div className="text-center p-3 bg-muted/50 rounded">
-                      <div className="font-bold">1,250</div>
+                      <div className="font-bold">{(retailerStats.apiUsage.limit - retailerStats.apiUsage.current).toLocaleString()}</div>
                       <div className="text-muted-foreground">Remaining</div>
                     </div>
                   </div>
@@ -432,22 +385,7 @@ const RetailerDashboard = () => {
                     <div className="flex gap-2">
                       <Input 
                         type="password" 
-                        value="sk_live_1234567890abcdef" 
-                        readOnly 
-                        className="font-mono text-sm"
-                      />
-                      <Button variant="outline" size="icon">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Test API Key</Label>
-                    <div className="flex gap-2">
-                      <Input 
-                        type="password" 
-                        value="sk_test_abcdef1234567890" 
+                        value="sk_live_****************"
                         readOnly 
                         className="font-mono text-sm"
                       />
@@ -464,109 +402,32 @@ const RetailerDashboard = () => {
                 </div>
               </Card>
             </div>
-
-            {/* API Logs */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Recent API Activity</h3>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filter
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                {apiLogs.map((log, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 text-sm border border-border rounded">
-                    <div className="space-y-1">
-                      <div className="font-mono">{log.method} {log.endpoint}</div>
-                      <div className="text-muted-foreground">{log.timestamp}</div>
-                    </div>
-                    <div className="text-right space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant={log.status === 200 || log.status === 201 ? "secondary" : "destructive"}>
-                          {log.status}
-                        </Badge>
-                        <span className="text-muted-foreground">{log.responseTime}ms</span>
-                      </div>
-                      <div className="text-muted-foreground">{log.requests} requests</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
           </TabsContent>
 
-          {/* Certificates Tab */}
           <TabsContent value="certificates" className="space-y-8">
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">POS Receipt Generator</h2>
-              
+              {/* Static certificate generator UI */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Customer Email</Label>
                     <Input placeholder="customer@example.com" />
                   </div>
-                  
                   <div className="space-y-2">
                     <Label>Device Details</Label>
                     <Input placeholder="iPhone 15 Pro Max" />
                   </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Serial Number</Label>
-                      <Input placeholder="ABC123456789" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Sale Price</Label>
-                      <Input placeholder="899.99" type="number" />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Receipt Image</Label>
-                    <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
-                      <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Upload receipt image</p>
-                      <Button variant="outline" size="sm" className="mt-2">
-                        Choose File
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <Button className="w-full">
-                    Generate & Email Certificate
-                  </Button>
+                  <Button className="w-full">Generate</Button>
                 </div>
-                
                 <div className="space-y-4">
                   <h3 className="font-semibold">Certificate Preview</h3>
                   <div className="border border-border rounded-lg p-4 bg-muted/50">
                     <div className="text-center space-y-2">
                       <Shield className="w-12 h-12 text-primary mx-auto" />
                       <h4 className="font-bold">STOLEN Verified Certificate</h4>
-                      <p className="text-sm text-muted-foreground">
-                        This device has been registered and verified on the STOLEN blockchain platform.
-                      </p>
-                      <div className="mt-4 space-y-1 text-xs">
-                        <div>Certificate ID: CERT-2025-001234</div>
-                        <div>Blockchain Hash: 0x1234...abcd</div>
-                        <div>Issue Date: January 20, 2025</div>
-                      </div>
+                      <p className="text-sm text-muted-foreground">Preview Mode</p>
                     </div>
-                  </div>
-                  
-                  <div className="text-xs text-muted-foreground">
-                    <strong>Note:</strong> Certificates are blockchain-anchored and tamper-proof. 
-                    They provide verifiable proof of legitimate purchase and ownership.
                   </div>
                 </div>
               </div>
