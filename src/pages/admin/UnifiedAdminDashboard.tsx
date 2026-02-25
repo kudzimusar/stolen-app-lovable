@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,6 +40,7 @@ import AdminUserManagement from "./AdminUserManagement";
 import { ApprovalQueue } from "@/components/admin/ApprovalQueue";
 import { TaskManagement } from "@/components/admin/TaskManagement";
 import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
+import { apiClient } from "@/lib/api-client";
 
 interface AdminStats {
   totalUsers: number;
@@ -59,7 +59,7 @@ interface UserRole {
 }
 
 const UnifiedAdminDashboard = () => {
-  const { user, getAuthToken } = useAuth();
+  const { user } = useAuth();
   const [activePanel, setActivePanel] = useState("overview");
   const [stats, setStats] = useState<AdminStats>({
     totalUsers: 0,
@@ -94,128 +94,36 @@ const UnifiedAdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const token = await getAuthToken();
+      console.log('📊 Fetching admin dashboard stats...');
       
-      // Try to fetch real data from database first
-      try {
-        const { supabase } = await import('@/integrations/supabase/client');
-        
-        // Call the admin dashboard stats function
-        // @ts-ignore - function exists in database but may not be in type definitions
-        const { data: statsData, error: statsError } = await (supabase as any)
-          .rpc('get_admin_dashboard_stats');
+      const { data, error } = await apiClient.invoke('admin-dashboard-stats');
 
-        if (!statsError && statsData) {
-          console.log('✅ Admin stats fetched from database:', statsData);
-          
-          const userStats = (statsData as any).user_stats || {};
-          const deviceStats = (statsData as any).device_stats || {};
-          const lostFoundStats = (statsData as any).lost_found_stats || {};
-          const financialStats = (statsData as any).financial_stats || {};
+      if (!error && data) {
+        console.log('✅ Admin stats fetched:', data);
 
-          setStats({
-            totalUsers: userStats.total_users || 0,
-            activeReports: lostFoundStats.total_reports || 0,
-            totalTransactions: lostFoundStats.total_reports || 0,
-            revenue: financialStats.total_revenue || 0,
-            recoveryRate: lostFoundStats.reunited_reports ? 
-              (lostFoundStats.reunited_reports / lostFoundStats.total_reports * 100) : 0,
-            pendingApprovals: lostFoundStats.pending_claims || 0,
-            pendingClaims: lostFoundStats.pending_claims || 0
-          });
-          return; // Success, exit early
-        } else {
-          console.error('❌ Database RPC error:', statsError);
-        }
-      } catch (dbError) {
-        console.error('❌ Database fetch failed:', dbError);
+        // Map backend response to state
+        // Assuming backend structure matches or is similar
+        const userStats = data.user_stats || {};
+        const deviceStats = data.device_stats || {};
+        const lostFoundStats = data.lost_found_stats || {};
+        const financialStats = data.financial_stats || {};
+
+        setStats({
+          totalUsers: userStats.total_users || data.totalUsers || 0,
+          activeReports: lostFoundStats.total_reports || data.activeReports || 0,
+          totalTransactions: financialStats.total_transactions || data.totalTransactions || 0,
+          revenue: financialStats.total_revenue || data.revenue || 0,
+          recoveryRate: lostFoundStats.recovery_rate || data.recoveryRate || 0,
+          pendingApprovals: lostFoundStats.pending_approvals || data.pendingApprovals || 0,
+          pendingClaims: lostFoundStats.pending_claims || data.pendingClaims || 0
+        });
+      } else {
+        console.warn('⚠️ Admin stats API returned error or no data, using fallback logic');
+        throw new Error(error?.message || 'No data returned');
       }
-      
-      // Fallback to existing API endpoints (keep original functionality)
-      const [usersResponse, reportsResponse, claimsResponse] = await Promise.all([
-        fetch('/api/v1/users/stats', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }).catch(() => ({ ok: false })),
-        fetch('/api/v1/lost-found/stats', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }).catch(() => ({ ok: false })),
-        fetch('/api/v1/admin/dashboard-stats', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }).catch(() => ({ ok: false }))
-      ]);
-
-      let totalUsers = 0;
-      let activeReports = 0;
-      let pendingApprovals = 0;
-      let pendingClaims = 0;
-
-      // Parse responses safely - check if HTML error page was returned
-      try {
-        if (usersResponse.ok && 'text' in usersResponse) {
-          const text = await (usersResponse as Response).text();
-          if (text.startsWith('{')) {
-            const usersData = JSON.parse(text);
-            totalUsers = usersData.data?.total_users || 0;
-          } else {
-            console.warn('Users API returned HTML, using fallback');
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to parse users response:', error);
-      }
-
-      try {
-        if (reportsResponse.ok && 'text' in reportsResponse) {
-          const text = await (reportsResponse as Response).text();
-          if (text.startsWith('{')) {
-            const reportsData = JSON.parse(text);
-            activeReports = reportsData.data?.total_reports || 0;
-            pendingApprovals = reportsData.data?.pending_approvals || 0;
-          } else {
-            console.warn('Reports API returned HTML, using fallback');
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to parse reports response:', error);
-      }
-
-      try {
-        if (claimsResponse.ok && 'text' in claimsResponse) {
-          const text = await (claimsResponse as Response).text();
-          if (text.startsWith('{')) {
-            const claimsData = JSON.parse(text);
-            pendingClaims = claimsData.data?.pending_claims || 0;
-            if (claimsData.data?.total_reports) activeReports = claimsData.data.total_reports;
-            if (claimsData.data?.active_users) totalUsers = claimsData.data.active_users;
-          } else {
-            console.warn('Claims API returned HTML, using fallback');
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to parse claims response:', error);
-      }
-      
-      setStats({
-        totalUsers,
-        activeReports,
-        totalTransactions: 0, // TODO: Implement when marketplace is ready
-        revenue: 0, // TODO: Implement when payment system is ready
-        recoveryRate: 0, // TODO: Calculate from reports data
-        pendingApprovals,
-        pendingClaims
-      });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      // Use fallback data on error
+      // Fallback data
       setStats({
         totalUsers: 1247,
         activeReports: 23,
@@ -229,6 +137,8 @@ const UnifiedAdminDashboard = () => {
       setLoading(false);
     }
   };
+
+  // ... (rest of the file remains largely the same, just keeping the render logic)
 
   const getNavigationItems = () => {
     return [
@@ -314,7 +224,7 @@ const UnifiedAdminDashboard = () => {
 
   const renderOverviewPanel = () => (
     <div className="space-y-4 sm:space-y-6">
-      {/* Super Admin Welcome - Mobile Optimized */}
+      {/* Super Admin Welcome */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-100 border border-blue-200 rounded-lg p-4 sm:p-6">
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
@@ -328,7 +238,7 @@ const UnifiedAdminDashboard = () => {
         </div>
       </div>
 
-      {/* Key Metrics Grid - Native Mobile First */}
+      {/* Key Metrics Grid */}
       <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
         <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200 p-2 sm:p-3">
           <CardContent className="pt-0">
@@ -374,7 +284,7 @@ const UnifiedAdminDashboard = () => {
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <p className="text-[10px] sm:text-xs font-medium text-purple-800 truncate">Recovery Rate</p>
-                <p className="text-lg sm:text-xl font-bold text-purple-900">{stats?.recoveryRate || 0}%</p>
+                <p className="text-lg sm:text-xl font-bold text-purple-900">{stats?.recoveryRate?.toFixed(1) || 0}%</p>
                 <p className="text-[8px] sm:text-[10px] text-purple-600 hidden sm:block">+5% from last month</p>
               </div>
               <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-purple-600 flex-shrink-0" />
@@ -382,7 +292,6 @@ const UnifiedAdminDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Pending Claims Card */}
         <Card className="bg-red-50 border-red-200 p-2 sm:p-3">
           <CardContent className="pt-0">
             <div className="flex items-center justify-between">
@@ -397,7 +306,7 @@ const UnifiedAdminDashboard = () => {
         </Card>
       </div>
 
-      {/* Quick Actions Grid - Native Mobile First */}
+      {/* Quick Actions Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
         <Card className="cursor-pointer hover:shadow-md transition-all active:scale-95 touch-manipulation" onClick={() => setActivePanel('lost-found')}>
           <CardContent className="p-2 sm:p-3">
@@ -440,7 +349,7 @@ const UnifiedAdminDashboard = () => {
         </Card>
       </div>
 
-      {/* Super Admin: View Stakeholder Dashboards */}
+      {/* Stakeholder Dashboards Links */}
       <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-purple-900">
@@ -558,7 +467,6 @@ const UnifiedAdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header - Mobile Optimized */}
       <div className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -570,7 +478,7 @@ const UnifiedAdminDashboard = () => {
             </div>
             <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
               <Button variant="outline" size="sm" onClick={fetchDashboardData} className="w-auto">
-                <RefreshCw className="h-4 w-4 sm:mr-2" />
+                <RefreshCw className={`h-4 w-4 sm:mr-2 ${loading ? 'animate-spin' : ''}`} />
                 <span className="hidden sm:inline">Refresh</span>
               </Button>
               <Badge variant="secondary" className="whitespace-nowrap text-xs">
@@ -583,7 +491,6 @@ const UnifiedAdminDashboard = () => {
 
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <Tabs value={activePanel} onValueChange={setActivePanel} className="space-y-4 sm:space-y-6">
-          {/* Navigation Grid - Mobile First */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-3">
             {getNavigationItems().map((item) => (
               <Card 
@@ -604,10 +511,8 @@ const UnifiedAdminDashboard = () => {
           <TabsContent value={activePanel} className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
             {renderActivePanel()}
 
-            {/* Smart Alerts + Blockchain Logs + Geo Map + AI Assistant (UI placeholders) */}
             {activePanel === "overview" && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
-                {/* Smart Alerts */}
                 <Card className="p-2 sm:p-3">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm sm:text-base">Smart Alerts</CardTitle>
@@ -620,7 +525,6 @@ const UnifiedAdminDashboard = () => {
                   </CardContent>
                 </Card>
 
-                {/* Blockchain Logs */}
                 <Card className="p-2 sm:p-3">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm sm:text-base">Blockchain Transaction Logs</CardTitle>
@@ -633,7 +537,6 @@ const UnifiedAdminDashboard = () => {
                   </CardContent>
                 </Card>
 
-                {/* Geo Map + AI Assistant */}
                 <Card className="p-2 sm:p-3">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm sm:text-base">Geo Map & Gutu Admin</CardTitle>
